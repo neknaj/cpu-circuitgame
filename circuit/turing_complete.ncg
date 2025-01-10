@@ -1,0 +1,321 @@
+using nor:2->1;
+
+//
+// 回路を定義する
+//
+
+
+// 定数
+
+module true ()->(a) {
+    a: not <- b;
+    b: not <- a;
+}
+
+module false ()->(b) {
+    a: not <- b;
+    b: not <- a;
+}
+
+// 基本的なゲート
+
+module buf (x)->(b) {
+    a: not <- x;
+    b: not <- a;
+}
+
+module not (x)->(a) {
+    a: nor <- x x;
+}
+
+module and (x y)->(c) {
+    a: not <- x  ;
+    b: not <- y  ;
+    c: nor <- a b;
+}
+
+module or (x y)->(b) {
+    a: nor <- x y;
+    b: not <- a  ;
+}
+
+module nand (x y)->(c) {
+    a: not <- x  ;
+    b: not <- y  ;
+    c: or <- a b;
+}
+
+module xor (x y)->(e) {
+    c: and <- x y;
+    d: nor <- x y;
+    e: nor <- c d;
+}
+module xnor (x y)->(b) {
+    a: xor <- x y;
+    b: not <- a  ;
+}
+
+// 多数決
+
+module 3or (x y z)->(b) {
+    a: or <- x y;
+    b: or <- a z;
+}
+
+module 3and (x y z)->(b) {
+    a: and <- x y;
+    b: and <- a z;
+}
+
+module 4match (a b c d)->(bool) {
+    a1: and <- a b;
+    c1: and <- c d;
+    a2: or <- a b;
+    c2: or <- c d;
+    ac2: and <- a2 c2;
+    bool: 3or <- a1 c1 ac2;
+}
+
+module 4even (a b c d)->(bool) {
+    x: xnor <- a b;
+    y: xnor <- c d;
+    bool: xnor <- x y;
+}
+module 4odd (a b c d)->(bool) {
+    x: xor <- a b;
+    y: xor <- c d;
+    bool: xor <- x y;
+}
+
+// circular dependency
+
+module circular (x) -> (z) {
+    z: nand <- z x;
+}
+module circular2 () -> (x) {
+    a: not <- x;
+    x: not <- b;
+    b: not <- a;
+}
+
+// count
+
+module 4or (a b c d) -> (bool) {
+    x: or <- a b;
+    y: or <- c d;
+    bool: or <- x y;
+}
+module 4and (a b c d) -> (bool) {
+    x: and <- a b;
+    y: and <- c d;
+    bool: and <- x y;
+}
+module 4count (a b c d) -> (x1 y2 z4) {
+    a2 a1 : hAddr <- a b;
+    c2 c1 : hAddr <- c d;
+    q x1 : hAddr <- a1 c1;
+    z4 r : hAddr <- a2 c2;
+    y2: or <- q r;
+}
+
+// 加算器
+
+module hAddr (x y)->(c s) {
+    c: and <- x y;
+    t: nor <- x y;
+    s: nor <- c t;
+}
+
+module fAddr (x y z)->(c s2) {
+    c1 s1: hAddr <- x y  ;
+    c2 s2: hAddr <- s1 z ;
+    c    : or    <- c1 c2;
+}
+
+// ラッチ回路
+
+module sr_latch (s r)->(q nq) {
+    q: nor <- r nq;
+    nq: nor <- s q;
+}
+
+module d_latch (d clk)->(q nq) {
+    nd: not <- d;
+    s: nor <- nd clk;
+    r: nor <- d clk;
+    q nq: sr_latch <- s r;
+}
+
+// クロック回路
+
+module clock()->(a) {
+    a: buf b;
+    b: not a;
+}
+
+// インパルス
+
+module impulse()->(c) {
+    c: not a;
+    a: not b;
+    b: not a;
+}
+
+// 8bit 回路
+
+module 8buf(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8){
+    o1: buf <- 1;
+    o2: buf <- 2;
+    o3: buf <- 3;
+    o4: buf <- 4;
+    o5: buf <- 5;
+    o6: buf <- 6;
+    o7: buf <- 7;
+    o8: buf <- 8;
+}
+module 8not(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8) {
+    o1: not <- 1;
+    o2: not <- 2;
+    o3: not <- 3;
+    o4: not <- 4;
+    o5: not <- 5;
+    o6: not <- 6;
+    o7: not <- 7;
+    o8: not <- 8;
+}
+module 8or(a1 a2 a3 a4 a5 a6 a7 a8
+           b1 b2 b3 b4 b5 b6 b7 b8) ->
+          (o1 o2 o3 o4 o5 o6 o7 o8) {
+    o1: or <- a1 b1;
+    o2: or <- a2 b2;
+    o3: or <- a3 b3;
+    o4: or <- a4 b4;
+    o5: or <- a5 b5;
+    o6: or <- a6 b6;
+    o7: or <- a7 b7;
+    o8: or <- a8 b8;
+}
+module 8and(a1 a2 a3 a4 a5 a6 a7 a8
+           b1 b2 b3 b4 b5 b6 b7 b8) ->
+          (o1 o2 o3 o4 o5 o6 o7 o8) {
+    o1: and <- a1 b1;
+    o2: and <- a2 b2;
+    o3: and <- a3 b3;
+    o4: and <- a4 b4;
+    o5: and <- a5 b5;
+    o6: and <- a6 b6;
+    o7: and <- a7 b7;
+    o8: and <- a8 b8;
+}
+module 8shiftr(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8){
+    o1: false;
+    o2: buf <- 1;
+    o3: buf <- 2;
+    o4: buf <- 3;
+    o5: buf <- 4;
+    o6: buf <- 5;
+    o7: buf <- 6;
+    o8: buf <- 7;
+}
+
+module 8addr(c0
+             a1 a2 a3 a4 a5 a6 a7 a8
+             b1 b2 b3 b4 b5 b6 b7 b8) ->
+             (c o1 o2 o3 o4 o5 o6 o7 o8) {
+    c1 o1: fAddr <- c0 a1 b1;
+    c2 o2: fAddr <- c1 a2 b2;
+    c3 o3: fAddr <- c2 a3 b3;
+    c4 o4: fAddr <- c3 a4 b4;
+    c5 o5: fAddr <- c4 a5 b5;
+    c6 o6: fAddr <- c5 a6 b6;
+    c7 o7: fAddr <- c6 a7 b7;
+    c  o8: fAddr <- c7 a8 b8;
+}
+
+module 8nagate(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8) {
+    c: true;
+    f: false;
+    n1 n2 n3 n4 n5 n6 n7 n8: 8not <- 1 2 3 4 5 6 7 8;
+    c1 o1 o2 o3 o4 o5 o6 o7 o8: 8addr <- c n1 n2 n3 n4 n5 n6 n7 n8 f f f f f f f f;
+}
+
+module decoder(i)->(o1 o2) {
+    o1: buf <- i;
+    o2: not <- i;
+}
+module 3decoder(a1 a2 a4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    n1: not <- a1;
+    n2: not <- a2;
+    n3: not <- a4;
+
+    o0: 3and <- n1 n2 n3;
+    o1: 3and <- a1 n2 n3;
+    o2: 3and <- n1 a2 n3;
+    o3: 3and <- a1 a2 n3;
+    o4: 3and <- n1 n2 a4;
+    o5: 3and <- a1 n2 a4;
+    o6: 3and <- n1 a2 a4;
+    o7: 3and <- a1 a2 a4;
+}
+module 8switch(1 2 3 4 5 6 7 8 swc) -> (o1 o2 o3 o4 o5 o6 o7 o8) {
+    o1: and <- 1 swc;
+    o2: and <- 2 swc;
+    o3: and <- 3 swc;
+    o4: and <- 4 swc;
+    o5: and <- 5 swc;
+    o6: and <- 6 swc;
+    o7: and <- 7 swc;
+    o8: and <- 8 swc;
+}
+module OrNandNorAnd(a1 a2 a3
+                    b1 b2 b3 b4 b5 b6 b7 b8
+                    c1 c2 c3 c4 c5 c6 c7 c8) ->
+                   (o1 o2 o3 o4 o5 o6 o7 o8) {
+    t0 t1 t2 t3 f0 f1 f2 f3: 3decoder <- a1 a2 a3;
+    or1 or2 or3 or4 or5 or6 or7 or8: 8or <- b1 b2 b3 b4 b5 b6 b7 b8 c1 c2 c3 c4 c5 c6 c7 c8;
+    nb1 nb2 nb3 nb4 nb5 nb6 nb7 nb8: 8not <- b1 b2 b3 b4 b5 b6 b7 b8;
+    nc1 nc2 nc3 nc4 nc5 nc6 nc7 nc8: 8not <- c1 c2 c3 c4 c5 c6 c7 c8;
+    nand1 nand2 nand3 nand4 nand5 nand6 nand7 nand8: 8or <- nb1 nb2 nb3 nb4 nb5 nb6 nb7 nb8 nc1 nc2 nc3 nc4 nc5 nc6 nc7 nc8;
+    // and1 and2 and3 and4 and5 and6 and7 and8: 8and <- b1 b2 b3 b4 b5 b6 b7 b8 c1 c2 c3 c4 c5 c6 c7 c8; //nandのnotと比べる
+    and1 and2 and3 and4 and5 and6 and7 and8: 8not <- nand1 nand2 nand3 nand4 nand5 nand6 nand7 nand8;
+    nor1 nor2 nor3 nor4 nor5 nor6 nor7 nor8: 8not <- or1 or2 or3 or4 or5 or6 or7 or8;
+    o01 o02 o03 o04 o05 o06 o07 o08: 8switch <- or1 or2 or3 or4 or5 or6 or7 or8 t0;
+    o11 o12 o13 o14 o15 o16 o17 o18: 8switch <- nand1 nand2 nand3 nand4 nand5 nand6 nand7 nand8 t1;
+    o21 o22 o23 o24 o25 o26 o27 o28: 8switch <- nor1 nor2 nor3 nor4 nor5 nor6 nor7 nor8 t2;
+    o31 o32 o33 o34 o35 o36 o37 o38: 8switch <- and1 and2 and3 and4 and5 and6 and7 and8 t3;
+    o1: 4or <- o01 o11 o21 o31;
+    o2: 4or <- o02 o12 o22 o32;
+    o3: 4or <- o03 o13 o23 o33;
+    o4: 4or <- o04 o14 o24 o34;
+    o5: 4or <- o05 o15 o25 o35;
+    o6: 4or <- o06 o16 o26 o36;
+    o7: 4or <- o07 o17 o27 o37;
+    o8: 4or <- o08 o18 o28 o38;
+}
+
+// #4
+// if switch A else B
+module selector(a1 a2 a3 a4 a5 a6 a7 a8
+                b1 b2 b3 b4 b5 b6 b7 b8
+                switch) ->
+               (1 2 3 4 5 6 7 8) {
+    nswitch: not <- switch;
+    01 02 03 04 05 06 07 08: 8switch <- a1 a2 a3 a4 a5 a6 a7 a8 switch;
+    11 12 13 14 15 16 17 18: 8switch <- b1 b2 b3 b4 b5 b6 b7 b8 nswitch;
+    1: or <- 01 11;
+    2: or <- 02 12;
+    3: or <- 03 13;
+    4: or <- 04 14;
+    5: or <- 05 15;
+    6: or <- 06 16;
+    7: or <- 07 17;
+    8: or <- 08 18;
+}
+
+module copyvalue(a1 a2 a3 a4 a5 a6 a7 a8
+                 b1 b2 b3 b4 b5 b6 b7 b8
+                 inswitch outswitch) ->
+                (01 02 03 04 05 06 07 08
+                 11 12 13 14 15 16 17 18) {
+    
+}
