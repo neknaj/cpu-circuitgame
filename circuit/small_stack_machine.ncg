@@ -192,20 +192,20 @@ module and4 (a b c d)->(o) {
     o: and o1 o2;
 }
 
-module mem8bits_2 (d0 d1 d2 d3,d4 d5 d6 d7, s0 s1, w)->(o0 o1 o2 o3,o4 o5 o6 o7) {
+module mem8bits2 (d0 d1 d2 d3 d4 d5 d6 d7, s0 s1, w)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     a b c d: adrDecoder2 s0 s1;
-    o0_0 o1_0 o2_0 o3_0 o4_0 o5_0 o6_0 o7_0: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 a a;
-    o0_1 o1_1 o2_1 o3_1 o4_1 o5_1 o6_1 o7_1: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 b b;
-    o0_2 o1_2 o2_2 o3_2 o4_2 o5_2 o6_2 o7_2: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 c c;
-    o0_3 o1_3 o2_3 o3_3 o4_3 o5_3 o6_3 o7_3: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 d d;
-    o0: or4 o0_0 o0_1 o0_2 o0_3;
-    o1: or4 o1_0 o1_1 o1_2 o1_3;
-    o2: or4 o2_0 o2_1 o2_2 o2_3;
-    o3: or4 o3_0 o3_1 o3_2 o3_3;
-    o4: or4 o4_0 o4_1 o4_2 o4_3;
-    o5: or4 o5_0 o5_1 o5_2 o5_3;
-    o6: or4 o6_0 o6_1 o6_2 o6_3;
-    o7: or4 o7_0 o7_1 o7_2 o7_3;
+    o00 o10 o20 o30 o40 o50 o60 o70: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 a a;
+    o01 o11 o21 o31 o41 o51 o61 o71: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 b b;
+    o02 o12 o22 o32 o42 o52 o62 o72: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 c c;
+    o03 o13 o23 o33 o43 o53 o63 o73: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 d d;
+    o0: or4 o00 o01 o02 o03;
+    o1: or4 o10 o11 o12 o13;
+    o2: or4 o20 o21 o22 o23;
+    o3: or4 o30 o31 o32 o33;
+    o4: or4 o40 o41 o42 o43;
+    o5: or4 o50 o51 o52 o53;
+    o6: or4 o60 o61 o62 o63;
+    o7: or4 o70 o71 o72 o73;
 }
 
 
