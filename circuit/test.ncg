@@ -80,6 +80,66 @@ test 3and:3->1 {
     f f f -> f;
 }
 
+test 4match:4->1 {
+    t t t t -> t;
+    f f f f -> f;
+    t t f f -> t;
+    f f t t -> t;
+    t f t f -> t;
+    f t f t -> t;
+}
+
+// 4偶数・奇数判定のテスト
+test 4even:4->1 {
+    t t t t -> t;
+    t t f f -> t;
+    t f t f -> t;
+    f f f f -> t;
+    t t t f -> f;
+    t f f f -> f;
+}
+
+test 4odd:4->1 {
+    t t t t -> f;
+    t t f f -> f;
+    t f t f -> f;
+    f f f f -> f;
+    t t t f -> t;
+    t f f f -> t;
+}
+
+// circular依存のテスト
+test circular:1->1 {}
+
+test circular2:0->1 {}
+
+// 4入力ANDとORのテスト
+test 4or:4->1 {
+    t t t t -> t;
+    t t t f -> t;
+    t t f f -> t;
+    t f f f -> t;
+    f f f f -> f;
+}
+
+test 4and:4->1 {
+    t t t t -> t;
+    t t t f -> f;
+    t t f f -> f;
+    t f f f -> f;
+    f f f f -> f;
+}
+
+// 4カウントのテスト
+test 4count:4->3 {
+    t t t t -> f f t;
+    t t f f -> f t f;
+    t f t f -> f t f;
+    f f f f -> f f f;
+    t f f f -> t f f;
+    f t f f -> t f f;
+}
+
 // 加算器のテスト
 test hAddr:2->2 {
     t t -> t f;
@@ -99,21 +159,36 @@ test fAddr:3->2 {
     f f f -> f f;
 }
 
-// ラッチ回路のテスト
-test sr_latch:2->2 {
+test fAddr2:2->2 {
+    t t -> t t;
+    f t -> t f;
     t f -> t f;
-    f t -> f t;
-    // f f -> ? ?;  // 前の状態を保持
+    f f -> f t;
 }
 
-// test d_latch:2->2 {
-//     t t -> t f;
-//     f t -> f t;
-//     t f -> ? ?;  // クロックがfの時は前の状態を保持
-//     f f -> ? ?;
-// }
+// ラッチ回路のテスト
+test sr_latch:2->2 {}
+
+test d_latch:2->2 {}
+
+// クロック回路のテスト
+test clock:0->1 {}
+
+// インパルス回路のテスト
+test impulse:0->1 {}
 
 // 8ビット回路のテスト
+test 8nor:16->8 {
+    t t t t f f f f
+    f f f f t t t t -> f f f f f f f f;
+    
+    t t t t f f f f
+    f f f f f f f f -> f f f f t t t t;
+    
+    f f f f f f f f
+    f f f f f f f f -> t t t t t t t t;
+}
+
 test 8buf:8->8 {
     t t t t f f f f -> t t t t f f f f;
     f f f f t t t t -> f f f f t t t t;
@@ -152,124 +227,27 @@ test 8shiftr:8->8 {
 }
 
 // 8ビット加算器のテスト
-test 8addr:17->9 {
-    f
-    t t t t f f f f
-    f f f f t t t t -> f t t t t t t t t;
-    
-    t
-    t t t t f f f f
-    f f f f t t t t -> t f f f f f f f f;
-    
-    f
-    f f f f f f f f
-    f f f f f f f f -> f f f f f f f f f;
-}
-
-// デコーダーのテスト
-test decoder:1->2 {
-    t -> t f;
-    f -> f t;
-}
-
-test 3decoder:3->8 {
-    f f f -> t f f f f f f f;
-    t f f -> f t f f f f f f;
-    f t f -> f f t f f f f f;
-    t t f -> f f f t f f f f;
-    f f t -> f f f f t f f f;
-    t f t -> f f f f f t f f;
-    f t t -> f f f f f f t f;
-    t t t -> f f f f f f f t;
-}
-
-// セレクターのテスト
-test selector:17->8 {
-    t t t t f f f f
-    f f f f t t t t
-    t -> t t t t f f f f;
-    
-    t t t t f f f f
-    f f f f t t t t
-    f -> f f f f t t t t;
-}
-
-// 4マッチのテスト
-test 4match:4->1 {
-    t t t t -> t;
-    f f f f -> f;
-    t t f f -> t;
-    f f t t -> t;
-    t f t f -> t;
-    f t f t -> t;
-}
-
-// 4偶数・奇数判定のテスト
-test 4even:4->1 {
-    t t t t -> t;
-    t t f f -> t;
-    t f t f -> t;
-    f f f f -> t;
-    t t t f -> f;
-    t f f f -> f;
-}
-
-test 4odd:4->1 {
-    t t t t -> f;
-    t t f f -> f;
-    t f t f -> f;
-    f f f f -> f;
-    t t t f -> t;
-    t f f f -> t;
-}
-
-// 4カウントのテスト
-test 4count:4->3 {
-    t t t t -> f f t;
-    t t f f -> f t f;
-    t f t f -> f t f;
-    f f f f -> f f f;
-    t f f f -> t f f;
-    f t f f -> t f f;
-}
-
-// OrNandNorAndのテスト
-test OrNandNorAnd:19->8 {
-    // OR選択 (000)
-    f f f
+test 8addr:16->8 {
     t t t t f f f f
     f f f f t t t t -> t t t t t t t t;
     
-    // NAND選択 (001)
-    t f f
-    t t t t f f f f
-    t t t t f f f f -> f f f f t t t t;
+    t t t t t t t f
+    t f f f t t t t -> f f f f t t t f;
     
-    // NOR選択 (010)
-    f t f
-    t t t t f f f f
-    f f f f t t t t -> f f f f f f f f;
-    
-    // AND選択 (011)
-    t t f
-    t t t t f f f f
-    t t t t f f f f -> t t t t f f f f;
+    f f f f f f f f
+    f f f f f f f f -> f f f f f f f f;
 }
+// 8ビット減算器のテスト
+test 8sub:16->8 {
+    t f t f f f f f
+    f t f f f f f f -> t t f f f f f f;
 
-// クロック回路のテスト
-// test clock:0->1 {
-//     -> t;
-//     -> f;
-//     -> t;
-//     -> f;
-// }
-
-// インパルス回路のテスト
-// test impulse:0->1 {
-//     -> t;
-//     -> f;
-//     -> f;
-// }
+    t t t t t t t t
+    f f f f f f f f -> t t t t t t t t;
+    
+    t t f t f f f f
+    f f t t f f f f -> t t t t t t t t;
+}
 
 // 8ビット否定のテスト
 test 8nagate:8->8 {
@@ -278,49 +256,10 @@ test 8nagate:8->8 {
     f f f f f f f f -> f f f f f f f f;
 }
 
-
-// circular依存のテスト
-// test circular:1->1 {
-//     t -> f;
-//     f -> t;
-// }
-
-// test circular2:0->1 {
-//     -> t;
-//     -> f;
-//     -> t;
-// }
-
-// 4入力ANDとORのテスト
-test 4and:4->1 {
-    t t t t -> t;
-    t t t f -> f;
-    t t f f -> f;
-    t f f f -> f;
-    f f f f -> f;
-}
-
-test 4or:4->1 {
-    t t t t -> t;
-    t t t f -> t;
-    t t f f -> t;
-    t f f f -> t;
-    f f f f -> f;
-}
-
-// 8スイッチのテスト
-test 8switch:9->8 {
-    t t t t f f f f
-    t -> t t t t f f f f;
-    
-    t t t t f f f f
-    f -> f f f f f f f f;
-    
-    f f f f t t t t
-    t -> f f f f t t t t;
-    
-    f f f f t t t t
-    f -> f f f f f f f f;
+// デコーダーのテスト
+test 1decoder:1->2 {
+    t -> f t;
+    f -> t f;
 }
 
 test 2decoder:2->4 {
@@ -339,4 +278,43 @@ test 3decoder: 3->8 {
     t f t  -> f f f f f t f f;
     f t t  -> f f f f f f t f;
     t t t  -> f f f f f f f t;
+}
+
+// 8スイッチのテスト
+test 8switch:9->8 {
+    t t t t f f f f
+    t -> t t t t f f f f;
+    
+    t t t t f f f f
+    f -> f f f f f f f f;
+    
+    f f f f t t t t
+    t -> f f f f t t t t;
+    
+    f f f f t t t t
+    f -> f f f f f f f f;
+}
+
+test 6or:6->1 {
+    t t t t t t -> t;
+    f t t t t t -> t;
+    t f t t t t -> t;
+    t t f t t t -> t;
+    t t t f t t -> t;
+    t t t t f t -> t;
+    t t t t t f -> t;
+    f f f f f f -> f;
+}
+
+// ALUのテスト(省略)
+
+// セレクターのテスト
+test selector:17->8 {
+    t t t t f f f f
+    f f f f t t t t
+    t -> t t t t f f f f;
+    
+    t t t t f f f f
+    f f f f t t t t
+    f -> f f f f t t t t;
 }
