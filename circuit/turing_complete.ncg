@@ -248,73 +248,51 @@ module 1decoder (s)->(a b) {
     a = not  s;
     b = buf  s;
 }
-
 module 2decoder (s0 s1)->(a b c d) {
-    a0 b0 = 1decoder  s0;
-    a1 b1 = 1decoder  s1;
-    a = and  a0 a1;
-    b = and  b0 a1;
-    c = and  a0 b1;
-    d = and  b0 b1;
-}
-module 2decoder_new (s0 s1)->(a b c d) {
     ns0 = not s0;
     ns1 = not s1;
-    a = and ns0 ns1;
-    b = false;
-    c = false;
-    d = and s0 s1;
+    a = nor s0 s1;
+    b = nor ns0 s1;
+    c = nor s0 ns1;
+    d = nor ns0 ns1;
 }
-
-module 3decoder(a1 a2 a4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+module 3nor(0 1 2) -> (o) {
+    p = nor 0 1;
+    o = nor p 2;
+}
+module 3decoder(a1 a2 a3)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     n1 = not a1;
     n2 = not a2;
-    n3 = not a4;
+    n3 = not a3;
 
-    o0 = 3and n1 n2 n3;
-    o1 = 3and a1 n2 n3;
-    o2 = 3and n1 a2 n3;
-    o3 = 3and a1 a2 n3;
-    o4 = 3and n1 n2 a4;
-    o5 = 3and a1 n2 a4;
-    o6 = 3and n1 a2 a4;
-    o7 = 3and a1 a2 a4;
+    nor_n1n2 = nor n1 n2;
+    nor_n12 = nor n1 a2;
+    nor_1n2 = nor a1 n2;
+    nor_12 = nor a1 a2;
+    not_n1n2 = not nor_n1n2;
+    not_n1a2 = not nor_n12;
+    not_a1n2 = not nor_1n2;
+    not_a1a2 = not nor_12;
+
+    o0 = nor not_a1a2 a3;
+    o1 = nor not_n1a2 a3;
+    o2 = nor not_a1n2 a3;
+    o3 = nor not_n1n2 a3;
+    o4 = nor not_a1a2 n3;
+    o5 = nor not_n1a2 n3;
+    o6 = nor not_a1n2 n3;
+    o7 = nor not_n1n2 n3;
 }
-
 // 8bitを流すかどうか
 module 8switch(0 1 2 3 4 5 6 7 swc) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     o0 o1 o2 o3 o4 o5 o6 o7 = 8and 0 1 2 3 4 5 6 7 swc swc swc swc swc swc swc swc;
 }
+// #5
 // ALU
-module OrNandNorAnd(a0 a1 a2
-                    b0 b1 b2 b3 b4 b5 b6 b7
-                    c0 c1 c2 c3 c4 c5 c6 c7) ->
-                    (o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1 t2 t3 f0 f1 f2 f3 = 3decoder a0 a1 a2;
-    or0 or1 or2 or3 or4 or5 or6 or7 = 8or b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 c4 c5 c6 c7;
-    nb0 nb1 nb2 nb3 nb4 nb5 nb6 nb7 = 8not b0 b1 b2 b3 b4 b5 b6 b7;
-    nc0 nc1 nc2 nc3 nc4 nc5 nc6 nc7 = 8not c0 c1 c2 c3 c4 c5 c6 c7;
-    nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7 = 8or nb0 nb1 nb2 nb3 nb4 nb5 nb6 nb7 nc0 nc1 nc2 nc3 nc4 nc5 nc6 nc7;
-    nor0 nor1 nor2 nor3 nor4 nor5 nor6 nor7 = 8not or0 or1 or2 or3 or4 or5 or6 or7;
-    // and0 and1 and2 and3 and4 and5 and6 and7 = 8and b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 c4 c5 c6 c7; //nandのnotと比べる
-    and0 and1 and2 and3 and4 and5 and6 and7 = 8not nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7;
-    o00 o01 o02 o03 o04 o05 o06 o07 = 8switch or0 or1 or2 or3 or4 or5 or6 or7 t0;
-    o10 o11 o12 o13 o14 o15 o16 o17 = 8switch nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7 t1;
-    o20 o21 o22 o23 o24 o25 o26 o27 = 8switch nor0 nor1 nor2 nor3 nor4 nor5 nor6 nor7 t2;
-    o30 o31 o32 o33 o34 o35 o36 o37 = 8switch and0 and1 and2 and3 and4 and5 and6 and7 t3;
-    o0 = 4or o00 o10 o20 o30;
-    o1 = 4or o01 o11 o21 o31;
-    o2 = 4or o02 o12 o22 o32;
-    o3 = 4or o03 o13 o23 o33;
-    o4 = 4or o04 o14 o24 o34;
-    o5 = 4or o05 o15 o25 o35;
-    o6 = 4or o06 o16 o26 o36;
-    o7 = 4or o07 o17 o27 o37;
-}
 module 6or(a0 a1 a2 a3 a4 a5)->(o) {
     p = 3or a0 a1 a2;
-    q = 3or p a3 a4;
-    o = or q a5;
+    q = 3or a3 a4 a5;
+    o = or p q;
 }
 module ALU(a0 a1 a2
             b0 b1 b2 b3 b4 b5 b6 b7
@@ -328,14 +306,17 @@ module ALU(a0 a1 a2
     nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7 = 8or nb0 nb1 nb2 nb3 nb4 nb5 nb6 nb7 nc0 nc1 nc2 nc3 nc4 nc5 nc6 nc7;
     nor0 nor1 nor2 nor3 nor4 nor5 nor6 nor7 = 8nor b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 c4 c5 c6 c7;
     and0 and1 and2 and3 and4 and5 and6 and7 = 8not nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7;
-    add0 add1 add2 add3 add4 add5 add6 add7 = 8addr b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 c4 c5 c6 c7;
-    sub0 sub1 sub2 sub3 sub4 sub5 sub6 sub7 = 8sub b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 c4 c5 c6 c7;
+    // add sub
+    d0 d1 d2 d3 d4 d5 d6 d7 = 8nagate c0 c1 c2 c3 c4 c5 c6 c7;
+    e0 e1 e2 e3 e4 e5 e6 e7 = selector c0 c1 c2 c3 c4 c5 c6 c7 d0 d1 d2 d3 d4 d5 d6 d7 t4;
+    add0 add1 add2 add3 add4 add5 add6 add7 = 8addr b0 b1 b2 b3 b4 b5 b6 b7 e0 e1 e2 e3 e4 e5 e6 e7;
+
     o00 o01 o02 o03 o04 o05 o06 o07 = 8switch or0 or1 or2 or3 or4 or5 or6 or7 t0;
     o10 o11 o12 o13 o14 o15 o16 o17 = 8switch nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7 t1;
     o20 o21 o22 o23 o24 o25 o26 o27 = 8switch nor0 nor1 nor2 nor3 nor4 nor5 nor6 nor7 t2;
     o30 o31 o32 o33 o34 o35 o36 o37 = 8switch and0 and1 and2 and3 and4 and5 and6 and7 t3;
     o40 o41 o42 o43 o44 o45 o46 o47 = 8switch add0 add1 add2 add3 add4 add5 add6 add7 t4;
-    o50 o51 o52 o53 o54 o55 o56 o57 = 8switch sub0 sub1 sub2 sub3 sub4 sub5 sub6 sub7 t5;
+    o50 o51 o52 o53 o54 o55 o56 o57 = 8switch add0 add1 add2 add3 add4 add5 add6 add7 t5;
 
     o0 = 6or o00 o10 o20 o30 o40 o50;
     o1 = 6or o01 o11 o21 o31 o41 o51;
@@ -358,7 +339,7 @@ module selector(a0 a1 a2 a3 a4 a5 a6 a7
     10 11 12 13 14 15 16 17 = 8switch b0 b1 b2 b3 b4 b5 b6 b7 nswitch;
     0 1 2 3 4 5 6 7 = 8or 00 01 02 03 04 05 06 07 10 11 12 13 14 15 16 17;
 }
-
+// 入力と出力を選ぶ
 module copyvalue(a0 a1 a2 a3 a4 a5 a6 a7
                 b0 b1 b2 b3 b4 b5 b6 b7
                 inswitch outswitch) ->
@@ -374,12 +355,13 @@ module copyvalue(a0 a1 a2 a3 a4 a5 a6 a7
 
 }
 
+// メモリ
+// wの間書き込み、rの間読み出し
 module mem1bit (d, w,r)->(o) {
     nw = not w;
     q nq = d_latch d nw;
     o = and q r;
 }
-// メモリ
 module mem8bits (d0 d1 d2 d3 d4 d5 d6 d7 w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     // nw = not w;
     o0 = mem1bit d0 w r;
@@ -514,3 +496,6 @@ module counter_swc (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o10 o11 o12 o13 o14 o15 o16 o17 = mem8bits i0 i1 i2 i3 i4 i5 i6 i7 swc swc;
     o0 o1 o2 o3 o4 o5 o6 o7 = 8or o00 o01 o02 o03 o04 o05 o06 o07 o10 o11 o12 o13 o14 o15 o16 o17;
 }
+
+// #5
+// レジスタ
