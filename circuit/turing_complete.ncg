@@ -209,13 +209,7 @@ module 8and(a1 a2 a3 a4 a5 a6 a7 a8
 }
 module 8shiftr(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8){
     o1: false;
-    o2: buf <- 1;
-    o3: buf <- 2;
-    o4: buf <- 3;
-    o5: buf <- 4;
-    o6: buf <- 5;
-    o7: buf <- 6;
-    o8: buf <- 7;
+    o2 o3 o4 o5 o6 o7 o8 f: 8buf <- 1 2 3 4 5 6 7 o1;
 }
 
 module 8addr(c0
@@ -243,6 +237,8 @@ module decoder(i)->(o1 o2) {
     o1: buf <- i;
     o2: not <- i;
 }
+
+// 2進数 to bit
 module 3decoder(a1 a2 a4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     n1: not <- a1;
     n2: not <- a2;
@@ -257,16 +253,12 @@ module 3decoder(a1 a2 a4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o6: 3and <- n1 a2 a4;
     o7: 3and <- a1 a2 a4;
 }
+
+// 8bitを流すかどうか
 module 8switch(1 2 3 4 5 6 7 8 swc) -> (o1 o2 o3 o4 o5 o6 o7 o8) {
-    o1: and <- 1 swc;
-    o2: and <- 2 swc;
-    o3: and <- 3 swc;
-    o4: and <- 4 swc;
-    o5: and <- 5 swc;
-    o6: and <- 6 swc;
-    o7: and <- 7 swc;
-    o8: and <- 8 swc;
+    o1 o2 o3 o4 o5 o6 o7 o8: 8and <- 1 2 3 4 5 6 7 8 swc swc swc swc swc swc swc swc;
 }
+// ALU
 module OrNandNorAnd(a1 a2 a3
                     b1 b2 b3 b4 b5 b6 b7 b8
                     c1 c2 c3 c4 c5 c6 c7 c8) ->
@@ -302,14 +294,7 @@ module selector(a1 a2 a3 a4 a5 a6 a7 a8
     nswitch: not <- switch;
     01 02 03 04 05 06 07 08: 8switch <- a1 a2 a3 a4 a5 a6 a7 a8 switch;
     11 12 13 14 15 16 17 18: 8switch <- b1 b2 b3 b4 b5 b6 b7 b8 nswitch;
-    1: or <- 01 11;
-    2: or <- 02 12;
-    3: or <- 03 13;
-    4: or <- 04 14;
-    5: or <- 05 15;
-    6: or <- 06 16;
-    7: or <- 07 17;
-    8: or <- 08 18;
+    1 2 3 4 5 6 7 8: 8or <- 01 02 03 04 05 06 07 08 11 12 13 14 15 16 17 18;
 }
 
 module copyvalue(a1 a2 a3 a4 a5 a6 a7 a8
@@ -317,5 +302,132 @@ module copyvalue(a1 a2 a3 a4 a5 a6 a7 a8
                  inswitch outswitch) ->
                 (01 02 03 04 05 06 07 08
                  11 12 13 14 15 16 17 18) {
+    // 入力選択
+    i1 i2 i3 i4 i5 i6 i7 i8: selector <- a1 a2 a3 a4 a5 a6 a7 a8 b1 b2 b3 b4 b5 b6 b7 b8 inswitch;
     
+    // 出力選択
+    01 02 03 04 05 06 07 08: 8switch <- i1 i2 i3 i4 i5 i6 i7 i8 outswitch;
+    noutswitch: not <- outswitch;
+    11 12 13 14 15 16 17 18: 8switch <- i1 i2 i3 i4 i5 i6 i7 i8 noutswitch;
+
+}
+
+module mem1bit (d, w,r)->(o) {
+    nw: not w;
+    q nq: d_latch d nw;
+    o: and q r;
+}
+// メモリ
+module mem8bits (d0 d1 d2 d3 d4 d5 d6 d7 w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    nw: not w;
+    o0: mem1bit <- d0 nw r;
+    o1: mem1bit <- d1 nw r;
+    o2: mem1bit <- d2 nw r;
+    o3: mem1bit <- d3 nw r;
+    o4: mem1bit <- d4 nw r;
+    o5: mem1bit <- d5 nw r;
+    o6: mem1bit <- d6 nw r;
+    o7: mem1bit <- d7 nw r;
+}
+
+module mem4byte (d0 d1 d2 d3 d4 d5 d6 d7
+                d8 d9 da db dc dd de df
+                d10 d11 d12 d13 d14 d15 d16 d17
+                d18 d19 d1a d1b d1c d1d d1e d1f
+                w r) ->
+               (o0 o1 o2 o3 o4 o5 o6 o7
+                o8 o9 oa ob oc od oe of
+                o10 o11 o12 o13 o14 o15 o16 o17
+                o18 o19 o1a o1b o1c o1d o1e o1f) {
+    o0 o1 o2 o3 o4 o5 o6 o7: mem8bits <- d0 d1 d2 d3 d4 d5 d6 d7 w r;
+    o8 o9 oa ob oc od oe of: mem8bits <- d8 d9 da db dc dd de df w r;
+    o10 o11 o12 o13 o14 o15 o16 o17: mem8bits <- d10 d11 d12 d13 d14 d15 d16 d17 w r;
+    o18 o19 o1a o1b o1c o1d o1e o1f: mem8bits <- d18 d19 d1a d1b d1c d1d d1e d1f w r;
+}
+module mem4byte_select(
+    a0 a1 a2 a3 a4 a5 a6 a7
+    a8 a9 aa ab ac ad ae af
+    a10 a11 a12 a13 a14 a15 a16 a17
+    a18 a19 a1a a1b a1c a1d a1e a1f 
+    b0 b1 b2 b3 b4 b5 b6 b7
+    b8 b9 ba bb bc bd be bf
+    b10 b11 b12 b13 b14 b15 b16 b17
+    b18 b19 b1a b1b b1c b1d b1e b1f
+    w r inswitch outswitch) -> (
+    oa0 oa1 oa2 oa3 oa4 oa5 oa6 oa7
+    oa8 oa9 oaa oab oac oad oae oaf
+    oa10 oa11 oa12 oa13 oa14 oa15 oa16 oa17
+    oa18 oa19 oa1a oa1b oa1c oa1d oa1e oa1f
+    ob0 ob1 ob2 ob3 ob4 ob5 ob6 ob7
+    ob8 ob9 oba obb obc obd obe obf
+    ob10 ob11 ob12 ob13 ob14 ob15 ob16 ob17
+    ob18 ob19 ob1a ob1b ob1c ob1d ob1e ob1f) {
+    noutswitch: not <- outswitch;
+    d0 d1 d2 d3 d4 d5 d6 d7: selector <- a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 inswitch;
+    d8 d9 da db dc dd de df: selector <- a8 a9 aa ab ac ad ae af b8 b9 ba bb bc bd be bf inswitch;
+    d10 d11 d12 d13 d14 d15 d16 d17: selector <- a10 a11 a12 a13 a14 a15 a16 a17 b10 b11 b12 b13 b14 b15 b16 b17 inswitch;
+    d18 d19 d1a d1b d1c d1d d1e d1f: selector <- a18 a19 a1a a1b a1c a1d a1e a1f b18 b19 b1a b1b b1c b1d b1e b1f inswitch;
+    
+    o0 o1 o2 o3 o4 o5 o6 o7: mem8bits <- d0 d1 d2 d3 d4 d5 d6 d7 w r;
+    o8 o9 oa ob oc od oe of: mem8bits <- d8 d9 da db dc dd de df w r;
+    o10 o11 o12 o13 o14 o15 o16 o17: mem8bits <- d10 d11 d12 d13 d14 d15 d16 d17 w r;
+    o18 o19 o1a o1b o1c o1d o1e o1f: mem8bits <- d18 d19 d1a d1b d1c d1d d1e d1f w r;
+
+    oa0 oa1 oa2 oa3 oa4 oa5 oa6 oa7: 8switch <- o0 o1 o2 o3 o4 o5 o6 o7 outswitch;
+    oa8 oa9 oaa oab oac oad oae oaf: 8switch <- o8 o9 oa ob oc od oe of outswitch;
+    oa10 oa11 oa12 oa13 oa14 oa15 oa16 oa17: 8switch <- o10 o11 o12 o13 o14 o15 o16 o17 outswitch;
+    oa18 oa19 oa1a oa1b oa1c oa1d oa1e oa1f: 8switch <- oa8 oa9 o1a o1b o1c o1d o1e o1f outswitch;
+
+    ob0 ob1 ob2 ob3 ob4 ob5 ob6 ob7: 8switch <- o0 o1 o2 o3 o4 o5 o6 o7 noutswitch;
+    ob8 ob9 oba obb obc obd obe obf: 8switch <- o8 o9 oa ob oc od oe of noutswitch;
+    ob10 ob11 ob12 ob13 ob14 ob15 ob16 ob17: 8switch <- o10 o11 o12 o13 o14 o15 o16 o17 noutswitch;
+    ob18 ob19 ob1a ob1b ob1c ob1d ob1e ob1f: 8switch <- o18 o19 o1a o1b o1c o1d o1e o1f noutswitch;
+}
+
+module mem12byte (d0 d1 d2 d3 d4 d5 d6 d7
+                 d8 d9 da db dc dd de df
+                 d10 d11 d12 d13 d14 d15 d16 d17
+                 d18 d19 d1a d1b d1c d1d d1e d1f
+                 d20 d21 d22 d23 d24 d25 d26 d27
+                 d28 d29 d2a d2b d2c d2d d2e d2f
+                 d30 d31 d32 d33 d34 d35 d36 d37
+                 d38 d39 d3a d3b d3c d3d d3e d3f
+                 d40 d41 d42 d43 d44 d45 d46 d47
+                 d48 d49 d4a d4b d4c d4d d4e d4f
+                 d50 d51 d52 d53 d54 d55 d56 d57
+                 d58 d59 d5a d5b d5c d5d d5e d5f
+                 w r) ->
+                (o0 o1 o2 o3 o4 o5 o6 o7
+                 o8 o9 oa ob oc od oe of
+                 o10 o11 o12 o13 o14 o15 o16 o17
+                 o18 o19 o1a o1b o1c o1d o1e o1f
+                 o20 o21 o22 o23 o24 o25 o26 o27
+                 o28 o29 o2a o2b o2c o2d o2e o2f
+                 o30 o31 o32 o33 o34 o35 o36 o37
+                 o38 o39 o3a o3b o3c o3d o3e o3f
+                 o40 o41 o42 o43 o44 o45 o46 o47
+                 o48 o49 o4a o4b o4c o4d o4e o4f
+                 o50 o51 o52 o53 o54 o55 o56 o57
+                 o58 o59 o5a o5b o5c o5d o5e o5f) {
+    o0 o1 o2 o3 o4 o5 o6 o7
+    o8 o9 oa ob oc od oe of
+    o10 o11 o12 o13 o14 o15 o16 o17
+    o18 o19 o1a o1b o1c o1d o1e o1f: mem4byte <- d0 d1 d2 d3 d4 d5 d6 d7
+                                              d8 d9 da db dc dd de df
+                                              d10 d11 d12 d13 d14 d15 d16 d17
+                                              d18 d19 d1a d1b d1c d1d d1e d1f w r;
+    o20 o21 o22 o23 o24 o25 o26 o27
+    o28 o29 o2a o2b o2c o2d o2e o2f
+    o30 o31 o32 o33 o34 o35 o36 o37
+    o38 o39 o3a o3b o3c o3d o3e o3f: mem4byte <- d20 d21 d22 d23 d24 d25 d26 d27
+                                              d28 d29 d2a d2b d2c d2d d2e d2f
+                                              d30 d31 d32 d33 d34 d35 d36 d37
+                                              d38 d39 d3a d3b d3c d3d d3e d3f w r;
+    o40 o41 o42 o43 o44 o45 o46 o47
+    o48 o49 o4a o4b o4c o4d o4e o4f
+    o50 o51 o52 o53 o54 o55 o56 o57
+    o58 o59 o5a o5b o5c o5d o5e o5f: mem4byte <- d40 d41 d42 d43 d44 d45 d46 d47
+                                              d48 d49 d4a d4b d4c d4d d4e d4f
+                                              d50 d51 d52 d53 d54 d55 d56 d57
+                                              d58 d59 d5a d5b d5c d5d d5e d5f w r;
 }
