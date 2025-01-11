@@ -135,15 +135,15 @@ module fAddr (x y z)->(c s2) {
 // ラッチ回路
 
 module sr_latch (s r)->(q nq) {
-    q = nor r nq;
-    nq = nor s q;
+    nq= nor s q;
+    q= nor r nq;
 }
 
 module d_latch (d clk)->(q nq) {
-    nd = not d;
-    s = nor nd clk;
-    r = nor d clk;
-    q nq = sr_latch s r;
+    nd= not d;
+    s= nor nd clk;
+    r= nor d clk;
+    q nq= sr_latch s r;
 }
 
 // クロック回路
@@ -239,6 +239,28 @@ module decoder(i)->(o1 o2) {
 }
 
 // 2進数 to bit
+module 1decoder (s)->(a b) {
+    a= not  s;
+    b= buf  s;
+}
+
+module 2decoder (s0 s1)->(a b c d) {
+    a0 b0= 1decoder  s0;
+    a1 b1= 1decoder  s1;
+    a= and  a0 a1;
+    b= and  b0 a1;
+    c= and  a0 b1;
+    d= and  b0 b1;
+}
+module 2decoder_new (s0 s1)->(a b c d) {
+    ns0 = not s0;
+    ns1 = not s1;
+    a = and ns0 ns1;
+    b = false;
+    c = false;
+    d = and s0 s1;
+}
+
 module 3decoder(a1 a2 a4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     n1 = not a1;
     n2 = not a2;
@@ -304,7 +326,7 @@ module copyvalue(a1 a2 a3 a4 a5 a6 a7 a8
                  11 12 13 14 15 16 17 18) {
     // 入力選択
     i1 i2 i3 i4 i5 i6 i7 i8 = selector a1 a2 a3 a4 a5 a6 a7 a8 b1 b2 b3 b4 b5 b6 b7 b8 inswitch;
-    
+
     // 出力選択
     01 02 03 04 05 06 07 08 = 8switch i1 i2 i3 i4 i5 i6 i7 i8 outswitch;
     noutswitch = not outswitch;
@@ -315,7 +337,7 @@ module copyvalue(a1 a2 a3 a4 a5 a6 a7 a8
 module mem1bit (d, w,r)->(o) {
     nw = not w;
     q nq = d_latch d nw;
-    o = and nq r;
+    o = and q r;
 }
 // メモリ
 module mem8bits (d0 d1 d2 d3 d4 d5 d6 d7 w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
@@ -346,12 +368,13 @@ module mem4byte (d0 d1 d2 d3 d4 d5 d6 d7
 }
 // sw1,2が保存メモリ先指定
 // w_rがオンなら write, オフなら read
-module mem4byte_select(a0 a1 a2 a3 a4 a5 a6 a7 sw1 sw2 w_r) -> (o_a0 o_a1 o_a2 o_a3 o_a4 o_a5 o_a6 o_a7 
-o_b0 o_b1 o_b2 o_b3 o_b4 o_b5 o_b6 o_b7 
-o_c0 o_c1 o_c2 o_c3 o_c4 o_c5 o_c6 o_c7 
-o_d0 o_d1 o_d2 o_d3 o_d4 o_d5 o_d6 o_d7 ) {
-    f = false;
-    sm1 sm2 sm3 sm4 _1 _2 _3 _4 = 3decoder sw1 sw2 f;   //memory selector
+module mem8bit2(a0 a1 a2 a3 a4 a5 a6 a7 sw1 sw2 w_r) -> (
+o0 o1 o2 o3 o4 o5 o6 o7 ) {
+// o_a0 o_a1 o_a2 o_a3 o_a4 o_a5 o_a6 o_a7
+// o_b0 o_b1 o_b2 o_b3 o_b4 o_b5 o_b6 o_b7
+// o_c0 o_c1 o_c2 o_c3 o_c4 o_c5 o_c6 o_c7
+// o_d0 o_d1 o_d2 o_d3 o_d4 o_d5 o_d6 o_d7
+    sm1 sm2 sm3 sm4 = 2decoder sw1 sw2;   //memory selector
     w_sm1 = and w_r sm1;
     w_sm2 = and w_r sm2;
     w_sm3 = and w_r sm3;
@@ -422,4 +445,32 @@ module mem12byte (d0 d1 d2 d3 d4 d5 d6 d7
                                               d48 d49 d4a d4b d4c d4d d4e d4f
                                               d50 d51 d52 d53 d54 d55 d56 d57
                                               d58 d59 d5a d5b d5c d5d d5e d5f w r;
+}
+
+module inc8bit (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    c = true;
+    c0 o0 = hAddr d0 c;
+    c1 o1 = hAddr d1 c0;
+    c2 o2 = hAddr d2 c1;
+    c3 o3 = hAddr d3 c2;
+    c4 o4 = hAddr d4 c3;
+    c5 o5 = hAddr d5 c4;
+    c6 o6 = hAddr d6 c5;
+    c7 o7 = hAddr d7 c6;
+}
+module counter ()->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    1 = true;
+    0 = false;
+    a0 a1 a2 a3 a4 a5 a6 a7 = inc8bit o0 o1 o2 o3 o4 o5 o6 o7;
+    o0 o1 o2 o3 o4 o5 o6 o7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 1 1;
+}
+
+module counter_swc (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    1 = true;
+    0 = false;
+    nswc = not swc;
+    a0 a1 a2 a3 a4 a5 a6 a7 = inc8bit o0 o1 o2 o3 o4 o5 o6 o7;
+    o00 o01 o02 o03 o04 o05 o06 o07 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 nswc nswc;
+    o10 o11 o12 o13 o14 o15 o16 o17 = mem8bits i0 i1 i2 i3 i4 i5 i6 i7 swc swc;
+    o0 o1 o2 o3 o4 o5 o6 o7 = 8or o00 o01 o02 o03 o04 o05 o06 o07 o10 o11 o12 o13 o14 o15 o16 o17;
 }
