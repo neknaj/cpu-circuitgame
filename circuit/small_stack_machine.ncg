@@ -48,9 +48,16 @@ module xor (x y)->(c) {
 
 // 加算器
 
-module hAddr (x y)->(c s) {
-    c: and x y;
-    s: xor x y;
+// hAddr (x true) に相当
+module increment (x)->(a c) {
+    a: buf x;
+    c: not x;
+}
+
+module hAddr (x y)->(a c) {
+    a: and x y;
+    b: nor <- x y;
+    c: nor <- a b;
 }
 
 module fAddr (x y z)->(c s2) {
@@ -86,6 +93,25 @@ module impulse()->(c) {
     c: not a;
     a: not b;
     b: not a;
+}
+
+// マルチプレクサ
+
+module mux8bits1 (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17, s)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0: mux1 d00 d10 s;
+    o1: mux1 d01 d11 s;
+    o2: mux1 d02 d12 s;
+    o3: mux1 d03 d13 s;
+    o4: mux1 d04 d14 s;
+    o5: mux1 d05 d15 s;
+    o6: mux1 d06 d16 s;
+    o7: mux1 d07 d17 s;
+}
+module mux1 (i0 i1, s)->(o) {
+    a0 a1: adrDecoder1 s;
+    o0: and i0 a0;
+    o1: and i1 a1;
+    o: or o0 o1;
 }
 
 // デマルチプレクサ
@@ -247,44 +273,44 @@ module mem1bit (d, w,r)->(o) {
 //
 
 module not8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:not d0;
-    o1:not d1;
-    o2:not d2;
-    o3:not d3;
-    o4:not d4;
-    o5:not d5;
-    o6:not d6;
-    o7:not d7;
+    o0: not d0;
+    o1: not d1;
+    o2: not d2;
+    o3: not d3;
+    o4: not d4;
+    o5: not d5;
+    o6: not d6;
+    o7: not d7;
 }
 module and8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:and d00 d10;
-    o1:and d01 d11;
-    o2:and d02 d12;
-    o3:and d03 d13;
-    o4:and d04 d14;
-    o5:and d05 d15;
-    o6:and d06 d16;
-    o7:and d07 d17;
+    o0: and d00 d10;
+    o1: and d01 d11;
+    o2: and d02 d12;
+    o3: and d03 d13;
+    o4: and d04 d14;
+    o5: and d05 d15;
+    o6: and d06 d16;
+    o7: and d07 d17;
 }
 module or8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:or d00 d10;
-    o1:or d01 d11;
-    o2:or d02 d12;
-    o3:or d03 d13;
-    o4:or d04 d14;
-    o5:or d05 d15;
-    o6:or d06 d16;
-    o7:or d07 d17;
+    o0: or d00 d10;
+    o1: or d01 d11;
+    o2: or d02 d12;
+    o3: or d03 d13;
+    o4: or d04 d14;
+    o5: or d05 d15;
+    o6: or d06 d16;
+    o7: or d07 d17;
 }
 module xor8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:xor d00 d10;
-    o1:xor d01 d11;
-    o2:xor d02 d12;
-    o3:xor d03 d13;
-    o4:xor d04 d14;
-    o5:xor d05 d15;
-    o6:xor d06 d16;
-    o7:xor d07 d17;
+    o0: xor d00 d10;
+    o1: xor d01 d11;
+    o2: xor d02 d12;
+    o3: xor d03 d13;
+    o4: xor d04 d14;
+    o5: xor d05 d15;
+    o6: xor d06 d16;
+    o7: xor d07 d17;
 }
 
 // logical shift
@@ -299,58 +325,117 @@ module lShiftL8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o7:buf d6;
 }
 module lShiftR8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:buf d1;
-    o1:buf d2;
-    o2:buf d3;
-    o3:buf d4;
-    o4:buf d5;
-    o5:buf d6;
-    o6:buf d7;
-    o7:false;
+    o0: buf d1;
+    o1: buf d2;
+    o2: buf d3;
+    o3: buf d4;
+    o4: buf d5;
+    o5: buf d6;
+    o6: buf d7;
+    o7: false;
 }
 // arithmetic shift
 module aShiftL8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:false;
-    o1:buf d0;
-    o2:buf d1;
-    o3:buf d2;
-    o4:buf d3;
-    o5:buf d4;
-    o6:buf d5;
-    o7:buf d7;
+    o0: false;
+    o1: buf d0;
+    o2: buf d1;
+    o3: buf d2;
+    o4: buf d3;
+    o5: buf d4;
+    o6: buf d5;
+    o7: buf d7;
 }
 module aShiftR8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:buf d1;
-    o1:buf d2;
-    o2:buf d3;
-    o3:buf d4;
-    o4:buf d5;
-    o5:buf d6;
-    o6:buf d7;
-    o7:buf d7;
+    o0: buf d1;
+    o1: buf d2;
+    o2: buf d3;
+    o3: buf d4;
+    o4: buf d5;
+    o5: buf d6;
+    o6: buf d7;
+    o7: buf d7;
 }
 // circular shift
 module cShiftL8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:buf o7;
-    o1:buf d0;
-    o2:buf d1;
-    o3:buf d2;
-    o4:buf d3;
-    o5:buf d4;
-    o6:buf d5;
-    o7:buf d6;
+    o0: buf o7;
+    o1: buf d0;
+    o2: buf d1;
+    o3: buf d2;
+    o4: buf d3;
+    o5: buf d4;
+    o6: buf d5;
+    o7: buf d6;
 }
 module cShiftR8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:buf d1;
-    o1:buf d2;
-    o2:buf d3;
-    o3:buf d4;
-    o4:buf d5;
-    o5:buf d6;
-    o6:buf d7;
-    o7:buf o0;
+    o0: buf d1;
+    o1: buf d2;
+    o2: buf d3;
+    o3: buf d4;
+    o4: buf d5;
+    o5: buf d6;
+    o6: buf d7;
+    o7: buf o0;
 }
 
+// addition
+module add8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    c0 o0: hAddr d00 d10;
+    c1 o1: fAddr d01 d11 c0;
+    c2 o2: fAddr d02 d12 c1;
+    c3 o3: fAddr d03 d13 c2;
+    c4 o4: fAddr d04 d14 c3;
+    c5 o5: fAddr d05 d15 c4;
+    c6 o6: fAddr d06 d16 c5;
+    c7 o7: fAddr d07 d17 c6;
+}
+
+// increment
+module increment8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0: not d0;
+    c1 o1: hAddr d1 d0;
+    c2 o2: hAddr d2 c1;
+    c3 o3: hAddr d3 c2;
+    c4 o4: hAddr d4 c3;
+    c5 o5: hAddr d5 c4;
+    c6 o6: hAddr d6 c5;
+    c7 o7: hAddr d7 c6;
+}
+
+// complement
+
+// 時、notの計算があることを鑑み、hAddrの1つめの入力を反転した
+module hAddr_4complement (nx y)->(c e) {
+    x: not nx;
+    b: not y  ;
+    c: nor nx b;
+    d: nor <- x y;
+    e: nor <- c d;
+}
+
+module complement8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    c: true;
+    c0 o0: hAddr_4complement d0 c;
+    c1 o1: hAddr_4complement d1 c0;
+    c2 o2: hAddr_4complement d2 c1;
+    c3 o3: hAddr_4complement d3 c2;
+    c4 o4: hAddr_4complement d4 c3;
+    c5 o5: hAddr_4complement d5 c4;
+    c6 o6: hAddr_4complement d6 c5;
+    c7 o7: hAddr_4complement d7 c6;
+}
+// module complement8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+//     n0 n1 n2 n3 n4 n5 n6 n7: not8bits       d0 d1 d2 d3 d4 d5 d6 d7;
+//     o0 o1 o2 o3 o4 o5 o6 o7: increment8bits n0 n1 n2 n3 n4 n5 n6 n7;
+// }
+
+// absolute
+module absolute8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    // 符号bitで場合分け
+    // 0: そのまま (正の値)
+    // 1: 補数をとる (負の値)
+    c0 c1 c2 c3 c4 c5 c6 c7: complement8bits d0 d1 d2 d3 d4 d5 d6 d7;
+    o0 o1 o2 o3 o4 o5 o6 o7: mux8bits1 d0 d1 d2 d3 d4 d5 d6 d7, c0 c1 c2 c3 c4 c5 c6 c7, d7;
+}
 
 //
 // テストを定義する
@@ -402,11 +487,21 @@ test xor:2->1 {
     f f -> f;
 }
 
+test increment:1->2 {
+    t -> t f;
+    f -> f t;
+}
 test hAddr:2->2 {
     t t -> t f;
     t f -> f t;
     f t -> f t;
     f f -> f f;
+}
+test hAddr_4complement:2->2 {
+    f t -> t f;
+    f f -> f t;
+    t t -> f t;
+    t f -> f f;
 }
 
 test fAddr:3->2 {
