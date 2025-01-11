@@ -126,24 +126,24 @@ module hAddr (x y)->(c s) {
     s = nor c t;
 }
 
-module fAddr (x y z)->(c s2) {
-    c1 s1 = hAddr x y  ;
-    c2 s2 = hAddr s1 z ;
-    c     = or    c1 c2;
+module fAddr (x y z)->(c s1) {
+    c0 s0 = hAddr x y  ;
+    c1 s1 = hAddr s0 z ;
+    c     = or    c0 c1;
 }
 
 // ラッチ回路
 
 module sr_latch (s r)->(q nq) {
-    nq= nor s q;
-    q= nor r nq;
+    nq = nor s q;
+    q = nor r nq;
 }
 
 module d_latch (d clk)->(q nq) {
-    nd= not d;
-    s= nor nd clk;
-    r= nor d clk;
-    q nq= sr_latch s r;
+    nd = not d;
+    s = nor nd clk;
+    r = nor d clk;
+    q nq = sr_latch s r;
 }
 
 // クロック回路
@@ -163,7 +163,8 @@ module impulse()->(c) {
 
 // 8bit 回路
 
-module 8buf(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8){
+module 8buf(0 1 2 3 4 5 6 7)->(o0 o1 o2 o3 o4 o5 o6 o7){
+    o0 = buf 0;
     o1 = buf 1;
     o2 = buf 2;
     o3 = buf 3;
@@ -171,9 +172,9 @@ module 8buf(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8){
     o5 = buf 5;
     o6 = buf 6;
     o7 = buf 7;
-    o8 = buf 8;
 }
-module 8not(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8) {
+module 8not(0 1 2 3 4 5 6 7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0 = not 0;
     o1 = not 1;
     o2 = not 2;
     o3 = not 3;
@@ -181,11 +182,11 @@ module 8not(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8) {
     o5 = not 5;
     o6 = not 6;
     o7 = not 7;
-    o8 = not 8;
 }
-module 8or(a1 a2 a3 a4 a5 a6 a7 a8
-            b1 b2 b3 b4 b5 b6 b7 b8) ->
-            (o1 o2 o3 o4 o5 o6 o7 o8) {
+module 8or(a0 a1 a2 a3 a4 a5 a6 a7
+            b0 b1 b2 b3 b4 b5 b6 b7) ->
+            (o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0 = or a8 b0;
     o1 = or a1 b1;
     o2 = or a2 b2;
     o3 = or a3 b3;
@@ -193,11 +194,11 @@ module 8or(a1 a2 a3 a4 a5 a6 a7 a8
     o5 = or a5 b5;
     o6 = or a6 b6;
     o7 = or a7 b7;
-    o8 = or a8 b8;
 }
-module 8and(a1 a2 a3 a4 a5 a6 a7 a8
-            b1 b2 b3 b4 b5 b6 b7 b8) ->
-            (o1 o2 o3 o4 o5 o6 o7 o8) {
+module 8and(a0 a1 a2 a3 a4 a5 a6 a7
+            b0 b1 b2 b3 b4 b5 b6 b7) ->
+            (o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0 = and a0 b0;
     o1 = and a1 b1;
     o2 = and a2 b2;
     o3 = and a3 b3;
@@ -205,52 +206,44 @@ module 8and(a1 a2 a3 a4 a5 a6 a7 a8
     o5 = and a5 b5;
     o6 = and a6 b6;
     o7 = and a7 b7;
-    o8 = and a8 b8;
 }
-module 8shiftr(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8){
-    o1 = false;
-    o2 o3 o4 o5 o6 o7 o8 f = 8buf 1 2 3 4 5 6 7 o1;
+module 8shiftr(0 1 2 3 4 5 6 7)->(o0 o1 o2 o3 o4 o5 o6 o7){
+    o0 = false;
+    o1 o2 o3 o4 o5 o6 o7 f = 8buf 0 1 2 3 4 5 6 o0;
 }
 
 module 8addr(c0
-                a1 a2 a3 a4 a5 a6 a7 a8
-                b1 b2 b3 b4 b5 b6 b7 b8) ->
-                (c o1 o2 o3 o4 o5 o6 o7 o8) {
-    c1 o1 = fAddr c0 a1 b1;
-    c2 o2 = fAddr c1 a2 b2;
-    c3 o3 = fAddr c2 a3 b3;
-    c4 o4 = fAddr c3 a4 b4;
-    c5 o5 = fAddr c4 a5 b5;
-    c6 o6 = fAddr c5 a6 b6;
-    c7 o7 = fAddr c6 a7 b7;
-    c  o8 = fAddr c7 a8 b8;
+                a0 a1 a2 a3 a4 a5 a6 a7
+                b0 b1 b2 b3 b4 b5 b6 b7) ->
+                (c o0 o1 o2 o3 o4 o5 o6 o7) {
+    c1 o0 = fAddr c0 a0 b0;
+    c2 o1 = fAddr c1 a1 b1;
+    c3 o2 = fAddr c2 a2 b2;
+    c4 o3 = fAddr c3 a3 b3;
+    c5 o4 = fAddr c4 a4 b4;
+    c6 o5 = fAddr c5 a5 b5;
+    c7 o6 = fAddr c6 a6 b6;
+    c  o7 = fAddr c7 a7 b7;
 }
 
-module 8nagate(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8) {
-    c = true;
-    f = false;
-    n1 n2 n3 n4 n5 n6 n7 n8 = 8not 1 2 3 4 5 6 7 8;
-    c1 o1 o2 o3 o4 o5 o6 o7 o8 = 8addr c n1 n2 n3 n4 n5 n6 n7 n8 f f f f f f f f;
-}
-
-module decoder(i)->(o1 o2) {
-    o1 = buf i;
-    o2 = not i;
+module 8nagate(0 1 2 3 4 5 6 7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    n0 n1 n2 n3 n4 n5 n6 n7 = 8not 0 1 2 3 4 5 6 7;
+    o0 o1 o2 o3 o4 o5 o6 o7 = 8inc n0 n1 n2 n3 n4 n5 n6 n7;
 }
 
 // 2進数 to bit
 module 1decoder (s)->(a b) {
-    a= not  s;
-    b= buf  s;
+    a = not  s;
+    b = buf  s;
 }
 
 module 2decoder (s0 s1)->(a b c d) {
-    a0 b0= 1decoder  s0;
-    a1 b1= 1decoder  s1;
-    a= and  a0 a1;
-    b= and  b0 a1;
-    c= and  a0 b1;
-    d= and  b0 b1;
+    a0 b0 = 1decoder  s0;
+    a1 b1 = 1decoder  s1;
+    a = and  a0 a1;
+    b = and  b0 a1;
+    c = and  a0 b1;
+    d = and  b0 b1;
 }
 module 2decoder_new (s0 s1)->(a b c d) {
     ns0 = not s0;
@@ -277,26 +270,27 @@ module 3decoder(a1 a2 a4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 }
 
 // 8bitを流すかどうか
-module 8switch(1 2 3 4 5 6 7 8 swc) -> (o1 o2 o3 o4 o5 o6 o7 o8) {
-    o1 o2 o3 o4 o5 o6 o7 o8 = 8and 1 2 3 4 5 6 7 8 swc swc swc swc swc swc swc swc;
+module 8switch(0 1 2 3 4 5 6 7 swc) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0 o1 o2 o3 o4 o5 o6 o7 = 8and 0 1 2 3 4 5 6 7 swc swc swc swc swc swc swc swc;
 }
 // ALU
-module OrNandNorAnd(a1 a2 a3
-                    b1 b2 b3 b4 b5 b6 b7 b8
-                    c1 c2 c3 c4 c5 c6 c7 c8) ->
-                    (o1 o2 o3 o4 o5 o6 o7 o8) {
-    t0 t1 t2 t3 f0 f1 f2 f3 = 3decoder a1 a2 a3;
-    or1 or2 or3 or4 or5 or6 or7 or8 = 8or b1 b2 b3 b4 b5 b6 b7 b8 c1 c2 c3 c4 c5 c6 c7 c8;
-    nb1 nb2 nb3 nb4 nb5 nb6 nb7 nb8 = 8not b1 b2 b3 b4 b5 b6 b7 b8;
-    nc1 nc2 nc3 nc4 nc5 nc6 nc7 nc8 = 8not c1 c2 c3 c4 c5 c6 c7 c8;
-    nand1 nand2 nand3 nand4 nand5 nand6 nand7 nand8 = 8or nb1 nb2 nb3 nb4 nb5 nb6 nb7 nb8 nc1 nc2 nc3 nc4 nc5 nc6 nc7 nc8;
-    // and1 and2 and3 and4 and5 and6 and7 and8 = 8and b1 b2 b3 b4 b5 b6 b7 b8 c1 c2 c3 c4 c5 c6 c7 c8; //nandのnotと比べる
-    and1 and2 and3 and4 and5 and6 and7 and8 = 8not nand1 nand2 nand3 nand4 nand5 nand6 nand7 nand8;
-    nor1 nor2 nor3 nor4 nor5 nor6 nor7 nor8 = 8not or1 or2 or3 or4 or5 or6 or7 or8;
-    o01 o02 o03 o04 o05 o06 o07 o08 = 8switch or1 or2 or3 or4 or5 or6 or7 or8 t0;
-    o11 o12 o13 o14 o15 o16 o17 o18 = 8switch nand1 nand2 nand3 nand4 nand5 nand6 nand7 nand8 t1;
-    o21 o22 o23 o24 o25 o26 o27 o28 = 8switch nor1 nor2 nor3 nor4 nor5 nor6 nor7 nor8 t2;
-    o31 o32 o33 o34 o35 o36 o37 o38 = 8switch and1 and2 and3 and4 and5 and6 and7 and8 t3;
+module OrNandNorAnd(a0 a1 a2
+                    b0 b1 b2 b3 b4 b5 b6 b7
+                    c0 c1 c2 c3 c4 c5 c6 c7) ->
+                    (o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0 t1 t2 t3 f0 f1 f2 f3 = 3decoder a0 a1 a2;
+    or0 or1 or2 or3 or4 or5 or6 or7 = 8or b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 c4 c5 c6 c7;
+    nb0 nb1 nb2 nb3 nb4 nb5 nb6 nb7 = 8not b0 b1 b2 b3 b4 b5 b6 b7;
+    nc0 nc1 nc2 nc3 nc4 nc5 nc6 nc7 = 8not c0 c1 c2 c3 c4 c5 c6 c7;
+    nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7 = 8or nb0 nb1 nb2 nb3 nb4 nb5 nb6 nb7 nc0 nc1 nc2 nc3 nc4 nc5 nc6 nc7;
+    // and0 and1 and2 and3 and4 and5 and6 and7 = 8and b0 b1 b2 b3 b4 b5 b6 b7 c0 c1 c2 c3 c4 c5 c6 c7; //nandのnotと比べる
+    and0 and1 and2 and3 and4 and5 and6 and7 = 8not nand1 nand2 nand3 nand4 nand5 nand6 nand7;
+    nor0 nor1 nor2 nor3 nor4 nor5 nor6 nor7 = 8not or1 or2 or3 or4 or5 or6 or7;
+    o00 o01 o02 o03 o04 o05 o06 o07 = 8switch or0 or1 or2 or3 or4 or5 or6 or7 t0;
+    o10 o11 o12 o13 o14 o15 o16 o17 = 8switch nand0 nand1 nand2 nand3 nand4 nand5 nand6 nand7 t1;
+    o20 o21 o22 o23 o24 o25 o26 o27 = 8switch nor0 nor1 nor2 nor3 nor4 nor5 nor6 nor7 t2;
+    o30 o31 o32 o33 o34 o35 o36 o37 = 8switch and0 and1 and2 and3 and4 and5 and6 and7 t3;
+    o0 = 4or o00 o10 o20 o30;
     o1 = 4or o01 o11 o21 o31;
     o2 = 4or o02 o12 o22 o32;
     o3 = 4or o03 o13 o23 o33;
@@ -304,33 +298,43 @@ module OrNandNorAnd(a1 a2 a3
     o5 = 4or o05 o15 o25 o35;
     o6 = 4or o06 o16 o26 o36;
     o7 = 4or o07 o17 o27 o37;
-    o8 = 4or o08 o18 o28 o38;
+}
+module ALU(a0 a1 a2
+            b[0:7]
+            c[0:7]) ->
+            (o[0:7]) {
+    // Or Nand Nor And Add Sub
+    t[0:4] f[0:2] = 3decoder a[0:2];
+    or[0:7] = 8or b[0:7] c[0:7];
+    o[00:07] = 8switch or[0:7];
+
+
 }
 
 // #4
 // if switch A else B
-module selector(a1 a2 a3 a4 a5 a6 a7 a8
-                b1 b2 b3 b4 b5 b6 b7 b8
+module selector(a0 a1 a2 a3 a4 a5 a6 a7
+                b0 b1 b2 b3 b4 b5 b6 b7
                 switch) ->
-                (1 2 3 4 5 6 7 8) {
+                (0 1 2 3 4 5 6 7) {
     nswitch = not switch;
-    01 02 03 04 05 06 07 08 = 8switch a1 a2 a3 a4 a5 a6 a7 a8 switch;
-    11 12 13 14 15 16 17 18 = 8switch b1 b2 b3 b4 b5 b6 b7 b8 nswitch;
-    1 2 3 4 5 6 7 8 = 8or 01 02 03 04 05 06 07 08 11 12 13 14 15 16 17 18;
+    00 01 02 03 04 05 06 07 = 8switch a0 a1 a2 a3 a4 a5 a6 a7 switch;
+    10 11 12 13 14 15 16 17 = 8switch b0 b1 b2 b3 b4 b5 b6 b7 nswitch;
+    0 1 2 3 4 5 6 7 = 8or 00 01 02 03 04 05 06 07 10 11 12 13 14 15 16 17;
 }
 
-module copyvalue(a1 a2 a3 a4 a5 a6 a7 a8
-                b1 b2 b3 b4 b5 b6 b7 b8
+module copyvalue(a0 a1 a2 a3 a4 a5 a6 a7
+                b0 b1 b2 b3 b4 b5 b6 b7
                 inswitch outswitch) ->
-                (01 02 03 04 05 06 07 08
-                11 12 13 14 15 16 17 18) {
+                (00 01 02 03 04 05 06 07
+                10 11 12 13 14 15 16 17) {
     // 入力選択
-    i1 i2 i3 i4 i5 i6 i7 i8 = selector a1 a2 a3 a4 a5 a6 a7 a8 b1 b2 b3 b4 b5 b6 b7 b8 inswitch;
+    i0 i1 i2 i3 i4 i5 i6 i7 = selector a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7 inswitch;
 
     // 出力選択
-    01 02 03 04 05 06 07 08 = 8switch i1 i2 i3 i4 i5 i6 i7 i8 outswitch;
+    00 01 02 03 04 05 06 07 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 outswitch;
     noutswitch = not outswitch;
-    11 12 13 14 15 16 17 18 = 8switch i1 i2 i3 i4 i5 i6 i7 i8 noutswitch;
+    10 11 12 13 14 15 16 17 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 i7 noutswitch;
 
 }
 
@@ -366,29 +370,29 @@ module mem4byte (d0 d1 d2 d3 d4 d5 d6 d7
     o10 o11 o12 o13 o14 o15 o16 o17 = mem8bits d10 d11 d12 d13 d14 d15 d16 d17 w r;
     o18 o19 o1a o1b o1c o1d o1e o1f = mem8bits d18 d19 d1a d1b d1c d1d d1e d1f w r;
 }
-// sw1,2が保存メモリ先指定
+// sw0,1が保存メモリ先指定
 // w_rがオンなら write, オフなら read
-module mem8bit2(a0 a1 a2 a3 a4 a5 a6 a7 sw1 sw2 w_r) -> (
+module mem8bit2(a0 a1 a2 a3 a4 a5 a6 a7 sw0 sw1 w_r) -> (
 o0 o1 o2 o3 o4 o5 o6 o7 ) {
 // o_a0 o_a1 o_a2 o_a3 o_a4 o_a5 o_a6 o_a7
 // o_b0 o_b1 o_b2 o_b3 o_b4 o_b5 o_b6 o_b7
 // o_c0 o_c1 o_c2 o_c3 o_c4 o_c5 o_c6 o_c7
 // o_d0 o_d1 o_d2 o_d3 o_d4 o_d5 o_d6 o_d7
-    sm1 sm2 sm3 sm4 = 2decoder sw1 sw2;   //memory selector
+    sm0 sm1 sm2 sm3 = 2decoder sw0 sw1;   //memory selector
+    w_sm0 = and w_r sm0;
     w_sm1 = and w_r sm1;
     w_sm2 = and w_r sm2;
     w_sm3 = and w_r sm3;
-    w_sm4 = and w_r sm4;
 
     nw_r = not w_r;
+    r_sm0 = and nw_r sm0;
     r_sm1 = and nw_r sm1;
     r_sm2 = and nw_r sm2;
     r_sm3 = and nw_r sm3;
-    r_sm4 = and nw_r sm4;
-    o_a0 o_a1 o_a2 o_a3 o_a4 o_a5 o_a6 o_a7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm1 r_sm1;  // memory 1
-    o_b0 o_b1 o_b2 o_b3 o_b4 o_b5 o_b6 o_b7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm2 r_sm2;  // memory 2
-    o_c0 o_c1 o_c2 o_c3 o_c4 o_c5 o_c6 o_c7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm3 r_sm3;  // memory 3
-    o_d0 o_d1 o_d2 o_d3 o_d4 o_d5 o_d6 o_d7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm4 r_sm4;  // memory 4
+    o_a0 o_a1 o_a2 o_a3 o_a4 o_a5 o_a6 o_a7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm1 r_sm0;  // memory 0
+    o_b0 o_b1 o_b2 o_b3 o_b4 o_b5 o_b6 o_b7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm2 r_sm1;  // memory 1
+    o_c0 o_c1 o_c2 o_c3 o_c4 o_c5 o_c6 o_c7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm3 r_sm2;  // memory 2
+    o_d0 o_d1 o_d2 o_d3 o_d4 o_d5 o_d6 o_d7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 w_sm4 r_sm3;  // memory 3
     o0 = 4or o_a0 o_b0 o_c0 o_d0;
     o1 = 4or o_a1 o_b1 o_c1 o_d1;
     o2 = 4or o_a2 o_b2 o_c2 o_d2;
@@ -447,7 +451,7 @@ module mem12byte (d0 d1 d2 d3 d4 d5 d6 d7
                                                 d58 d59 d5a d5b d5c d5d d5e d5f w r;
 }
 
-module inc8bit (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+module 8inc (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     c = true;
     c0 o0 = hAddr d0 c;
     c1 o1 = hAddr d1 c0;
@@ -461,7 +465,7 @@ module inc8bit (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 module counter ()->(o0 o1 o2 o3 o4 o5 o6 o7) {
     1 = true;
     0 = false;
-    a0 a1 a2 a3 a4 a5 a6 a7 = inc8bit o0 o1 o2 o3 o4 o5 o6 o7;
+    a0 a1 a2 a3 a4 a5 a6 a7 = 8inc o0 o1 o2 o3 o4 o5 o6 o7;
     o0 o1 o2 o3 o4 o5 o6 o7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 1 1;
 }
 
@@ -469,7 +473,7 @@ module counter_swc (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     1 = true;
     0 = false;
     nswc = not swc;
-    a0 a1 a2 a3 a4 a5 a6 a7 = inc8bit o0 o1 o2 o3 o4 o5 o6 o7;
+    a0 a1 a2 a3 a4 a5 a6 a7 = 8inc o0 o1 o2 o3 o4 o5 o6 o7;
     o00 o01 o02 o03 o04 o05 o06 o07 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 nswc nswc;
     o10 o11 o12 o13 o14 o15 o16 o17 = mem8bits i0 i1 i2 i3 i4 i5 i6 i7 swc swc;
     o0 o1 o2 o3 o4 o5 o6 o7 = 8or o00 o01 o02 o03 o04 o05 o06 o07 o10 o11 o12 o13 o14 o15 o16 o17;
