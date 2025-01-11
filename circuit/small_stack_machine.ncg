@@ -1,0 +1,280 @@
+using nor:2->1;
+
+// 定数
+
+module true ()->(a) {
+    a: not <- b;
+    b: not <- a;
+}
+
+module false ()->(b) {
+    a: not <- b;
+    b: not <- a;
+}
+
+// 基本的なゲート
+
+module buf (x)->(b) {
+    a: not <- x;
+    b: not <- a;
+}
+
+module not (x)->(a) {
+    a: nor <- x x;
+}
+
+module and (x y)->(c) {
+    a: not <- x  ;
+    b: not <- y  ;
+    c: nor <- a b;
+}
+
+module or (x y)->(b) {
+    a: nor <- x y;
+    b: not <- a  ;
+}
+
+module nand (x y)->(c) {
+    a: not <- x  ;
+    b: not <- y  ;
+    c: or <- a b;
+}
+
+module xor (x y)->(e) {
+    a: not <- x  ;
+    b: not <- y  ;
+    c: nor <- a b;
+    d: nor <- x y;
+    e: nor <- c d;
+}
+
+// 加算器
+
+module hAddr (x y)->(c s) {
+    c: and <- x y;
+    s: xor <- x y;
+}
+
+module fAddr (x y z)->(c s2) {
+    c1 s1: hAddr <- x y  ;
+    c2 s2: hAddr <- s1 z ;
+    c    : or    <- c1 c2;
+}
+
+// ラッチ回路
+
+module sr_latch (s r)->(q nq) {
+    q: nor <- r nq;
+    nq: nor <- s q;
+}
+
+module d_latch (d clk)->(q nq) {
+    nd: not <- d;
+    s: nor <- nd clk;
+    r: nor <- d clk;
+    q nq: sr_latch <- s r;
+}
+
+// クロック回路
+
+module clock()->(a) {
+    a: buf b;
+    b: not a;
+}
+
+// インパルス
+
+module impulse()->(c) {
+    c: not a;
+    a: not b;
+    b: not a;
+}
+
+// デマルチプレクサ
+
+module demux1 (in s)->(a b) {
+    a0 b0: adrDecoder1 s;
+    a: and in a0;
+    b: and in b0;
+}
+
+module demux2 (in s0 s1)->(a b c d) {
+    a0 b0 c0 d0: adrDecoder2 <- s0 s1;
+    a: and in a0;
+    b: and in b0;
+    c: and in c0;
+    d: and in d0;
+}
+
+module adrDecoder8
+    (s0 s1 s2 s3 s4 s5 s6 s7)->(
+        o00 o10 o20 o30 o40 o50 o60 o70 o80 o90 oa0 ob0 oc0 od0 oe0 of0
+        o01 o11 o21 o31 o41 o51 o61 o71 o81 o91 oa1 ob1 oc1 od1 oe1 of1
+        o02 o12 o22 o32 o42 o52 o62 o72 o82 o92 oa2 ob2 oc2 od2 oe2 of2
+        o03 o13 o23 o33 o43 o53 o63 o73 o83 o93 oa3 ob3 oc3 od3 oe3 of3
+        o04 o14 o24 o34 o44 o54 o64 o74 o84 o94 oa4 ob4 oc4 od4 oe4 of4
+        o05 o15 o25 o35 o45 o55 o65 o75 o85 o95 oa5 ob5 oc5 od5 oe5 of5
+        o06 o16 o26 o36 o46 o56 o66 o76 o86 o96 oa6 ob6 oc6 od6 oe6 of6
+        o07 o17 o27 o37 o47 o57 o67 o77 o87 o97 oa7 ob7 oc7 od7 oe7 of7
+        o08 o18 o28 o38 o48 o58 o68 o78 o88 o98 oa8 ob8 oc8 od8 oe8 of8
+        o09 o19 o29 o39 o49 o59 o69 o79 o89 o99 oa9 ob9 oc9 od9 oe9 of9
+        o0a o1a o2a o3a o4a o5a o6a o7a o8a o9a oaa oba oca oda oea ofa
+        o0b o1b o2b o3b o4b o5b o6b o7b o8b o9b oab obb ocb odb oeb ofb
+        o0c o1c o2c o3c o4c o5c o6c o7c o8c o9c oac obc occ odc oec ofc
+        o0d o1d o2d o3d o4d o5d o6d o7d o8d o9d oad obd ocd odd oed ofd
+        o0e o1e o2e o3e o4e o5e o6e o7e o8e o9e oae obe oce ode oee ofe
+        o0f o1f o2f o3f o4f o5f o6f o7f o8f o9f oaf obf ocf odf oef off
+    ) {
+    a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af: adrDecoder4 <- s0 s1 s2 s3;
+    b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf: adrDecoder4 <- s4 s5 s6 s7;
+    o00:and a0 b0; o10:and a1 b0; o20:and a2 b0; o30:and a3 b0; o40:and a4 b0; o50:and a5 b0; o60:and a6 b0; o70:and a7 b0; o80:and a8 b0; o90:and a9 b0; oa0:and aa b0; ob0:and ab b0; oc0:and ac b0; od0:and ad b0; oe0:and ae b0; of0:and af b0;
+    o01:and a0 b1; o11:and a1 b1; o21:and a2 b1; o31:and a3 b1; o41:and a4 b1; o51:and a5 b1; o61:and a6 b1; o71:and a7 b1; o81:and a8 b1; o91:and a9 b1; oa1:and aa b1; ob1:and ab b1; oc1:and ac b1; od1:and ad b1; oe1:and ae b1; of1:and af b1;
+    o02:and a0 b2; o12:and a1 b2; o22:and a2 b2; o32:and a3 b2; o42:and a4 b2; o52:and a5 b2; o62:and a6 b2; o72:and a7 b2; o82:and a8 b2; o92:and a9 b2; oa2:and aa b2; ob2:and ab b2; oc2:and ac b2; od2:and ad b2; oe2:and ae b2; of2:and af b2;
+    o03:and a0 b3; o13:and a1 b3; o23:and a2 b3; o33:and a3 b3; o43:and a4 b3; o53:and a5 b3; o63:and a6 b3; o73:and a7 b3; o83:and a8 b3; o93:and a9 b3; oa3:and aa b3; ob3:and ab b3; oc3:and ac b3; od3:and ad b3; oe3:and ae b3; of3:and af b3;
+    o04:and a0 b4; o14:and a1 b4; o24:and a2 b4; o34:and a3 b4; o44:and a4 b4; o54:and a5 b4; o64:and a6 b4; o74:and a7 b4; o84:and a8 b4; o94:and a9 b4; oa4:and aa b4; ob4:and ab b4; oc4:and ac b4; od4:and ad b4; oe4:and ae b4; of4:and af b4;
+    o05:and a0 b5; o15:and a1 b5; o25:and a2 b5; o35:and a3 b5; o45:and a4 b5; o55:and a5 b5; o65:and a6 b5; o75:and a7 b5; o85:and a8 b5; o95:and a9 b5; oa5:and aa b5; ob5:and ab b5; oc5:and ac b5; od5:and ad b5; oe5:and ae b5; of5:and af b5;
+    o06:and a0 b6; o16:and a1 b6; o26:and a2 b6; o36:and a3 b6; o46:and a4 b6; o56:and a5 b6; o66:and a6 b6; o76:and a7 b6; o86:and a8 b6; o96:and a9 b6; oa6:and aa b6; ob6:and ab b6; oc6:and ac b6; od6:and ad b6; oe6:and ae b6; of6:and af b6;
+    o07:and a0 b7; o17:and a1 b7; o27:and a2 b7; o37:and a3 b7; o47:and a4 b7; o57:and a5 b7; o67:and a6 b7; o77:and a7 b7; o87:and a8 b7; o97:and a9 b7; oa7:and aa b7; ob7:and ab b7; oc7:and ac b7; od7:and ad b7; oe7:and ae b7; of7:and af b7;
+    o08:and a0 b8; o18:and a1 b8; o28:and a2 b8; o38:and a3 b8; o48:and a4 b8; o58:and a5 b8; o68:and a6 b8; o78:and a7 b8; o88:and a8 b8; o98:and a9 b8; oa8:and aa b8; ob8:and ab b8; oc8:and ac b8; od8:and ad b8; oe8:and ae b8; of8:and af b8;
+    o09:and a0 b9; o19:and a1 b9; o29:and a2 b9; o39:and a3 b9; o49:and a4 b9; o59:and a5 b9; o69:and a6 b9; o79:and a7 b9; o89:and a8 b9; o99:and a9 b9; oa9:and aa b9; ob9:and ab b9; oc9:and ac b9; od9:and ad b9; oe9:and ae b9; of9:and af b9;
+    o0a:and a0 ba; o1a:and a1 ba; o2a:and a2 ba; o3a:and a3 ba; o4a:and a4 ba; o5a:and a5 ba; o6a:and a6 ba; o7a:and a7 ba; o8a:and a8 ba; o9a:and a9 ba; oaa:and aa ba; oba:and ab ba; oca:and ac ba; oda:and ad ba; oea:and ae ba; ofa:and af ba;
+    o0b:and a0 bb; o1b:and a1 bb; o2b:and a2 bb; o3b:and a3 bb; o4b:and a4 bb; o5b:and a5 bb; o6b:and a6 bb; o7b:and a7 bb; o8b:and a8 bb; o9b:and a9 bb; oab:and aa bb; obb:and ab bb; ocb:and ac bb; odb:and ad bb; oeb:and ae bb; ofb:and af bb;
+    o0c:and a0 bc; o1c:and a1 bc; o2c:and a2 bc; o3c:and a3 bc; o4c:and a4 bc; o5c:and a5 bc; o6c:and a6 bc; o7c:and a7 bc; o8c:and a8 bc; o9c:and a9 bc; oac:and aa bc; obc:and ab bc; occ:and ac bc; odc:and ad bc; oec:and ae bc; ofc:and af bc;
+    o0d:and a0 bd; o1d:and a1 bd; o2d:and a2 bd; o3d:and a3 bd; o4d:and a4 bd; o5d:and a5 bd; o6d:and a6 bd; o7d:and a7 bd; o8d:and a8 bd; o9d:and a9 bd; oad:and aa bd; obd:and ab bd; ocd:and ac bd; odd:and ad bd; oed:and ae bd; ofd:and af bd;
+    o0e:and a0 be; o1e:and a1 be; o2e:and a2 be; o3e:and a3 be; o4e:and a4 be; o5e:and a5 be; o6e:and a6 be; o7e:and a7 be; o8e:and a8 be; o9e:and a9 be; oae:and aa be; obe:and ab be; oce:and ac be; ode:and ad be; oee:and ae be; ofe:and af be;
+    o0f:and a0 bf; o1f:and a1 bf; o2f:and a2 bf; o3f:and a3 bf; o4f:and a4 bf; o5f:and a5 bf; o6f:and a6 bf; o7f:and a7 bf; o8f:and a8 bf; o9f:and a9 bf; oaf:and aa bf; obf:and ab bf; ocf:and ac bf; odf:and ad bf; oef:and ae bf; off:and af bf;
+}
+
+module adrDecoder4 (s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
+    a0 a1 a2 a3: adrDecoder2 <- s0 s1;
+    b0 b1 b2 b3: adrDecoder2 <- s2 s3;
+    o0:and a0 b0; o1:and a1 b0; o2:and a2 b0; o3:and a3 b0; o4:and a0 b1; o5:and a1 b1; o6:and a2 b1; o7:and a3 b1; o8:and a0 b2; o9:and a1 b2; oa:and a2 b2; ob:and a3 b2; oc:and a0 b3; od:and a1 b3; oe:and a2 b3; of:and a3 b3;
+}
+
+module adrDecoder2 (s0 s1)->(a b c d) {
+    a0 b0: adrDecoder1 <- s0;
+    a1 b1: adrDecoder1 <- s1;
+    a: and <- a0 a1;
+    b: and <- b0 a1;
+    c: and <- a0 b1;
+    d: and <- b0 b1;
+}
+
+module adrDecoder1 (s)->(a b) {
+    a: not <- s;
+    b: buf <- s;
+}
+
+// メモリ
+module mem8bits (d0 d1 d2 d3,d4 d5 d6 d7, w,r)->(o0 o1 o2 o3,o4 o5 o6 o7) {
+    o0: mem1bit d0 w r;
+    o1: mem1bit d1 w r;
+    o2: mem1bit d2 w r;
+    o3: mem1bit d3 w r;
+    o4: mem1bit d4 w r;
+    o5: mem1bit d5 w r;
+    o6: mem1bit d6 w r;
+    o7: mem1bit d7 w r;
+}
+module mem1bit (d, w,r)->(o) {
+    nw: not w;
+    q nq: d_latch d nw;
+    o: and q r;
+}
+
+module or4 (a b c d)->(o) {
+    o1: or a b;
+    o2: or c d;
+    o: or o1 o2;
+}
+
+module and4 (a b c d)->(o) {
+    o1: and a b;
+    o2: and c d;
+    o: and o1 o2;
+}
+
+module mem8bits_2 (d0 d1 d2 d3,d4 d5 d6 d7, s0 s1, w)->(o0 o1 o2 o3,o4 o5 o6 o7) {
+    a b c d: adrDecoder2 s0 s1;
+    o0_0 o1_0 o2_0 o3_0 o4_0 o5_0 o6_0 o7_0: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 a a;
+    o0_1 o1_1 o2_1 o3_1 o4_1 o5_1 o6_1 o7_1: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 b b;
+    o0_2 o1_2 o2_2 o3_2 o4_2 o5_2 o6_2 o7_2: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 c c;
+    o0_3 o1_3 o2_3 o3_3 o4_3 o5_3 o6_3 o7_3: mem8bits d0 d1 d2 d3 d4 d5 d6 d7 d d;
+    o0: or4 o0_0 o0_1 o0_2 o0_3;
+    o1: or4 o1_0 o1_1 o1_2 o1_3;
+    o2: or4 o2_0 o2_1 o2_2 o2_3;
+    o3: or4 o3_0 o3_1 o3_2 o3_3;
+    o4: or4 o4_0 o4_1 o4_2 o4_3;
+    o5: or4 o5_0 o5_1 o5_2 o5_3;
+    o6: or4 o6_0 o6_1 o6_2 o6_3;
+    o7: or4 o7_0 o7_1 o7_2 o7_3;
+}
+
+
+//
+// テストを定義する
+//
+
+test true:0->1 {
+    -> t;
+}
+
+test false:0->1 {
+    -> f;
+}
+
+test buf:1->1 {
+    t -> t;
+    f -> f;
+}
+
+test not:1->1 {
+    t -> f;
+    f -> t;
+}
+
+test and:2->1 {
+    t t -> t;
+    t f -> f;
+    f t -> f;
+    f f -> f;
+}
+
+test or:2->1 {
+    t t -> t;
+    t f -> t;
+    f t -> t;
+    f f -> f;
+}
+
+test nand:2->1 {
+    t t -> f;
+    t f -> t;
+    f t -> t;
+    f f -> t;
+}
+
+test xor:2->1 {
+    t t -> f;
+    t f -> t;
+    f t -> t;
+    f f -> f;
+}
+
+test hAddr:2->2 {
+    t t -> t f;
+    t f -> f t;
+    f t -> f t;
+    f f -> f f;
+}
+
+test fAddr:3->2 {
+    t t t -> t t;
+    f t t -> t f;
+    t f t -> t f;
+    f f t -> f t;
+    t t f -> t f;
+    f t f -> f t;
+    t f f -> f t;
+    f f f -> f f;
+}
