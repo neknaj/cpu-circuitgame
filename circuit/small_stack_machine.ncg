@@ -192,14 +192,55 @@ module and4 (a b c d)->(o) {
     o: and o1 o2;
 }
 
+module mem8bits8 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6 s7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0 t1: adrDecoder1 s7;
+    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5 s6;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5 s6;
+    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits7 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0 t1: adrDecoder1 s6;
+    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5;
+    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits6 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0 t1: adrDecoder1 s5;
+    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4;
+    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits5 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0 t1: adrDecoder1 s4;
+    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3;
+    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits4 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0 t1: adrDecoder1 s3;
+    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2;
+    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits3 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0 t1: adrDecoder1 s2;
+    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1;
+    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
 module mem8bits2 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     t0 t1: adrDecoder1 s1;
     t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
-    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s1;
-    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s1;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
-
 module mem8bits1 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     t0 t1: adrDecoder1 s0;
     t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
@@ -208,16 +249,11 @@ module mem8bits1 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 
+
 // 8bits纏めてor
 module or8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0: or d00 d10;
-    o1: or d01 d11;
-    o2: or d02 d12;
-    o3: or d03 d13;
-    o4: or d04 d14;
-    o5: or d05 d15;
-    o6: or d06 d16;
-    o7: or d07 d17;
+    o0:or d00 d10; o1:or d01 d11; o2:or d02 d12; o3:or d03 d13;
+    o4:or d04 d14; o5:or d05 d15; o6:or d06 d16; o7:or d07 d17;
 }
 
 
