@@ -184,8 +184,8 @@ module 8not(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8) {
     o8 = not 8;
 }
 module 8or(a1 a2 a3 a4 a5 a6 a7 a8
-           b1 b2 b3 b4 b5 b6 b7 b8) ->
-          (o1 o2 o3 o4 o5 o6 o7 o8) {
+            b1 b2 b3 b4 b5 b6 b7 b8) ->
+            (o1 o2 o3 o4 o5 o6 o7 o8) {
     o1 = or a1 b1;
     o2 = or a2 b2;
     o3 = or a3 b3;
@@ -196,8 +196,8 @@ module 8or(a1 a2 a3 a4 a5 a6 a7 a8
     o8 = or a8 b8;
 }
 module 8and(a1 a2 a3 a4 a5 a6 a7 a8
-           b1 b2 b3 b4 b5 b6 b7 b8) ->
-          (o1 o2 o3 o4 o5 o6 o7 o8) {
+            b1 b2 b3 b4 b5 b6 b7 b8) ->
+            (o1 o2 o3 o4 o5 o6 o7 o8) {
     o1 = and a1 b1;
     o2 = and a2 b2;
     o3 = and a3 b3;
@@ -213,9 +213,9 @@ module 8shiftr(1 2 3 4 5 6 7 8)->(o1 o2 o3 o4 o5 o6 o7 o8){
 }
 
 module 8addr(c0
-             a1 a2 a3 a4 a5 a6 a7 a8
-             b1 b2 b3 b4 b5 b6 b7 b8) ->
-             (c o1 o2 o3 o4 o5 o6 o7 o8) {
+                a1 a2 a3 a4 a5 a6 a7 a8
+                b1 b2 b3 b4 b5 b6 b7 b8) ->
+                (c o1 o2 o3 o4 o5 o6 o7 o8) {
     c1 o1 = fAddr c0 a1 b1;
     c2 o2 = fAddr c1 a2 b2;
     c3 o3 = fAddr c2 a3 b3;
@@ -284,7 +284,7 @@ module 8switch(1 2 3 4 5 6 7 8 swc) -> (o1 o2 o3 o4 o5 o6 o7 o8) {
 module OrNandNorAnd(a1 a2 a3
                     b1 b2 b3 b4 b5 b6 b7 b8
                     c1 c2 c3 c4 c5 c6 c7 c8) ->
-                   (o1 o2 o3 o4 o5 o6 o7 o8) {
+                    (o1 o2 o3 o4 o5 o6 o7 o8) {
     t0 t1 t2 t3 f0 f1 f2 f3 = 3decoder a1 a2 a3;
     or1 or2 or3 or4 or5 or6 or7 or8 = 8or b1 b2 b3 b4 b5 b6 b7 b8 c1 c2 c3 c4 c5 c6 c7 c8;
     nb1 nb2 nb3 nb4 nb5 nb6 nb7 nb8 = 8not b1 b2 b3 b4 b5 b6 b7 b8;
@@ -312,7 +312,7 @@ module OrNandNorAnd(a1 a2 a3
 module selector(a1 a2 a3 a4 a5 a6 a7 a8
                 b1 b2 b3 b4 b5 b6 b7 b8
                 switch) ->
-               (1 2 3 4 5 6 7 8) {
+                (1 2 3 4 5 6 7 8) {
     nswitch = not switch;
     01 02 03 04 05 06 07 08 = 8switch a1 a2 a3 a4 a5 a6 a7 a8 switch;
     11 12 13 14 15 16 17 18 = 8switch b1 b2 b3 b4 b5 b6 b7 b8 nswitch;
@@ -320,10 +320,10 @@ module selector(a1 a2 a3 a4 a5 a6 a7 a8
 }
 
 module copyvalue(a1 a2 a3 a4 a5 a6 a7 a8
-                 b1 b2 b3 b4 b5 b6 b7 b8
-                 inswitch outswitch) ->
+                b1 b2 b3 b4 b5 b6 b7 b8
+                inswitch outswitch) ->
                 (01 02 03 04 05 06 07 08
-                 11 12 13 14 15 16 17 18) {
+                11 12 13 14 15 16 17 18) {
     // 入力選択
     i1 i2 i3 i4 i5 i6 i7 i8 = selector a1 a2 a3 a4 a5 a6 a7 a8 b1 b2 b3 b4 b5 b6 b7 b8 inswitch;
 
@@ -357,7 +357,7 @@ module mem4byte (d0 d1 d2 d3 d4 d5 d6 d7
                 d10 d11 d12 d13 d14 d15 d16 d17
                 d18 d19 d1a d1b d1c d1d d1e d1f
                 w r) ->
-               (o0 o1 o2 o3 o4 o5 o6 o7
+                (o0 o1 o2 o3 o4 o5 o6 o7
                 o8 o9 oa ob oc od oe of
                 o10 o11 o12 o13 o14 o15 o16 o17
                 o18 o19 o1a o1b o1c o1d o1e o1f) {
@@ -400,51 +400,51 @@ o0 o1 o2 o3 o4 o5 o6 o7 ) {
 }
 
 module mem12byte (d0 d1 d2 d3 d4 d5 d6 d7
-                 d8 d9 da db dc dd de df
-                 d10 d11 d12 d13 d14 d15 d16 d17
-                 d18 d19 d1a d1b d1c d1d d1e d1f
-                 d20 d21 d22 d23 d24 d25 d26 d27
-                 d28 d29 d2a d2b d2c d2d d2e d2f
-                 d30 d31 d32 d33 d34 d35 d36 d37
-                 d38 d39 d3a d3b d3c d3d d3e d3f
-                 d40 d41 d42 d43 d44 d45 d46 d47
-                 d48 d49 d4a d4b d4c d4d d4e d4f
-                 d50 d51 d52 d53 d54 d55 d56 d57
-                 d58 d59 d5a d5b d5c d5d d5e d5f
-                 w r) ->
+                    d8 d9 da db dc dd de df
+                    d10 d11 d12 d13 d14 d15 d16 d17
+                    d18 d19 d1a d1b d1c d1d d1e d1f
+                    d20 d21 d22 d23 d24 d25 d26 d27
+                    d28 d29 d2a d2b d2c d2d d2e d2f
+                    d30 d31 d32 d33 d34 d35 d36 d37
+                    d38 d39 d3a d3b d3c d3d d3e d3f
+                    d40 d41 d42 d43 d44 d45 d46 d47
+                    d48 d49 d4a d4b d4c d4d d4e d4f
+                    d50 d51 d52 d53 d54 d55 d56 d57
+                    d58 d59 d5a d5b d5c d5d d5e d5f
+                    w r) ->
                 (o0 o1 o2 o3 o4 o5 o6 o7
-                 o8 o9 oa ob oc od oe of
-                 o10 o11 o12 o13 o14 o15 o16 o17
-                 o18 o19 o1a o1b o1c o1d o1e o1f
-                 o20 o21 o22 o23 o24 o25 o26 o27
-                 o28 o29 o2a o2b o2c o2d o2e o2f
-                 o30 o31 o32 o33 o34 o35 o36 o37
-                 o38 o39 o3a o3b o3c o3d o3e o3f
-                 o40 o41 o42 o43 o44 o45 o46 o47
-                 o48 o49 o4a o4b o4c o4d o4e o4f
-                 o50 o51 o52 o53 o54 o55 o56 o57
-                 o58 o59 o5a o5b o5c o5d o5e o5f) {
+                    o8 o9 oa ob oc od oe of
+                    o10 o11 o12 o13 o14 o15 o16 o17
+                    o18 o19 o1a o1b o1c o1d o1e o1f
+                    o20 o21 o22 o23 o24 o25 o26 o27
+                    o28 o29 o2a o2b o2c o2d o2e o2f
+                    o30 o31 o32 o33 o34 o35 o36 o37
+                    o38 o39 o3a o3b o3c o3d o3e o3f
+                    o40 o41 o42 o43 o44 o45 o46 o47
+                    o48 o49 o4a o4b o4c o4d o4e o4f
+                    o50 o51 o52 o53 o54 o55 o56 o57
+                    o58 o59 o5a o5b o5c o5d o5e o5f) {
     o0 o1 o2 o3 o4 o5 o6 o7
     o8 o9 oa ob oc od oe of
     o10 o11 o12 o13 o14 o15 o16 o17
     o18 o19 o1a o1b o1c o1d o1e o1f = mem4byte d0 d1 d2 d3 d4 d5 d6 d7
-                                              d8 d9 da db dc dd de df
-                                              d10 d11 d12 d13 d14 d15 d16 d17
-                                              d18 d19 d1a d1b d1c d1d d1e d1f w r;
+                                                d8 d9 da db dc dd de df
+                                                d10 d11 d12 d13 d14 d15 d16 d17
+                                                d18 d19 d1a d1b d1c d1d d1e d1f w r;
     o20 o21 o22 o23 o24 o25 o26 o27
     o28 o29 o2a o2b o2c o2d o2e o2f
     o30 o31 o32 o33 o34 o35 o36 o37
     o38 o39 o3a o3b o3c o3d o3e o3f = mem4byte d20 d21 d22 d23 d24 d25 d26 d27
-                                              d28 d29 d2a d2b d2c d2d d2e d2f
-                                              d30 d31 d32 d33 d34 d35 d36 d37
-                                              d38 d39 d3a d3b d3c d3d d3e d3f w r;
+                                                d28 d29 d2a d2b d2c d2d d2e d2f
+                                                d30 d31 d32 d33 d34 d35 d36 d37
+                                                d38 d39 d3a d3b d3c d3d d3e d3f w r;
     o40 o41 o42 o43 o44 o45 o46 o47
     o48 o49 o4a o4b o4c o4d o4e o4f
     o50 o51 o52 o53 o54 o55 o56 o57
     o58 o59 o5a o5b o5c o5d o5e o5f = mem4byte d40 d41 d42 d43 d44 d45 d46 d47
-                                              d48 d49 d4a d4b d4c d4d d4e d4f
-                                              d50 d51 d52 d53 d54 d55 d56 d57
-                                              d58 d59 d5a d5b d5c d5d d5e d5f w r;
+                                                d48 d49 d4a d4b d4c d4d d4e d4f
+                                                d50 d51 d52 d53 d54 d55 d56 d57
+                                                d58 d59 d5a d5b d5c d5d d5e d5f w r;
 }
 
 module inc8bit (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
