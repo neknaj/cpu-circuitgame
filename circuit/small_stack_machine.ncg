@@ -42,8 +42,8 @@ module nand (x y)->(c) {
 
 module xor (x y)->(c) {
     a: and x y;
-    b: nor <- x y;
-    c: nor <- a b;
+    b: nor x y;
+    c: nor a b;
 }
 
 // 加算器
@@ -56,8 +56,8 @@ module increment (x)->(a c) {
 
 module hAddr (x y)->(a c) {
     a: and x y;
-    b: nor <- x y;
-    c: nor <- a b;
+    b: nor x y;
+    c: nor a b;
 }
 
 module fAddr (x y z)->(c s2) {
@@ -123,7 +123,7 @@ module demux1 (in s)->(a b) {
 }
 
 module demux2 (in s0 s1)->(a b c d) {
-    a0 b0 c0 d0: adrDecoder2 <- s0 s1;
+    a0 b0 c0 d0: adrDecoder2 s0 s1;
     a: and in a0;
     b: and in b0;
     c: and in c0;
@@ -151,8 +151,8 @@ module adrDecoder8
         o0e o1e o2e o3e o4e o5e o6e o7e o8e o9e oae obe oce ode oee ofe
         o0f o1f o2f o3f o4f o5f o6f o7f o8f o9f oaf obf ocf odf oef off
     ) {
-    a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af: adrDecoder4 <- s0 s1 s2 s3;
-    b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf: adrDecoder4 <- s4 s5 s6 s7;
+    a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af: adrDecoder4 s0 s1 s2 s3;
+    b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf: adrDecoder4 s4 s5 s6 s7;
     o00:and a0 b0; o10:and a1 b0; o20:and a2 b0; o30:and a3 b0; o40:and a4 b0; o50:and a5 b0; o60:and a6 b0; o70:and a7 b0; o80:and a8 b0; o90:and a9 b0; oa0:and aa b0; ob0:and ab b0; oc0:and ac b0; od0:and ad b0; oe0:and ae b0; of0:and af b0;
     o01:and a0 b1; o11:and a1 b1; o21:and a2 b1; o31:and a3 b1; o41:and a4 b1; o51:and a5 b1; o61:and a6 b1; o71:and a7 b1; o81:and a8 b1; o91:and a9 b1; oa1:and aa b1; ob1:and ab b1; oc1:and ac b1; od1:and ad b1; oe1:and ae b1; of1:and af b1;
     o02:and a0 b2; o12:and a1 b2; o22:and a2 b2; o32:and a3 b2; o42:and a4 b2; o52:and a5 b2; o62:and a6 b2; o72:and a7 b2; o82:and a8 b2; o92:and a9 b2; oa2:and aa b2; ob2:and ab b2; oc2:and ac b2; od2:and ad b2; oe2:and ae b2; of2:and af b2;
@@ -421,15 +421,30 @@ module increment8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 
 // decrement
 module decrement8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    c: true;
-    c0 o0: hAddr d0 c;
-    c1 o1: fAddr d1 c0 c;
-    c2 o2: fAddr d2 c1 c;
-    c3 o3: fAddr d3 c2 c;
-    c4 o4: fAddr d4 c3 c;
-    c5 o5: fAddr d5 c4 c;
-    c6 o6: fAddr d6 c5 c;
-    c7 o7: fAddr d7 c6 c;
+    o0: not d0;
+    c1 o1: fAddr_4decrement d1 d0;
+    c2 o2: fAddr_4decrement d2 c1;
+    c3 o3: fAddr_4decrement d3 c2;
+    c4 o4: fAddr_4decrement d4 c3;
+    c5 o5: fAddr_4decrement d5 c4;
+    c6 o6: fAddr_4decrement d6 c5;
+    c7 o7: fAddr_4decrement d7 c6;
+}
+// module fAddr2 (x y)->(v0 s) {
+//     v0 : or  x y;
+//     v1: and x y;
+//     v2: nor <- x y;
+//     v3: nor <- v1 v2;
+//     s: not v3;
+// }
+module fAddr_4decrement (x y)->(v0 s) {
+    a: nor x y;
+    v0: not a  ;
+    a0: not x  ;
+    b0: not y  ;
+    v1: nor a0 b0;
+    v3: nor v1 a;
+    s: not v3;
 }
 
 // complement
@@ -439,8 +454,8 @@ module hAddr_4complement (nx y)->(c e) {
     x: not nx;
     b: not y  ;
     c: nor nx b;
-    d: nor <- x y;
-    e: nor <- c d;
+    d: nor x y;
+    e: nor c d;
 }
 module hAddr_4complement2 (nx)->(c e) {
     c: not nx;
@@ -551,4 +566,11 @@ test fAddr:3->2 {
     f t f -> f t;
     t f f -> f t;
     f f f -> f f;
+}
+
+test fAddr_4decrement:2->2 {
+    t t -> t t;
+    f t -> t f;
+    t f -> t f;
+    f f -> f t;
 }

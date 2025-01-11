@@ -46,7 +46,8 @@
 | add8bits | 16 -> 8 | 89 |
 | sub8bits | 16 -> 8 | 125 |
 | increment8bits | 8 -> 8 | 36 |
-| decrement8bits | 8 -> 8 | 91 |
+| decrement8bits | 8 -> 8 | 50 |
+| fAddr_4decrement | 2 -> 2 | 7 |
 | hAddr_4complement | 2 -> 2 | 5 |
 | hAddr_4complement2 | 1 -> 2 | 3 |
 | complement8bits | 8 -> 8 | 38 |
