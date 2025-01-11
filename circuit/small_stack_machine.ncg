@@ -371,6 +371,18 @@ module cShiftR8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o7: buf o0;
 }
 
+// addition
+module add8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    c0 o0: hAddr d00 d10;
+    c1 o1: fAddr d01 d11 c0;
+    c2 o2: fAddr d02 d12 c1;
+    c3 o3: fAddr d03 d13 c2;
+    c4 o4: fAddr d04 d14 c3;
+    c5 o5: fAddr d05 d15 c4;
+    c6 o6: fAddr d06 d16 c5;
+    c7 o7: fAddr d07 d17 c6;
+}
+
 // increment
 module increment8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     c: true;
