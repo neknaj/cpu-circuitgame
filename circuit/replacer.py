@@ -39,7 +39,7 @@ def replace_sequential_numbers(code):
         return separator.join(sequence)
 
     # Regular expression to find patterns like a[0:7], a[00:07], a[0:f]
-    pattern = r"([a-zA-Z_]+)\[(0?[0-9a-fA-F]+):(0?[0-9a-fA-F]+)\]"
+    pattern = r"([a-zA-Z0-9_]+)\[(0?[0-9a-fA-F]+):(0?[0-9a-fA-F]+)\]"
     
     # Replace the patterns with sequential numbers
     modified_code = re.sub(pattern, replace_match, code)

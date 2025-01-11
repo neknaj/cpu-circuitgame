@@ -131,7 +131,13 @@ module fAddr (x y z)->(c s1) {
     c1 s1 = hAddr s0 z ;
     c     = or    c0 c1;
 }
-
+module fAddr2 (x y) -> (or xnor) {
+    ab = nor x y;
+    xa = nor x ab;
+    ya = nor y ab;
+    xnor = nor xa ya;
+    or = not ab;
+}
 // ラッチ回路
 
 module sr_latch (s r)->(q nq) {
@@ -499,3 +505,50 @@ module counter_swc (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 
 // #5
 // レジスタ
+// a@0:2 REG@0~5, INPUT, UNUSED
+// b@0:2 REG@0~5, OUTPUT, UNUSED
+// 人間が操作できるものではない(ボタンのオンオフを一括で操作しないとfill(0)が多発する)
+module 7or(0 1 2 3 4 5 6)->(b) {
+    05 = 6or 0 1 2 3 4 5;
+    b = or 05 6;
+}
+module register(a0 a1 a2
+                b0 b1 b2
+                i0 i1 i2 i3 i4 i5 i6 i7 test) ->
+                (in0 in1 in2 in3 in4 in5 in6 in7
+                ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7
+                sir0 sir1 sir2 sir3 sir4 sir5 sin _0
+                sor0 sor1 sor2 sor3 sor4 sor5 sout _1
+                r00 r01 r02 r03 r04 r05 r06 r07
+                r10 r11 r12 r13 r14 r15 r16 r17
+                r20 r21 r22 r23 r24 r25 r26 r27
+                r30 r31 r32 r33 r34 r35 r36 r37
+                r40 r41 r42 r43 r44 r45 r46 r47
+                r50 r51 r52 r53 r54 r55 r56 r57
+                o0 o1 o2 o3 o4 o5 o6 o7
+                sor0 sor1 sor2 sor3 sor4 sor5) {
+    // decode input
+    sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a0 a1 a2;
+    sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder b0 b1 b2;
+    // filter value
+    ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sin;  // input valueをswitch inuptでフィルター
+    _ = false;
+    sior0 sior1 sior2 sior3 sior4 sior5 sior6 sior7 = 8or test test test test test test _ _ sir0 sir1 sir2 sir3 sir4 sir5 _ _;
+    r00 r01 r02 r03 r04 r05 r06 r07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor0 sior0;
+    r10 r11 r12 r13 r14 r15 r16 r17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor1 sior1;
+    r20 r21 r22 r23 r24 r25 r26 r27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor2 sior2;
+    r30 r31 r32 r33 r34 r35 r36 r37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor3 sior3;
+    r40 r41 r42 r43 r44 r45 r46 r47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor4 sior4;
+    r50 r51 r52 r53 r54 r55 r56 r57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor5 sior5;
+    // value code
+    in0 = 7or r00 r10 r20 r30 r40 r50 ins0;
+    in1 = 7or r01 r11 r21 r31 r41 r51 ins1;
+    in2 = 7or r02 r12 r22 r32 r42 r52 ins2;
+    in3 = 7or r03 r13 r23 r33 r43 r53 ins3;
+    in4 = 7or r04 r14 r24 r34 r44 r54 ins4;
+    in5 = 7or r05 r15 r25 r35 r45 r55 ins5;
+    in6 = 7or r06 r16 r26 r36 r46 r56 ins6;
+    in7 = 7or r07 r17 r27 r37 r47 r57 ins7;
+
+    o0 o1 o2 o3 o4 o5 o6 o7 = 8switch in0 in1 in2 in3 in4 in5 in6 in7 sout;
+}
