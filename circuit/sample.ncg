@@ -69,15 +69,15 @@ module fAddr (x y z)->(c s2) {
 // ラッチ回路
 
 module sr_latch (s r)->(q nq) {
-    q: nor <- r nq;
-    nq: nor <- s q;
+    nq: nor s q;
+    q: nor r nq;
 }
 
 module d_latch (d clk)->(q nq) {
-    nd: not <- d;
-    s: nor <- nd clk;
-    r: nor <- d clk;
-    q nq: sr_latch <- s r;
+    nd: not d;
+    s: nor nd clk;
+    r: nor d clk;
+    q nq: sr_latch s r;
 }
 
 // クロック回路
