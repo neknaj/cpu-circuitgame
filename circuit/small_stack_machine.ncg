@@ -104,6 +104,8 @@ module demux2 (in s0 s1)->(a b c d) {
     d: and in d0;
 }
 
+// アドレスデコーダ
+
 module adrDecoder8
     (s0 s1 s2 s3 s4 s5 s6 s7)->(
         o00 o10 o20 o30 o40 o50 o60 o70 o80 o90 oa0 ob0 oc0 od0 oe0 of0
@@ -163,34 +165,10 @@ module adrDecoder1 (s)->(a b) {
     b: buf s;
 }
 
+
+//
 // メモリ
-module mem8bits (d0 d1 d2 d3 d4 d5 d6 d7, w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0: mem1bit d0 w r;
-    o1: mem1bit d1 w r;
-    o2: mem1bit d2 w r;
-    o3: mem1bit d3 w r;
-    o4: mem1bit d4 w r;
-    o5: mem1bit d5 w r;
-    o6: mem1bit d6 w r;
-    o7: mem1bit d7 w r;
-}
-module mem1bit (d, w,r)->(o) {
-    nw: not w;
-    q nq: d_latch d nw;
-    o: and q r;
-}
-
-module or4 (a b c d)->(o) {
-    o1: or a b;
-    o2: or c d;
-    o: or o1 o2;
-}
-
-module and4 (a b c d)->(o) {
-    o1: and a b;
-    o2: and c d;
-    o: and o1 o2;
-}
+//
 
 module mem8bits8 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6 s7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     t0 t1: adrDecoder1 s7;
@@ -248,12 +226,129 @@ module mem8bits1 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits d0 d1 d2 d3 d4 d5 d6 d7, t10 t11;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
+module mem8bits (d0 d1 d2 d3 d4 d5 d6 d7, w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0: mem1bit d0 w r;
+    o1: mem1bit d1 w r;
+    o2: mem1bit d2 w r;
+    o3: mem1bit d3 w r;
+    o4: mem1bit d4 w r;
+    o5: mem1bit d5 w r;
+    o6: mem1bit d6 w r;
+    o7: mem1bit d7 w r;
+}
+module mem1bit (d, w,r)->(o) {
+    nw: not w;
+    q nq: d_latch d nw;
+    o: and q r;
+}
 
+//
+// ALU
+//
 
-// 8bits纏めてor
+module not8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:not d0;
+    o1:not d1;
+    o2:not d2;
+    o3:not d3;
+    o4:not d4;
+    o5:not d5;
+    o6:not d6;
+    o7:not d7;
+}
+module and8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:and d00 d10;
+    o1:and d01 d11;
+    o2:and d02 d12;
+    o3:and d03 d13;
+    o4:and d04 d14;
+    o5:and d05 d15;
+    o6:and d06 d16;
+    o7:and d07 d17;
+}
 module or8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0:or d00 d10; o1:or d01 d11; o2:or d02 d12; o3:or d03 d13;
-    o4:or d04 d14; o5:or d05 d15; o6:or d06 d16; o7:or d07 d17;
+    o0:or d00 d10;
+    o1:or d01 d11;
+    o2:or d02 d12;
+    o3:or d03 d13;
+    o4:or d04 d14;
+    o5:or d05 d15;
+    o6:or d06 d16;
+    o7:or d07 d17;
+}
+module xor8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:xor d00 d10;
+    o1:xor d01 d11;
+    o2:xor d02 d12;
+    o3:xor d03 d13;
+    o4:xor d04 d14;
+    o5:xor d05 d15;
+    o6:xor d06 d16;
+    o7:xor d07 d17;
+}
+
+// logical shift
+module lShiftL8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:false;
+    o1:buf d0;
+    o2:buf d1;
+    o3:buf d2;
+    o4:buf d3;
+    o5:buf d4;
+    o6:buf d5;
+    o7:buf d6;
+}
+module lShiftR8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:buf d1;
+    o1:buf d2;
+    o2:buf d3;
+    o3:buf d4;
+    o4:buf d5;
+    o5:buf d6;
+    o6:buf d7;
+    o7:false;
+}
+// arithmetic shift
+module aShiftL8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:false;
+    o1:buf d0;
+    o2:buf d1;
+    o3:buf d2;
+    o4:buf d3;
+    o5:buf d4;
+    o6:buf d5;
+    o7:buf d7;
+}
+module aShiftR8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:buf d1;
+    o1:buf d2;
+    o2:buf d3;
+    o3:buf d4;
+    o4:buf d5;
+    o5:buf d6;
+    o6:buf d7;
+    o7:buf d7;
+}
+// circular shift
+module cShiftL8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:buf o7;
+    o1:buf d0;
+    o2:buf d1;
+    o3:buf d2;
+    o4:buf d3;
+    o5:buf d4;
+    o6:buf d5;
+    o7:buf d6;
+}
+module cShiftR8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0:buf d1;
+    o1:buf d2;
+    o2:buf d3;
+    o3:buf d4;
+    o4:buf d5;
+    o5:buf d6;
+    o6:buf d7;
+    o7:buf o0;
 }
 
 
