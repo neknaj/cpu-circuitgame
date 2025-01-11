@@ -3,76 +3,74 @@ using nor:2->1;
 // 定数
 
 module true ()->(a) {
-    a: not <- b;
-    b: not <- a;
+    a: not b;
+    b: not a;
 }
 
 module false ()->(b) {
-    a: not <- b;
-    b: not <- a;
+    a: not b;
+    b: not a;
 }
 
 // 基本的なゲート
 
 module buf (x)->(b) {
-    a: not <- x;
-    b: not <- a;
+    a: not x;
+    b: not a;
 }
 
 module not (x)->(a) {
-    a: nor <- x x;
+    a: nor x x;
 }
 
 module and (x y)->(c) {
-    a: not <- x  ;
-    b: not <- y  ;
-    c: nor <- a b;
+    a: not x  ;
+    b: not y  ;
+    c: nor a b;
 }
 
 module or (x y)->(b) {
-    a: nor <- x y;
-    b: not <- a  ;
+    a: nor x y;
+    b: not a  ;
 }
 
 module nand (x y)->(c) {
-    a: not <- x  ;
-    b: not <- y  ;
-    c: or <- a b;
+    a: not x  ;
+    b: not y  ;
+    c: or a b;
 }
 
-module xor (x y)->(e) {
-    a: not <- x  ;
-    b: not <- y  ;
+module xor (x y)->(c) {
+    a: and x y;
+    b: nor <- x y;
     c: nor <- a b;
-    d: nor <- x y;
-    e: nor <- c d;
 }
 
 // 加算器
 
 module hAddr (x y)->(c s) {
-    c: and <- x y;
-    s: xor <- x y;
+    c: and x y;
+    s: xor x y;
 }
 
 module fAddr (x y z)->(c s2) {
-    c1 s1: hAddr <- x y  ;
-    c2 s2: hAddr <- s1 z ;
-    c    : or    <- c1 c2;
+    c1 s1: hAddr x y  ;
+    c2 s2: hAddr s1 z ;
+    c    : or    c1 c2;
 }
 
 // ラッチ回路
 
 module sr_latch (s r)->(q nq) {
-    q: nor <- r nq;
-    nq: nor <- s q;
+    q: nor r nq;
+    nq: nor s q;
 }
 
 module d_latch (d clk)->(q nq) {
-    nd: not <- d;
-    s: nor <- nd clk;
-    r: nor <- d clk;
-    q nq: sr_latch <- s r;
+    nd: not d;
+    s: nor nd clk;
+    r: nor d clk;
+    q nq: sr_latch s r;
 }
 
 // クロック回路
@@ -146,23 +144,23 @@ module adrDecoder8
 }
 
 module adrDecoder4 (s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
-    a0 a1 a2 a3: adrDecoder2 <- s0 s1;
-    b0 b1 b2 b3: adrDecoder2 <- s2 s3;
+    a0 a1 a2 a3: adrDecoder2 s0 s1;
+    b0 b1 b2 b3: adrDecoder2 s2 s3;
     o0:and a0 b0; o1:and a1 b0; o2:and a2 b0; o3:and a3 b0; o4:and a0 b1; o5:and a1 b1; o6:and a2 b1; o7:and a3 b1; o8:and a0 b2; o9:and a1 b2; oa:and a2 b2; ob:and a3 b2; oc:and a0 b3; od:and a1 b3; oe:and a2 b3; of:and a3 b3;
 }
 
 module adrDecoder2 (s0 s1)->(a b c d) {
-    a0 b0: adrDecoder1 <- s0;
-    a1 b1: adrDecoder1 <- s1;
-    a: and <- a0 a1;
-    b: and <- b0 a1;
-    c: and <- a0 b1;
-    d: and <- b0 b1;
+    a0 b0: adrDecoder1 s0;
+    a1 b1: adrDecoder1 s1;
+    a: and a0 a1;
+    b: and b0 a1;
+    c: and a0 b1;
+    d: and b0 b1;
 }
 
 module adrDecoder1 (s)->(a b) {
-    a: not <- s;
-    b: buf <- s;
+    a: not s;
+    b: buf s;
 }
 
 // メモリ
