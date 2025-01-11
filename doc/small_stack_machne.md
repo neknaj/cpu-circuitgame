@@ -3,7 +3,7 @@
 | TRUE | 0 -> 1 | 2 |
 | FALSE | 0 -> 1 | 2 |
 | true | 1 -> 1 | 3 |
-| false | 1 -> 1 | 3 |
+| false | 1 -> 1 | 2 |
 | buf | 1 -> 1 | 2 |
 | not | 1 -> 1 | 1 |
 | and | 2 -> 1 | 3 |
@@ -39,9 +39,9 @@
 | and8bits | 16 -> 8 | 24 |
 | or8bits | 16 -> 8 | 16 |
 | xor8bits | 16 -> 8 | 40 |
-| lShiftL8bits | 8 -> 8 | 17 |
-| lShiftR8bits | 8 -> 8 | 17 |
-| aShiftL8bits | 8 -> 8 | 17 |
+| lShiftL8bits | 8 -> 8 | 16 |
+| lShiftR8bits | 8 -> 8 | 16 |
+| aShiftL8bits | 8 -> 8 | 16 |
 | aShiftR8bits | 8 -> 8 | 16 |
 | cShiftL8bits | 8 -> 8 | 16 |
 | cShiftR8bits | 8 -> 8 | 16 |
