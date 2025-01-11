@@ -389,6 +389,24 @@ module add8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d1
     c7 o7: fAddr d07 d17 c6;
 }
 
+// subtraction
+module sub8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    c0: not d10;
+    // s0: buf d10;
+    c1 s1: hAddr_4complement d11 c0;
+    c2 s2: hAddr_4complement d12 c1;
+    c3 s3: hAddr_4complement d13 c2;
+    c4 s4: hAddr_4complement d14 c3;
+    c5 s5: hAddr_4complement d15 c4;
+    c6 s6: hAddr_4complement d16 c5;
+    c7 s7: hAddr_4complement d17 c6;
+    o0 o1 o2 o3 o4 o5 o6 o7: add8bits d00 d01 d02 d03 d04 d05 d06 d07 d10 s1 s2 s3 s4 s5 s6 s7;
+}
+// module sub8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+//     c0 c1 c2 c3 c4 c5 c6 c7: complement8bits d10 d11 d12 d13 d14 d15 d16 d17;
+//     o0 o1 o2 o3 o4 o5 o6 o7: add8bits d00 d01 d02 d03 d04 d05 d06 d07 c0 c1 c2 c3 c4 c5 c6 c7;
+// }
+
 // increment
 module increment8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o0: not d0;
@@ -411,10 +429,13 @@ module hAddr_4complement (nx y)->(c e) {
     d: nor <- x y;
     e: nor <- c d;
 }
+module hAddr_4complement2 (nx)->(c e) {
+    c: not nx;
+    e: buf nx;
+}
 
 module complement8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    c: true;
-    c0 o0: hAddr_4complement d0 c;
+    c0 o0: hAddr_4complement2 d0;
     c1 o1: hAddr_4complement d1 c0;
     c2 o2: hAddr_4complement d2 c1;
     c3 o3: hAddr_4complement d3 c2;
@@ -502,6 +523,10 @@ test hAddr_4complement:2->2 {
     f f -> f t;
     t t -> f t;
     t f -> f f;
+}
+test hAddr_4complement2:1->2 {
+    f -> t f;
+    t -> f t;
 }
 
 test fAddr:3->2 {
