@@ -48,6 +48,12 @@ module xor (x y)->(c) {
 
 // 加算器
 
+// hAddr (x true) に相当
+module increment (x)->(a c) {
+    a: buf x;
+    c: not x;
+}
+
 module hAddr (x y)->(a c) {
     a: and x y;
     b: nor <- x y;
@@ -385,9 +391,8 @@ module add8bits (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d1
 
 // increment
 module increment8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    c: true;
-    c0 o0: hAddr d0 c;
-    c1 o1: hAddr d1 c0;
+    o0: not d0;
+    c1 o1: hAddr d1 d0;
     c2 o2: hAddr d2 c1;
     c3 o3: hAddr d3 c2;
     c4 o4: hAddr d4 c3;
@@ -482,6 +487,10 @@ test xor:2->1 {
     f f -> f;
 }
 
+test increment:1->2 {
+    t -> t f;
+    f -> f t;
+}
 test hAddr:2->2 {
     t t -> t f;
     t f -> f t;
