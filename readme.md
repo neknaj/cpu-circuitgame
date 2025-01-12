@@ -1,43 +1,50 @@
 # CPU on Circuit Game
 making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)  
 
-## Server
-- Build  
+## Build CircuitGame CLI Tool
+- Clone  
     ```sh
     git clone https://github.com/neknaj/circuitgame
+    ```
+- Sync
+    ```sh
+    git pull
+    ```
+- Build  
+    ```sh
     cd circuitgame
     cargo build --release
     cd ..
-    ```
-- copy  
-    ```sh
-    # linux
     cp ./circuitgame/target/release/circuitgame_bin ./ncg
-    # windows
-    cp ./circuitgame/target/release/circuitgame_bin.exe ./ncg.exe
+    ./ncg -i circuit/turing_complete/turing_complete.ncg -s true -d doc/turing_complete.md
     ```
+## Open Server and Debug in Web Browser
 - run  
     ```sh
     ./ncg -i circuit/sample.ncg -s true
     ```
 - open in your browser  
-    https://neknaj.github.io/circuitgame/?socket=ws://localhost:8081
+    https://neknaj.github.io/circuitgame/?socket=ws://localhost:8081  
 
-## Help(2025-1-10)
+
+## Help(2025-1-12)
 
 ```sh
 ncg --help
 ```
 
 ```sh
-< Neknaj Circuit Game >
-Usage: ./ncg [OPTIONS]
+Usage: ncg [OPTIONS]
 
 Options:
-  -i, --input <Input File Path>       Input file
-  -o, --output <Output NCGb to File>  
-  -s, --server <Open server for API>  [possible values: true, false]
-  -h, --help                          Print help
+  -i, --input <Input File Path>             Input file
+  -o, --output <Output File Path>
+  -d, --docOut <Document output File Path>  
+  -m, --module <Name of module to compile>  
+  -s, --server <Open server for API>        
+  -w, --watch <File Watch>                  [possible values: true, false]
+      --vm <Run VM>                         [possible values: true, false]
+  -h, --help                                Print help
   ```
 
 ## License
