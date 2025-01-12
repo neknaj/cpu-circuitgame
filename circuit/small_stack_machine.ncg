@@ -125,9 +125,9 @@ func mux8bits1 (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17
     o7: mux1 d07 d17 s;
 }
 func mux1 (i0 i1, s)->(o) {
-    a0 a1: adrDecoder1 s;
+    a0: not s;
     o0: and i0 a0;
-    o1: and i1 a1;
+    o1: and i1 s;
     o: or o0 o1;
 }
 
@@ -524,12 +524,28 @@ func complement8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 // }
 
 // absolute
+// func absolute8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+//     // 符号bitで場合分け
+//     // 0: そのまま (正の値)
+//     // 1: 補数をとる (負の値)
+//     c0 c1 c2 c3 c4 c5 c6 c7: complement8bits d0 d1 d2 d3 d4 d5 d6 d7;
+//     o0 o1 o2 o3 o4 o5 o6 o7: mux8bits1 d0 d1 d2 d3 d4 d5 d6 d7, c0 c1 c2 c3 c4 c5 c6 c7, d7;
+// }
 func absolute8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     // 符号bitで場合分け
     // 0: そのまま (正の値)
     // 1: 補数をとる (負の値)
-    c0 c1 c2 c3 c4 c5 c6 c7: complement8bits d0 d1 d2 d3 d4 d5 d6 d7;
-    o0 o1 o2 o3 o4 o5 o6 o7: mux8bits1 d0 d1 d2 d3 d4 d5 d6 d7, c0 c1 c2 c3 c4 c5 c6 c7, d7;
+    cr0: not d0;
+    cr0 c0: hAddr_4complement2 d0;
+    cr1 c1: hAddr_4complement d1 cr0;
+    cr2 c2: hAddr_4complement d2 cr1;
+    cr3 c3: hAddr_4complement d3 cr2;
+    cr4 c4: hAddr_4complement d4 cr3;
+    cr5 c5: hAddr_4complement d5 cr4;
+    cr6 c6: hAddr_4complement d6 cr5;
+    cr7 c7: hAddr_4complement d7 cr6;
+    // c0 c1 c2 c3 c4 c5 c6 c7: complement8bits d0 d1 d2 d3 d4 d5 d6 d7;
+    o0 o1 o2 o3 o4 o5 o6 o7: mux8bits1 d0 d1 d2 d3 d4 d5 d6 d7, d0 c1 c2 c3 c4 c5 c6 c7, d7;
 }
 
 //

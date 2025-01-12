@@ -17,8 +17,8 @@
 | d_latch | 2 -> 2 | 5 |
 | clock | 0 -> 1 | 3 |
 | impulse | 0 -> 1 | 3 |
-| mux8bits1 | 17 -> 8 | 88 |
-| mux1 | 3 -> 1 | 11 |
+| mux8bits1 | 17 -> 8 | 72 |
+| mux1 | 3 -> 1 | 9 |
 | demux1 | 2 -> 2 | 7 |
 | demux2 | 3 -> 4 | 26 |
 | adrDecoder8 | 8 -> 256 | 920 |
@@ -26,7 +26,7 @@
 | adrDecoder2 | 2 -> 4 | 14 |
 | adrDecoder1 | 1 -> 2 | 3 |
 | counter8bits | 0 -> 8 | 36 |
-| counter8bitsRewritable | 9 -> 8 | 124 |
+| counter8bitsRewritable | 9 -> 8 | 108 |
 | mem8bits8 | 18 -> 8 | 25827 |
 | mem8bits7 | 17 -> 8 | 12899 |
 | mem8bits6 | 16 -> 8 | 6435 |
@@ -37,7 +37,7 @@
 | mem8bits1 | 11 -> 8 | 173 |
 | mem8bits | 10 -> 8 | 72 |
 | mem1bit | 3 -> 1 | 9 |
-| Rewritable | 10 -> 8 | 112 |
+| Rewritable | 10 -> 8 | 96 |
 | buf8bits | 8 -> 8 | 16 |
 | not8bits | 8 -> 8 | 8 |
 | and8bits | 16 -> 8 | 24 |
@@ -57,4 +57,4 @@
 | hAddr_4complement | 2 -> 2 | 5 |
 | hAddr_4complement2 | 1 -> 2 | 3 |
 | complement8bits | 8 -> 8 | 38 |
-| absolute8bits | 8 -> 8 | 126 |
+| absolute8bits | 8 -> 8 | 110 |
