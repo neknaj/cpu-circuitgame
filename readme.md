@@ -6,13 +6,10 @@ making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)
     ```sh
     git clone https://github.com/neknaj/circuitgame
     ```
-- Sync
-    ```sh
-    git pull
-    ```
 - Build  
     ```sh
     cd circuitgame
+    git pull
     cargo build --release
     cd ..
     cp ./circuitgame/target/release/circuitgame_bin ./ncg
