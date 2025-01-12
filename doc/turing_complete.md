@@ -57,7 +57,7 @@
 | register_view | 15 -> 94 | 632 |
 | register | 14 -> 8 | 614 |
 | instdecoder | 8 -> 4 | 6 |
-| caluclator | 16 -> 64 | 1337 |
-| 8bit_or | 8 -> 1 | 14 |
+| caluclator | 16 -> 104 | 1409 |
+| 9bit_or | 9 -> 1 | 16 |
 | 8finc | 9 -> 9 | 40 |
 | 32counter | 0 -> 32 | 453 |
