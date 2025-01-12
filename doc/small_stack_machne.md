@@ -26,7 +26,7 @@
 | adrDecoder2 | 2 -> 4 | 18 |
 | adrDecoder1 | 1 -> 2 | 3 |
 | counter8bits | 0 -> 8 | 36 |
-| counter8bitsRewritable | 9 -> 8 | 140 |
+| counter8bitsRewritable | 9 -> 8 | 124 |
 | mem8bits8 | 18 -> 8 | 25827 |
 | mem8bits7 | 17 -> 8 | 12899 |
 | mem8bits6 | 16 -> 8 | 6435 |

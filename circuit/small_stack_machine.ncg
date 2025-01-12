@@ -218,8 +218,7 @@ module counter8bits ()->(o0 o1 o2 o3 o4 o5 o6 o7) {
 
 module counter8bitsRewritable (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     a0 a1 a2 a3 a4 a5 a6 a7 = increment8bits o0 o1 o2 o3 o4 o5 o6 o7;
-    p0 p1 p2 p3 p4 p5 p6 p7 = mux8bits1 i0 i1 i2 i3 i4 i5 i6 i7, a0 a1 a2 a3 a4 a5 a6 a7, swc;
-    o0 o1 o2 o3 o4 o5 o6 o7 = buf8bits p0 p1 p2 p3 p4 p5 p6 p7;
+    o0 o1 o2 o3 o4 o5 o6 o7 = mux8bits1 i0 i1 i2 i3 i4 i5 i6 i7, a0 a1 a2 a3 a4 a5 a6 a7, swc;
 }
 
 //
