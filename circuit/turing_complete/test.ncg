@@ -2,13 +2,22 @@
 // テストを定義する
 //
 
-// 定数のテスト
-test true:0->1 {
-    -> t;
+test nor:2->1 {
+    t t -> f;
+    t f -> f;
+    f t -> f;
+    f f -> t;
 }
 
-test false:0->1 {
-    -> f;
+// 定数のテスト
+test true:1->1 {
+    t -> t;
+    f -> t;
+}
+
+test false:1->1 {
+    f -> f;
+    f -> f;
 }
 
 // 基本ゲートのテスト
@@ -108,11 +117,6 @@ test 4odd:4->1 {
     t f f f -> t;
 }
 
-// circular依存のテスト
-test circular:1->1 {}
-
-test circular2:0->1 {}
-
 // 4入力ANDとORのテスト
 test 4or:4->1 {
     t t t t -> t;
@@ -165,17 +169,6 @@ test fAddr2:2->2 {
     t f -> t f;
     f f -> f t;
 }
-
-// ラッチ回路のテスト
-test sr_latch:2->2 {}
-
-test d_latch:2->2 {}
-
-// クロック回路のテスト
-test clock:0->1 {}
-
-// インパルス回路のテスト
-test impulse:0->1 {}
 
 // 8ビット回路のテスト
 test 8nor:16->8 {
@@ -317,4 +310,38 @@ test selector:17->8 {
     t t t t f f f f
     f f f f t t t t
     f -> f f f f t t t t;
+}
+
+test copyvalue:18->16 {
+    t t t t t t t t
+    f f f f f f f f f f ->
+    f f f f f f f f
+    f f f f f f f f;
+
+    t t t t t t t t
+    f f f f f f f f t f ->
+    t t t t t t t t
+    f f f f f f f f;
+
+    t t t t t t t t
+    f f f f f f f f f t ->
+    f f f f f f f f
+    f f f f f f f f;
+
+    t t t t t t t t
+    f f f f f f f f t t ->
+    f f f f f f f f
+    t t t t t t t t;
+}
+
+test 8inc:8->8 {
+    f t t t t t t t -> t t t t t t t t;
+    f f f f f f f f -> t f f f f f f f;
+    t t t t t t t f -> f f f f f f f t;
+}
+test 7or:7->1 {
+    t f f f f f f -> t;
+    f f f f f f t -> t;
+    f f f f f f f -> f;
+    t t t t t t t -> t;
 }
