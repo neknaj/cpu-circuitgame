@@ -66,9 +66,9 @@ func xor (x y)->(e) {
 // 加算器
 
 // hAddr (x true) に相当
-func increment (x)->(a c) {
-    a: buf x;
-    c: not x;
+func increment (x)->(b a) {
+    a: not <- x;
+    b: not <- a;
 }
 
 func hAddr (x y)->(a c) {

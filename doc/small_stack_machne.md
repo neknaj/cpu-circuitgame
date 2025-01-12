@@ -10,7 +10,7 @@
 | or | 2 -> 1 | 2 |
 | nand | 2 -> 1 | 4 |
 | xor | 2 -> 1 | 5 |
-| increment | 1 -> 2 | 3 |
+| increment | 1 -> 2 | 2 |
 | hAddr | 2 -> 2 | 5 |
 | fAddr | 3 -> 2 | 12 |
 | sr_latch | 2 -> 2 | 2 |
