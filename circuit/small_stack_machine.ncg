@@ -134,7 +134,8 @@ func mux1 (i0 i1, s)->(o) {
 // デマルチプレクサ
 
 func demux1 (in s)->(a b) {
-    a0 b0: adrDecoder1 s;
+    a0: not s;
+    b0: not s;
     a: and in a0;
     b: and in b0;
 }
@@ -195,12 +196,12 @@ func adrDecoder4 (s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of
 }
 
 func adrDecoder2 (s0 s1)->(a b c d) {
-    a0 b0: adrDecoder1 s0;
-    a1 b1: adrDecoder1 s1;
+    a0: not s0;
+    a1: not s1;
     a: and a0 a1;
-    b: and b0 a1;
-    c: and a0 b1;
-    d: and b0 b1;
+    b: and s0 a1;
+    c: and a0 s1;
+    d: and s0 s1;
 }
 
 func adrDecoder1 (s)->(a b) {

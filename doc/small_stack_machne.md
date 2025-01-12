@@ -19,11 +19,11 @@
 | impulse | 0 -> 1 | 3 |
 | mux8bits1 | 17 -> 8 | 88 |
 | mux1 | 3 -> 1 | 11 |
-| demux1 | 2 -> 2 | 9 |
-| demux2 | 3 -> 4 | 30 |
-| adrDecoder8 | 8 -> 256 | 936 |
-| adrDecoder4 | 4 -> 16 | 84 |
-| adrDecoder2 | 2 -> 4 | 18 |
+| demux1 | 2 -> 2 | 8 |
+| demux2 | 3 -> 4 | 26 |
+| adrDecoder8 | 8 -> 256 | 920 |
+| adrDecoder4 | 4 -> 16 | 76 |
+| adrDecoder2 | 2 -> 4 | 14 |
 | adrDecoder1 | 1 -> 2 | 3 |
 | counter8bits | 0 -> 8 | 36 |
 | counter8bitsRewritable | 9 -> 8 | 124 |
