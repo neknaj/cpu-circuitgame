@@ -135,9 +135,8 @@ func mux1 (i0 i1, s)->(o) {
 
 func demux1 (in s)->(a b) {
     a0: not s;
-    b0: not s;
     a: and in a0;
-    b: and in b0;
+    b: and in s;
 }
 
 func demux2 (in s0 s1)->(a b c d) {
@@ -622,4 +621,11 @@ test fAddr_4decrement:2->2 {
     f t -> t f;
     t f -> t f;
     f f -> f t;
+}
+
+test demux1:2->2 {
+    t t -> f t;
+    t f -> t f;
+    f t -> f f;
+    f f -> f f;
 }
