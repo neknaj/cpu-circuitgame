@@ -213,8 +213,7 @@ func adrDecoder1 (s)->(a b) {
 //
 
 module counter8bits ()->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    a0 a1 a2 a3 a4 a5 a6 a7 = increment8bits o0 o1 o2 o3 o4 o5 o6 o7;
-    o0 o1 o2 o3 o4 o5 o6 o7 = buf8bits a0 a1 a2 a3 a4 a5 a6 a7;
+    o0 o1 o2 o3 o4 o5 o6 o7: increment8bits o0 o1 o2 o3 o4 o5 o6 o7;
 }
 
 module counter8bitsRewritable (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 o6 o7) {
@@ -228,57 +227,57 @@ module counter8bitsRewritable (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 
 //
 
 module mem8bits8 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6 s7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s7;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s7;
+    t00: and t0 w; t10: and s7 w; t01: and t0 r; t11: and s7 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5 s6;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5 s6;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 module mem8bits7 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s6;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s6;
+    t00: and t0 w; t10: and s6 w; t01: and t0 r; t11: and s6 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 module mem8bits6 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s5;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s5;
+    t00: and t0 w; t10: and s5 w; t01: and t0 r; t11: and s5 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 module mem8bits5 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s4;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s4;
+    t00: and t0 w; t10: and s4 w; t01: and t0 r; t11: and s4 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 module mem8bits4 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s3;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s3;
+    t00: and t0 w; t10: and s3 w; t01: and t0 r; t11: and s3 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 module mem8bits3 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s2;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s2;
+    t00: and t0 w; t10: and s2 w; t01: and t0 r; t11: and s2 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 module mem8bits2 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s1;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s1;
+    t00: and t0 w; t10: and s1 w; t01: and t0 r; t11: and s1 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
 }
 module mem8bits1 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0 t1: adrDecoder1 s0;
-    t00: and t0 w; t10: and t1 w; t01: and t0 r; t11: and t1 r;
+    t0: not s0;
+    t00: and t0 w; t10: and s0 w; t01: and t0 r; t11: and s0 r;
     d00 d01 d02 d03 d04 d05 d06 d07: mem8bits d0 d1 d2 d3 d4 d5 d6 d7, t00 t01;
     d10 d11 d12 d13 d14 d15 d16 d17: mem8bits d0 d1 d2 d3 d4 d5 d6 d7, t10 t11;
     o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
@@ -299,6 +298,11 @@ module mem1bit (d, w,r)->(o) {
     o: and q r;
 }
 
+// mem8bits1の別実装
+module Rewritable (i0 i1 i2 i3 i4 i5 i6 i7, w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    d0 d1 d2 d3 d4 d5 d6 d7 : mux8bits1 d0 d1 d2 d3 d4 d5 d6 d7, i0 i1 i2 i3 i4 i5 i6 i7, w;
+    o0 o1 o2 o3 o4 o5 o6 o7 : and8bits d0 d1 d2 d3 d4 d5 d6 d7, r r r r r r r r;
+}
 
 func buf8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o0: buf d0;
