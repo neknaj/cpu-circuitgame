@@ -593,7 +593,7 @@ func instdecoder(a0 a1 a2 a3 a4 a5 a6 a7)->(o0 o1 o2 o3) {
 
 // merge ALU and register machine
 // a0 a1で命令の選択
-    // (00: immediate)
+    // 00: immediate
     // 01: calculate
     // 10: copy
     // (11: comdition)
@@ -603,78 +603,99 @@ func instdecoder(a0 a1 a2 a3 a4 a5 a6 a7)->(o0 o1 o2 o3) {
     // output:  REG2
 module caluclator(a0 a1 a2 a3 a4 a5 a6 a7
                 i0 i1 i2 i3 i4 i5 i6 i7) ->(
-sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07
-sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17
-sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27
-sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37
-sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47
-sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57
-re0 re1 re2 re3 re4 re5 re6 re7
-o0 o1 o2 o3 o4 o5 o6 o7) {
+                sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07
+                sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17
+                sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27
+                sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37
+                sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47
+                sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57
+                r00 r01 r02 r03 r04 r05 r06 r07
+                r10 r11 r12 r13 r14 r15 r16 r17
+                r20 r21 r22 r23 r24 r25 r26 r27
+                r30 r31 r32 r33 r34 r35 r36 r37
+                r40 r41 r42 r43 r44 r45 r46 r47
+                r50 r51 r52 r53 r54 r55 r56 r57
+                o0 o1 o2 o3 o4 o5 o6 o7) {
     // 定数
     0 = false <- a0;
     1 = true <- a0;
     // decode input
     t0 t1 t2 t3 = 2decoder a0 a1;   // どの命令か
-    sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a2 a3 a4;   // 入力メモリの選択 or 演算の選択
-    sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a5 a6 a7;  // 出力メモリの選択 or 演算の選択
+    sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a2 a3 a4;   // 入力REGの選択 or 演算の選択
+    sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a5 a6 a7;  // 出力REGの選択 or 演算の選択
     // filter input
-    ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sin;  // input valueをswitch inuptでフィルター
-    // 全てのメモリの読み出し/書き込みコード
-    // r00 r01 r02 r03 r04 r05 r06 r07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor0 sicr0;
-    // r10 r11 r12 r13 r14 r15 r16 r17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor1 sicr1;
-    // r20 r21 r22 r23 r24 r25 r26 r27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr2 sir2;
-    // r30 r31 r32 r33 r34 r35 r36 r37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor3 sir3;
-    // r40 r41 r42 r43 r44 r45 r46 r47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor4 sir4;
-    // r50 r51 r52 r53 r54 r55 r56 r57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor5 sir5;
+    ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sin_t2;  // input valueをswitch inuptでフィルター
+    // REGが書き込まれるのは
+    // REG0 => t0, t2
+    // REG2 => t1, t2
+    // REG1345 => t2
+    t0t2 = or t0 t2;
+    t1t2 = or t1 t2;
+    sor0t2 = and sor0 t2;
+    socr0 = or t0 sor0t2;  // t0 or (t2 and sor0)
+    socr1 = and sor1 t1t2;
+    socr2 = and sor2 t2;
+    socr3 = and sor3 t2;
+    socr4 = and sor4 t2;
+    socr5 = and sor5 t2;
+    // REGが読み出されるのは
+    // REG01 => t1, t2
+    // REG2345 => t2
+    sicr0 = and sir0 t1t2;
+    sicr1 = and sir1 t1t2;
+    sicr2 = and sir2 t2;
+    sicr3 = and sir3 t2;
+    sicr4 = and sir4 t2;
+    sicr5 = and sir5 t2;
 
-    // 現在のメモリ内部を表示し続ける
+    // 全てのメモリの読み出し/書き込みコード
+    // r00 r01 r02 r03 r04 r05 r06 r07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr0 sicr0;
+    // r10 r11 r12 r13 r14 r15 r16 r17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr1 sicr1;
+    // r20 r21 r22 r23 r24 r25 r26 r27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr2 sicr2;
+    // r30 r31 r32 r33 r34 r35 r36 r37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr3 sicr3;
+    // r40 r41 r42 r43 r44 r45 r46 r47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr4 sicr4;
+    // r50 r51 r52 r53 r54 r55 r56 r57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr5 sicr5;
+
+    // 現在のREG内部を表示し続ける
     sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr0 1;
     sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr1 1;
     sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr2 1;
-    sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor3 1;
-    sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor4 1;
-    sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sor5 1;
+    sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr3 1;
+    sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr4 1;
+    sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr5 1;
     r00 r01 r02 r03 r04 r05 r06 r07 = 8switch sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sicr0;
     r10 r11 r12 r13 r14 r15 r16 r17 = 8switch sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 sicr1;
-    r20 r21 r22 r23 r24 r25 r26 r27 = 8switch sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 sir2;
-    r30 r31 r32 r33 r34 r35 r36 r37 = 8switch sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 sir3;
-    r40 r41 r42 r43 r44 r45 r46 r47 = 8switch sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 sir4;
-    r50 r51 r52 r53 r54 r55 r56 r57 = 8switch sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 sir5;
+    r20 r21 r22 r23 r24 r25 r26 r27 = 8switch sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 sicr2;
+    r30 r31 r32 r33 r34 r35 r36 r37 = 8switch sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 sicr3;
+    r40 r41 r42 r43 r44 r45 r46 r47 = 8switch sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 sicr4;
+    r50 r51 r52 r53 r54 r55 r56 r57 = 8switch sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 sicr5;
 
     // value code
-    in0 = 8bit_or r00 r10 r20 r30 r40 r50 ins0 sre0; // レジスタの読み出し or INPUT or ALU結果
-    in1 = 8bit_or r01 r11 r21 r31 r41 r51 ins1 sre1;
-    in2 = 8bit_or r02 r12 r22 r32 r42 r52 ins2 sre2;
-    in3 = 8bit_or r03 r13 r23 r33 r43 r53 ins3 sre3;
-    in4 = 8bit_or r04 r14 r24 r34 r44 r54 ins4 sre4;
-    in5 = 8bit_or r05 r15 r25 r35 r45 r55 ins5 sre5;
-    in6 = 8bit_or r06 r16 r26 r36 r46 r56 ins6 sre6;
-    in7 = 8bit_or r07 r17 r27 r37 r47 r57 ins7 sre7;
+    in0 = 9bit_or r00 r10 r20 r30 r40 r50 ins0 sre0 imm0; // REGの読み出し or INPUT or ALU結果
+    in1 = 9bit_or r01 r11 r21 r31 r41 r51 ins1 sre1 imm1;
+    in2 = 9bit_or r02 r12 r22 r32 r42 r52 ins2 sre2 imm2;
+    in3 = 9bit_or r03 r13 r23 r33 r43 r53 ins3 sre3 imm3;
+    in4 = 9bit_or r04 r14 r24 r34 r44 r54 ins4 sre4 imm4;
+    in5 = 9bit_or r05 r15 r25 r35 r45 r55 ins5 sre5 imm5;
+    in6 = 9bit_or r06 r16 r26 r36 r46 r56 ins6 sre6   _2;
+    in7 = 9bit_or r07 r17 r27 r37 r47 r57 ins7 sre7   _3;
 
+    // t0の場合 REG0 = a@2:7
+        imm0 imm1 imm2 imm3 imm4 imm5 _2 _3 = 8switch a2 a3 a4 a5 a6 a7 0 0 t0;
     // t1の場合 REG2 = REG0 {ope} REG1;
-        // REG@0,1 読み出し
-        sicr0 = or sir0 t1;
-        sicr1 = or sir1 t1;
-
         // calc(命令はa5 a6 a7)
         re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r00 r01 r02 r03 r04 r05 r06 r07 r10 r11 r12 r13 r14 r15 r16 r17;
         // !t1の場合は流さない
         sre0 sre1 sre2 sre3 sre4 sre5 sre6 sre7 = 8switch re0 re1 re2 re3 re4 re5 re6 re7 t1;
-        // REG2に代入
-        socr2 = or sor2 t1;
-        // REG0, REG1が更新されないようにする t1 false other sor0
-        nt1 = not t1;
-        socr0 = and sor0 nt1;
-        socr1 = and sor1 nt1;
     // t2の場合 OUTPUT(a5 a6 a7) = INPUT(a2 a3 a4)
+        sin_t2 = and sin t2;    // t2の時 & INPUT => INPUTを流す
         is_to_out = and sout t2;
         o0 o1 o2 o3 o4 o5 o6 o7 = 8switch in0 in1 in2 in3 in4 in5 in6 in7 is_to_out;
 }
-func 8bit_or (i0 i1 i2 i3 i4 i5 i6 i7) -> (bool) {
+func 9bit_or (i0 i1 i2 i3 i4 i5 i6 i7 i8) -> (bool) {
     p = 4or i0 i1 i2 i3;
     q = 4or i4 i5 i6 i7;
-    bool = or p q;
+    bool = 3or p q i8;
 }
 
 
