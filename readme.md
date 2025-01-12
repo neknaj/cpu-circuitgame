@@ -18,13 +18,19 @@ making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)
     cp ./circuitgame/target/release/circuitgame_bin ./ncg
     ./ncg -i circuit/turing_complete/turing_complete.ncg -s true -d doc/turing_complete.md
     ```
-## Open Server and Debug in Web Browser
+
+## Develop
+### Open Server and Debug in Web Browser
 - run  
     ```sh
-    ./ncg -i circuit/sample.ncg -s true
+    ./ncg -i circuit/sample.ncg -d doc/sample.ncg -s 8081
     ```
 - open in your browser  
     https://neknaj.github.io/circuitgame/?socket=ws://localhost:8081  
+### Create Document
+```sh
+./ncg -i circuit/sample.ncg -d doc/sample.ncg
+```
 
 
 ## Help(2025-1-12)
