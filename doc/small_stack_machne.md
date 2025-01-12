@@ -57,4 +57,4 @@
 | hAddr_4complement | 2 -> 2 | 5 |
 | hAddr_4complement2 | 1 -> 2 | 3 |
 | complement8bits | 8 -> 8 | 38 |
-| absolute8bits | 8 -> 8 | 110 |
+| absolute8bits | 8 -> 8 | 108 |
