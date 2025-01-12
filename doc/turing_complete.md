@@ -52,6 +52,12 @@
 | mem12byte | 98 -> 96 | 864 |
 | 8inc | 8 -> 8 | 43 |
 | counter | 0 -> 8 | 120 |
-| counter_swc | 9 -> 8 | 209 |
+| counter_swc | 9 -> 8 | 185 |
 | 7or | 7 -> 1 | 12 |
-| register | 15 -> 94 | 632 |
+| register_view | 15 -> 94 | 632 |
+| register | 14 -> 8 | 614 |
+| instdecoder | 8 -> 4 | 6 |
+| caluclator | 16 -> 64 | 1337 |
+| 8bit_or | 8 -> 1 | 14 |
+| 8finc | 9 -> 9 | 40 |
+| 32counter | 0 -> 32 | 453 |
