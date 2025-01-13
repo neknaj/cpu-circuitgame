@@ -57,10 +57,11 @@
 | register_view | 15 -> 94 | 632 |
 | register | 14 -> 8 | 614 |
 | instdecoder | 8 -> 4 | 6 |
-| caluclator | 16 -> 104 | 1409 |
+| calculator | 16 -> 104 | 1415 |
 | 8bit_or | 8 -> 1 | 14 |
 | 9bit_or | 9 -> 1 | 16 |
 | 8finc | 9 -> 9 | 40 |
 | 32counter | 0 -> 32 | 453 |
 | demux1 | 2 -> 2 | 7 |
 | condition | 11 -> 1 | 41 |
+| turing_complete | 16 -> 17 | 1488 |
