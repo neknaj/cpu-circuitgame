@@ -19,43 +19,7 @@ it("should correctly convert between i8 and boolean[8]", () => {
     }
 });
 
-describe("ALU", () => {
-    const operand: [boolean, boolean, boolean][] = [
-        [false, false, false],
-        [true, false, false],
-        [false, true, false],
-        [true, true, false],
-        [false, false, true],
-        [true, false, true],
-    ];
-
-    it("should correctly handle bitwise OR operations", () => {
-        for (let i = 0; i < 256; i++) {
-            for (let j = 0; j < 256; j++) {
-                const input1 = i8ToBoolArray(i); // Convert i to boolean[8]
-                const input2 = i8ToBoolArray(j); // Convert j to boolean[8]
-                const expectedI8 = i | j; // Perform bitwise OR on integers
-                const expected = i8ToBoolArray(expectedI8); // Convert result to boolean[8]
-                const op = operand[0];
-                expect(Modules["ALU"].func(...op, ...input1, ...input2)).toEqual(expected);
-            }
-        }
-    });
-    it("NAND", () => {
-        for (let i = 0; i < 256; i++) {
-            for (let j = 0; j < 256; j++) {
-                const input1 = i8ToBoolArray(i); // Convert i to boolean[8]
-                const input2 = i8ToBoolArray(j); // Convert j to boolean[8]
-                const expectedI8 = ~(i & j); // Perform bitwise OR on integers
-                const expected = i8ToBoolArray(expectedI8); // Convert result to boolean[8]
-                const op = operand[1];
-                expect(Modules["ALU"].func(...op, ...input1, ...input2)).toEqual(expected);
-            }
-        }
-    })
-});
-
-function testBitwiseOperation(operationName: string, operand: [boolean, boolean, boolean][], operandIndex: number, bitwiseFunc: (a: number, b: number) => number) {
+function testBitwiseOperation(operationName: string, operand: [boolean, boolean, boolean], bitwiseFunc: (a: number, b: number) => number) {
     it(operationName, () => {
         for (let i = 0; i < 256; i++) {
             for (let j = 0; j < 256; j++) {
@@ -63,8 +27,7 @@ function testBitwiseOperation(operationName: string, operand: [boolean, boolean,
                 const input2 = i8ToBoolArray(j); // Convert j to boolean[8]
                 const expectedI8 = bitwiseFunc(i, j); // Perform the bitwise operation on integers
                 const expected = i8ToBoolArray(expectedI8); // Convert result to boolean[8]
-                const op = operand[operandIndex];
-                expect(Modules["ALU"].func(...op, ...input1, ...input2)).toEqual(expected);
+                expect(Modules["ALU"].func(...operand, ...input1, ...input2)).toEqual(expected);
             }
         }
     });
@@ -80,14 +43,11 @@ describe("ALU", () => {
         [true, false, true],
     ];
 
-    testBitwiseOperation("should correctly handle bitwise OR operations", operand, 0, (a, b) => a | b);
-    testBitwiseOperation("NAND", operand, 1, (a, b) => ~(a & b));
+    testBitwiseOperation("OR", operand[0], (a, b) => a | b);
+    testBitwiseOperation("NAND", operand[1], (a, b) => ~(a & b));
+    testBitwiseOperation("NOR", operand[2], (a, b) => ~(a | b));
+    testBitwiseOperation("AND", operand[3], (a, b) => a & b);
+    testBitwiseOperation("ADD", operand[4], (a, b) => a + b);
+    testBitwiseOperation("SUB", operand[5], (a, b) => a - b);
 
-    it("should correctly convert between i8 and boolean[8]", () => {
-        for (let i = 0; i < 256; i++) {
-            const boolArray = i8ToBoolArray(i);
-            const resultI8 = boolArrayToI8(boolArray);
-            expect(resultI8).toBe(i);
-        }
-    });
 });
