@@ -35,7 +35,7 @@ making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)
     ```
 - all modules
     ```sh
-    ./ncg -i circuit/sample.ncg -o test/module/sample.ts -m .*
+    ./ncg -i circuit/sample.ncg -o test/module/sample.ts -m .+
     ```
 
 ## Help(2025-1-12)

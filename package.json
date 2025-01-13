@@ -3,6 +3,7 @@
     "license": "MIT",
     "type": "module",
     "scripts": {
+        "build": "cd circuitgame && git pull && cargo build --release && cd .. && cp ./circuitgame/target/release/circuitgame_bin ./ncg",
         "test": "jest --maxWorkers=100%"
     },
     "devDependencies": {
