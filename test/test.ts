@@ -37,6 +37,7 @@ function test_func_8x1_8(name: string, fn1: (x: number) => FixedLengthArray<bool
 }
 
 function test_func_8x2_8(name: string, fn1: (x: number) => FixedLengthArray<boolean, 8>, ref: (x: FixedLengthArray<boolean, 16>) => FixedLengthArray<boolean, 8>) {
+
     let failed = false;
     console.assert(Modules[name].inputsLen == 8 || Modules[name].outputsLen == 8, `[func type] ${name}`);
     for (let a = 0x00; a < 0xff; a++) {
