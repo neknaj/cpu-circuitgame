@@ -28,7 +28,10 @@ making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)
 ```sh
 ./ncg -i circuit/sample.ncg -d doc/sample.ncg
 ```
-
+### Transpile
+```sh
+./ncg -i circuit/sample.ncg -o test/module/sample.ts -m fAddr
+```
 
 ## Help(2025-1-12)
 
@@ -42,9 +45,9 @@ Usage: ncg [OPTIONS]
 Options:
   -i, --input <Input File Path>             Input file
   -o, --output <Output File Path>
-  -d, --docOut <Document output File Path>  
-  -m, --module <Name of module to compile>  
-  -s, --server <Open server for API>        
+  -d, --docOut <Document output File Path>
+  -m, --module <Name of module to compile>
+  -s, --server <Open server for API>
   -w, --watch <File Watch>                  [possible values: true, false]
       --vm <Run VM>                         [possible values: true, false]
   -h, --help                                Print help
