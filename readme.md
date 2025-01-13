@@ -29,9 +29,14 @@ making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)
 ./ncg -i circuit/sample.ncg -d doc/sample.ncg
 ```
 ### Transpile
-```sh
-./ncg -i circuit/sample.ncg -o test/module/sample.ts -m fAddr
-```
+- one module
+    ```sh
+    ./ncg -i circuit/sample.ncg -o test/module/sample.ts -m fAddr
+    ```
+- all modules
+    ```sh
+    ./ncg -i circuit/sample.ncg -o test/module/sample.ts -m .*
+    ```
 
 ## Help(2025-1-12)
 
