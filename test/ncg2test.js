@@ -61,7 +61,7 @@ if (args.length !== 1) {
 }
 
 const inputFilePath = args[0];
-const outputFileName = path.basename(inputFilePath, '.txt') + '.test.ts';
+const outputFileName = path.basename(inputFilePath, '.ncg') + '.test.ts';
 const outputFilePath = path.join('./test', outputFileName);
 
 try {
