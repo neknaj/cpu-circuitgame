@@ -22,7 +22,7 @@ esbuild.build({
     outfile: './test/test.js',
     tsconfig: './tsconfig.json',
     bundle: false,
-    minify: true,
+    // minify: true,
     platform: "node",
     format: "esm",
     sourcemap: false,
