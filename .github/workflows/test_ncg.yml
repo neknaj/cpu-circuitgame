@@ -20,6 +20,7 @@ jobs:
         run: |
           git clone https://github.com/neknaj/circuitgame.git
           cd circuitgame
+          npm install
           npm run build
 
       - name: Run NCG Test (bem)
