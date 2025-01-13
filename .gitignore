@@ -4,5 +4,9 @@ ncg.exe
 
 /tmp
 
+
 /test/module
 /node_modules
+package-lock.json
+
+/test/test.js
