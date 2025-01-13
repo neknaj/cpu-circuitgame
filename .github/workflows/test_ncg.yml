@@ -28,11 +28,13 @@ jobs:
 
       - name: Run NCG Test (bem)
         run: |
+          mkdir -p test/module # 出力先ディレクトリを作成
           ./ncg -i circuit/small_stack_machine.ncg -o test/module/small_stack_machine.ts -m .+
           node build.js
           bun run test/test.js
           
       - name: Run NCG Test (wogikaze)
         run: |
+          mkdir -p test/module # 出力先ディレクトリを作成
           ./ncg -i circuit/turing_complete/turing_complete.ncg -o test/module/turing_complete.ts -m .+
           npm run test
