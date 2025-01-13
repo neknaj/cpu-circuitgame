@@ -692,6 +692,11 @@ module caluclator(a0 a1 a2 a3 a4 a5 a6 a7
         is_to_out = and sout t2;
         o0 o1 o2 o3 o4 o5 o6 o7 = 8switch in0 in1 in2 in3 in4 in5 in6 in7 is_to_out;
 }
+func 8bit_or (i0 i1 i2 i3 i4 i5 i6 i7)->(bool) {
+    p = 4or i0 i1 i2 i3;
+    q = 4or i4 i5 i6 i7;
+    bool = or p q;
+}
 func 9bit_or (i0 i1 i2 i3 i4 i5 i6 i7 i8) -> (bool) {
     p = 4or i0 i1 i2 i3;
     q = 4or i4 i5 i6 i7;
@@ -722,4 +727,24 @@ module 32counter ()->(o00 o01 o02 o03 o04 o05 o06 o07 o08 o09 o0a o0b o0c o0d o0
     o08 o09 o0a o0b o0c o0d o0e o0f = mem8bits a08 a09 a0a a0b a0c a0d a0e a0f 1 1;
     o10 o11 o12 o13 o14 o15 o16 o17 = mem8bits a10 a11 a12 a13 a14 a15 a16 a17 1 1;
     o18 o19 o1a o1b o1c o1d o1e o1f = mem8bits a18 a19 a1a a1b a1c a1d a1e a1f 1 1;
+}
+func demux1 (in s)->(a b) {
+    a0: not s;
+    a: and in a0;
+    b: and in s;
+}
+// 条件分岐
+func condition(i0 i1 i2 i3 i4 i5 i6 i7 c0 c1 c2)->(bool) {
+    t0 t1 t2 t3 = 2decoder c0 c1;
+
+    not0 = 8bit_or i0 i1 i2 i3 i4 i5 i6 i7;
+    is0 = not not0;
+    0neg = or is0 i7;
+    
+    a = and is0 t1;
+    b = and i7 t2;
+    c = and 0neg t3;
+    p = 3or a b c;    //4つの条件まとめ
+    
+    bool = xor p c2;
 }
