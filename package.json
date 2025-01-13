@@ -4,12 +4,10 @@
     "type": "module",
     "scripts": {
         "build": "cd circuitgame && git pull && cargo build --release && cd .. && cp ./circuitgame/target/release/circuitgame_bin ./ncg",
-        "test": "jest --maxWorkers=100%"
+        "test": "bun test"
     },
     "devDependencies": {
         "@types/jest": "^29.5.14",
-        "jest": "^29.7.0",
-        "ts-jest": "^29.2.5",
         "typescript": "^5.7.3"
     },
     "dependencies": {

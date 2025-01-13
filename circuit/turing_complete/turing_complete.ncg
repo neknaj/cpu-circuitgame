@@ -232,6 +232,18 @@ func 8and(a0 a1 a2 a3 a4 a5 a6 a7
     o6 = and a6 b6;
     o7 = and a7 b7;
 }
+func 8xor(a0 a1 a2 a3 a4 a5 a6 a7
+            b0 b1 b2 b3 b4 b5 b6 b7) ->
+            (o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0 = xor a0 b0;
+    o1 = xor a1 b1;
+    o2 = xor a2 b2;
+    o3 = xor a3 b3;
+    o4 = xor a4 b4;
+    o5 = xor a5 b5;
+    o6 = xor a6 b6;
+    o7 = xor a7 b7;
+}
 func 8shiftr(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     o0 = false 0;
     o1 o2 o3 o4 o5 o6 o7 f = 8buf 0 1 2 3 4 5 6 o0;
@@ -491,6 +503,25 @@ func 8inc(d0 d1 d2 d3 d4 d5 d6 d7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     c5 o5 = hAddr d5 c4;
     c6 o6 = hAddr d6 c5;
     c7 o7 = hAddr d7 c6;
+}
+func 8dec (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0: not d0;
+    c1 o1: fAddr_4decrement d1 d0;
+    c2 o2: fAddr_4decrement d2 c1;
+    c3 o3: fAddr_4decrement d3 c2;
+    c4 o4: fAddr_4decrement d4 c3;
+    c5 o5: fAddr_4decrement d5 c4;
+    c6 o6: fAddr_4decrement d6 c5;
+    c7 o7: fAddr_4decrement d7 c6;
+}
+func fAddr_4decrement (x y)->(v0 s) {
+    a: nor x y;
+    v0: not a  ;
+    a0: not x  ;
+    b0: not y  ;
+    v1: nor a0 b0;
+    v3: nor v1 a;
+    s: not v3;
 }
 module counter() -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     1 = true o0;
