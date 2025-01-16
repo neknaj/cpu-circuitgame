@@ -7,12 +7,12 @@ function i8ToBoolArray(i8: number): FixedLengthArray<boolean, 8> {
 
 function boolArrayToI8(boolArray: FixedLengthArray<boolean, 8>): number {
     // reduce を使用して1回のイテレーションで計算
-    return boolArray.reduce((result, bool, i) => 
+    return boolArray.reduce((result, bool, i) =>
         result | (Number(bool) << i), 0);
 }
 
 // ルックアップテーブルの生成（初期化時に1回だけ実行）
-const lookup = new Array(256).fill(0).map((_, n) => 
+const lookup = new Array(256).fill(0).map((_, n) =>
     Array.from({ length: 8 }, (_, i) => !!(n & (1 << i)))
 );
 
@@ -81,14 +81,17 @@ describe("ALU", () => {
 
 });
 
+// 8bit回路のテスト
+test8x2bit("8nor", (a, b) => ~(a | b));
 test8bit("8buf", a => a);
 test8bit("8not", a => ~a);
-test8x2bit("8and", (a, b) => a & b);
 test8x2bit("8or", (a, b) => a | b);
+test8x2bit("8and", (a, b) => a & b);
 test8x2bit("8xor", (a, b) => a ^ b);
-
+test8bit("8shiftr", a => a << 1);
 test8x2bit("8addr", (a, b) => a + b);
 test8x2bit("8sub", (a, b) => a - b);
+test8bit("8nagate", a => ~a + 1);
 
 test8bit("8inc", a => a + 1);
 test8bit("8dec", a => a - 1);
