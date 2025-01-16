@@ -68,3 +68,6 @@
 | demux1 | 2 -> 2 | 7 |
 | condition | 11 -> 1 | 41 |
 | turing_complete | 16 -> 17 | 1488 |
+| 4bit_addr | 9 -> 5 | 50 |
+| BCD_addr | 9 -> 5 | 83 |
+| 8bit_to_decimal | 8 -> 13 | 832 |
