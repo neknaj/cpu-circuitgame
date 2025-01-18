@@ -1,5 +1,9 @@
 | name | type | size |
 | -- | -- | -- |
+| 4bits_7seg | 4 -> 7 | 627 |
+| chain_and_2_or_16 | 32 -> 1 | 78 |
+| chain_or_16 | 16 -> 1 | 30 |
+| chain_or_8 | 8 -> 1 | 14 |
 | TRUE | 0 -> 1 | 2 |
 | FALSE | 0 -> 1 | 2 |
 | true | 1 -> 1 | 3 |
@@ -17,6 +21,7 @@
 | d_latch | 2 -> 2 | 5 |
 | clock | 0 -> 1 | 3 |
 | impulse | 0 -> 1 | 3 |
+| mux16bits1 | 33 -> 16 | 144 |
 | mux8bits1 | 17 -> 8 | 72 |
 | mux1 | 3 -> 1 | 9 |
 | demux1 | 2 -> 2 | 7 |

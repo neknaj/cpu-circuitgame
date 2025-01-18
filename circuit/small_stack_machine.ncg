@@ -4,15 +4,86 @@ using nor:2->1;
 // graphical-interfaceを定義する
 //
 
-// graphical
+graphical 4bits_7seg: 10x10 {
+    1,0: o0 #ffffff #000000;
+    2,0: o0 #ffffff #000000;
+    3,1: o1 #ffffff #000000;
+    3,2: o1 #ffffff #000000;
+    3,5: o2 #ffffff #000000;
+    3,4: o2 #ffffff #000000;
+    1,6: o3 #ffffff #000000;
+    2,6: o3 #ffffff #000000;
+    0,4: o4 #ffffff #000000;
+    0,5: o4 #ffffff #000000;
+    0,1: o5 #ffffff #000000;
+    0,2: o5 #ffffff #000000;
+    1,3: o6 #ffffff #000000;
+    2,3: o6 #ffffff #000000;
+}
 
 // graphical-io用の回路
 
-// func BCD_7seg ()->() {
-    
-// }
+func 4bits_7seg (i0 i1 i2 i3)->(o0 o1 o2 o3 o4 o5 o6) {
+    1: true i0;
+    0: false i0;
+    d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df: adrDecoder4 i0 i1 i2 i3;
+    o0: chain_and_2_or_16 1 0 1 1 0 1 1 1 1 1 1 0 1 0 1 1, d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df;
+    o1: chain_and_2_or_16 1 1 1 1 1 0 0 1 1 1 1 0 0 1 0 0, d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df;
+    o2: chain_and_2_or_16 1 1 0 1 1 1 1 1 1 1 1 1 0 1 0 0, d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df;
+    o3: chain_and_2_or_16 1 0 1 1 0 1 1 0 1 1 0 1 1 1 1 0, d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df;
+    o4: chain_and_2_or_16 1 0 1 0 0 0 1 0 1 0 1 1 1 1 1 1, d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df;
+    o5: chain_and_2_or_16 1 0 0 0 1 1 1 0 1 1 1 1 1 0 1 1, d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df;
+    o6: chain_and_2_or_16 0 0 1 1 1 1 1 0 1 1 1 1 0 1 1 1, d0 d1 d2 d3 d4 d5 d6 d7 d8 d9 da db dc dd de df;
+}
 
 
+func chain_and_2_or_16 (a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af, b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf)->(o) {
+    o0: and a0 b0;
+    o1: and a1 b1;
+    o2: and a2 b2;
+    o3: and a3 b3;
+    o4: and a4 b4;
+    o5: and a5 b5;
+    o6: and a6 b6;
+    o7: and a7 b7;
+    o8: and a8 b8;
+    o9: and a9 b9;
+    oa: and aa ba;
+    ob: and ab bb;
+    oc: and ac bc;
+    od: and ad bd;
+    oe: and ae be;
+    of: and af bf;
+    o: chain_or_16 o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of;
+}
+
+func chain_or_16 (o0000 o0001 o0010 o0011 o0100 o0101 o0110 o0111 o1000 o1001 o1010 o1011 o1100 o1101 o1110 o1111)->(o) {
+    o000: or o0000 o0001;
+    o001: or o0010 o0011;
+    o010: or o0100 o0101;
+    o011: or o0110 o0111;
+    o100: or o1000 o1001;
+    o101: or o1010 o1011;
+    o110: or o1100 o1101;
+    o111: or o1110 o1111;
+    o00: or o000 o001;
+    o01: or o010 o011;
+    o10: or o100 o101;
+    o11: or o110 o111;
+    o0: or o00 o01;
+    o1: or o10 o11;
+    o: or o0 o1;
+}
+
+func chain_or_8 (o000 o001 o010 o011 o100 o101 o110 o111)->(o) {
+    o00: or o000 o001;
+    o01: or o010 o011;
+    o10: or o100 o101;
+    o11: or o110 o111;
+    o0: or o00 o01;
+    o1: or o10 o11;
+    o: or o0 o1;
+}
 
 //
 // 回路を定義する
@@ -127,6 +198,25 @@ module impulse()->(c) {
 }
 
 // マルチプレクサ
+
+func mux16bits1 (d00 d01 d02 d03 d04 d05 d06 d07 d08 d09 d0a d0b d0c d0d d0e d0f, d10 d11 d12 d13 d14 d15 d16 d17 d18 d19 d1a d1b d1c d1d d1e d1f, s)->(o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
+    o0: mux1 d00 d10 s;
+    o1: mux1 d01 d11 s;
+    o2: mux1 d02 d12 s;
+    o3: mux1 d03 d13 s;
+    o4: mux1 d04 d14 s;
+    o5: mux1 d05 d15 s;
+    o6: mux1 d06 d16 s;
+    o7: mux1 d07 d17 s;
+    o8: mux1 d08 d18 s;
+    o9: mux1 d09 d19 s;
+    oa: mux1 d0a d1a s;
+    ob: mux1 d0b d1b s;
+    oc: mux1 d0c d1c s;
+    od: mux1 d0d d1d s;
+    oe: mux1 d0e d1e s;
+    of: mux1 d0f d1f s;
+}
 
 func mux8bits1 (d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17, s)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     o0: mux1 d00 d10 s;
