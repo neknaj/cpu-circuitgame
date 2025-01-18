@@ -1,6 +1,20 @@
 using nor:2->1;
 
 //
+// graphical-interfaceを定義する
+//
+
+// graphical
+
+// graphical-io用の回路
+
+// func BCD_7seg ()->() {
+    
+// }
+
+
+
+//
 // 回路を定義する
 //
 
