@@ -68,6 +68,13 @@
 | demux1 | 2 -> 2 | 7 |
 | condition | 11 -> 1 | 41 |
 | turing_complete | 16 -> 17 | 1488 |
-| 4bit_addr | 9 -> 5 | 50 |
-| BCD_addr | 9 -> 5 | 83 |
-| 8bit_to_decimal | 8 -> 13 | 832 |
+| 4bit_addr | 9 -> 5 | 48 |
+| BCD_addr | 9 -> 5 | 79 |
+| 8bit_to_decimal | 8 -> 13 | 792 |
+| 4bit_addr_ni | 8 -> 5 | 41 |
+| BCD_addr_noci | 8 -> 5 | 72 |
+| BCD_addr_noco | 9 -> 4 | 77 |
+| 3bit_BCD_convert | 3 -> 4 | 27 |
+| 8bit_to_decimal_ | 8 -> 10 | 523 |
+| 8bit_and | 8 -> 1 | 21 |
+| 8bit_encoder | 8 -> 255 | 5384 |

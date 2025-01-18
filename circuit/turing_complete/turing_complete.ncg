@@ -890,7 +890,6 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
 }
 
 func 4bit_addr(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3 c3) {
-    false = false a0;
     c0 o0 = fAddr a0 b0 c;
     c1 o1 = fAddr a1 b1 c0;
     c2 o2 = fAddr a2 b2 c1;
@@ -898,7 +897,6 @@ func 4bit_addr(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3 c3) {
 }
 
 func BCD_addr(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3 carry) {
-    false = false a0;
     o0 x1 x2 x3 c0 = 4bit_addr a0 a1 a2 a3 b0 b1 b2 b3 c;
     y0 = or x1 x2;
     y1 = and y0 x3;
@@ -908,7 +906,7 @@ func BCD_addr(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3 carry) {
     
     c1 o1 = hAddr x1 y2;
     c2 o2 = fAddr x2 y2 c1;
-    c3 o3 = hAddr x3 c2;
+    o3 = xor x3 c2;
     carry = or c0 c1;
 }
 
@@ -944,4 +942,61 @@ func 8bit_to_decimal(1 2 4 8 16 32 64 128) -> (0001x1 0001x2 0001x4 0001x8 0010x
     0010x1 0010x2 0010x4 0010x8 z8 = BCD_addr h0 h1 h2 h3 fa 128 fa fa z4;
 
     0100x1 0100x2 0100x4 0100x8 1000 = BCD_addr z7 fa fa fa 128 fa fa fa z8;
+}
+// 最適化コーナー
+func 4bit_addr_ni(a0 a1 a2 a3 b0 b1 b2 b3) -> (o0 o1 o2 o3 carry){
+    c0 o0 = hAddr a0 b0;
+    c1 o1 = fAddr a1 b1 c0;
+    c2 o2 = fAddr a2 b2 c1;
+    carry o3 = fAddr a3 b3 c2;
+}
+func BCD_addr_noci(a0 a1 a2 a3 b0 b1 b2 b3) -> (o0 o1 o2 o3 carry) {
+    o0 x1 x2 x3 c0 = 4bit_addr_ni a0 a1 a2 a3 b0 b1 b2 b3;
+    y0 = or x1 x2;
+    y1 = and y0 x3;
+    y2 = or c0 y1;
+    c1 o1 = hAddr x1 y2;
+    c2 o2 = fAddr x2 y2 c1;
+    o3 = xor x3 c2;
+    carry = or c0 c1;
+}
+func BCD_addr_noco(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3) {
+    o0 x1 x2 x3 c0 = 4bit_addr a0 a1 a2 a3 b0 b1 b2 b3 c;
+    y0 = or x1 x2;
+    y1 = and y0 x3;
+    y2 = or c0 y1;
+    c1 o1 = hAddr x1 y2;
+    c2 o2 = fAddr x2 y2 c1;
+    o3 = xor x3 c2;
+}
+func 3bit_BCD_convert(a1 a2 a3) -> (o1 o2 o3 c3) {
+    y0 = or a1 a2;  // 2 or 4
+    y1 = and y0 a3; // 8 + (2or4)
+    
+    c1 o1 = hAddr a1 y1;
+    c2 o2 = fAddr a2 y1 c1;
+    c3 o3 = hAddr a3 c2;
+}
+func 8bit_to_decimal_(1 2 4 8 16 32 64 128) -> (0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2) {
+    fa = false 1;
+    // 1の位
+    b1 b2 b3 z0 = 3bit_BCD_convert 2 4 8;
+    c0 c1 c2 c3 z1 = BCD_addr_noci 1 b1 b2 b3 fa 16 16 fa;
+    d0 d1 d2 d3 z2 = BCD_addr_noci c0 c1 c2 c3 fa 32 fa fa;
+    e0 e1 e2 e3 z3 = BCD_addr_noci d0 d1 d2 d3 fa fa 64 fa;
+    0001x1 0001x2 0001x4 0001x8 z4 = BCD_addr_noci e0 e1 e2 e3 fa fa fa 128;
+    // 10の位
+    f1 f0 = fAddr z0 16 z1;
+
+    i0 g0 = fAddr f0 32 z2;
+    g2 g1 = fAddr f1 32 i0;
+    h0 h1 h2 h3 z7 = BCD_addr g0 g1 g2 fa fa 64 64 fa z3;
+    0010x1 0010x2 0010x4 0010x8 z8 = BCD_addr h0 h1 h2 h3 fa 128 fa fa z4;
+    // 100の位
+    0100x1 0100x2 = fAddr z7 128 z8;
+}
+func 8bit_and(a0 a1 a2 a3 a4 a5 a6 a7) -> (bool) {
+    b0 = 4and a0 a1 a2 a3;
+    b1 = 4and a4 a5 a6 a7;
+    bool = and b0 b1;
 }
