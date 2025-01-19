@@ -1,6 +1,7 @@
 | name | type | size |
 | -- | -- | -- |
 | 4bits_7seg | 4 -> 7 | 627 |
+| counter_7seg | 0 -> 7 | 663 |
 | chain_and_2_or_16 | 32 -> 1 | 78 |
 | chain_or_16 | 16 -> 1 | 30 |
 | chain_or_8 | 8 -> 1 | 14 |
