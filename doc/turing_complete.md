@@ -77,4 +77,6 @@
 | 3bit_BCD_convert | 3 -> 4 | 27 |
 | 8bit_to_decimal_ | 8 -> 10 | 523 |
 | 8bit_and | 8 -> 1 | 21 |
-| 8bit_encoder | 8 -> 255 | 5384 |
+| 7seg | 4 -> 7 | 180 |
+| counter_7seg | 0 -> 7 | 823 |
+| counter_7segx3 | 0 -> 34 | 1452 |

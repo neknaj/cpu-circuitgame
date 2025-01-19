@@ -1000,3 +1000,113 @@ func 8bit_and(a0 a1 a2 a3 a4 a5 a6 a7) -> (bool) {
     b1 = 4and a4 a5 a6 a7;
     bool = and b0 b1;
 }
+
+// 7segment
+graphical counter_7seg: 10x10 {
+    1,0: o0 #ffffff #000000;
+    2,0: o0 #ffffff #000000;
+    3,1: o1 #ffffff #000000;
+    3,2: o1 #ffffff #000000;
+    3,5: o2 #ffffff #000000;
+    3,4: o2 #ffffff #000000;
+    1,6: o3 #ffffff #000000;
+    2,6: o3 #ffffff #000000;
+    0,4: o4 #ffffff #000000;
+    0,5: o4 #ffffff #000000;
+    0,1: o5 #ffffff #000000;
+    0,2: o5 #ffffff #000000;
+    1,3: o6 #ffffff #000000;
+    2,3: o6 #ffffff #000000;
+}
+// 0~9を7セグに表示
+func 7seg(i1 i2 i4 i8) -> (o0 o1 o2 o3 o4 o5 o6) {
+    // 入力信号の否定を生成
+    false = false i1;
+    n1 = not i1;
+    n2 = not i2;
+    n4 = not i4;
+    n8 = not i8;
+    
+    0 = 4and n1 n2 n4 n8;
+    1 = 4and i1 n2 n4 n8;
+    2 = 4and n1 i2 n4 n8;
+    3 = 4and i1 i2 n4 n8;
+    4 = 4and n1 n2 i4 n8;
+    5 = 4and i1 n2 i4 n8;
+    6 = 4and n1 i2 i4 n8;
+    7 = 4and i1 i2 i4 n8;
+    8 = 4and n1 n2 n4 i8;
+    9 = 4and i1 n2 n4 i8;
+
+    o0 = 8bit_or 0   2 3   5 6 7 8 9;
+    o1 = 8bit_or 0 1 2 3 4     7 8 9;
+    o2 = 9bit_or 0 1   3 4 5 6 7 8 9;
+    o3 = 7or     0   2 3   5 6   8 9;
+    o4 = 4or     0   2       6   8  ;
+    o5 = 6or     0       4 5 6   8 9;
+    o6 = 7or         2 3 4 5 6   8 9;
+}
+module counter_7seg() -> (o0 o1 o2 o3 o4 o5 o6) {
+    i0 i1 i2 i3 i4 i5 i6 i7 = counter;
+    0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 = 8bit_to_decimal_ i0 i1 i2 i3 i4 i5 i6 i7;
+    o0 o1 o2 o3 o4 o5 o6 = 7seg 0001x1 0001x2 0001x4 0001x8;
+}
+graphical counter_7segx3: 30x10 {
+    1,0: o20 #ffffff #000000;
+    2,0: o20 #ffffff #000000;
+    3,1: o21 #ffffff #000000;
+    3,2: o21 #ffffff #000000;
+    3,5: o22 #ffffff #000000;
+    3,4: o22 #ffffff #000000;
+    1,6: o23 #ffffff #000000;
+    2,6: o23 #ffffff #000000;
+    0,4: o24 #ffffff #000000;
+    0,5: o24 #ffffff #000000;
+    0,1: o25 #ffffff #000000;
+    0,2: o25 #ffffff #000000;
+    1,3: o26 #ffffff #000000;
+    2,3: o26 #ffffff #000000;
+
+    7,0: o10 #ffffff #000000;
+    8,0: o10 #ffffff #000000;
+    9,1: o11 #ffffff #000000;
+    9,2: o11 #ffffff #000000;
+    9,5: o12 #ffffff #000000;
+    9,4: o12 #ffffff #000000;
+    7,6: o13 #ffffff #000000;
+    8,6: o13 #ffffff #000000;
+    6,4: o14 #ffffff #000000;
+    6,5: o14 #ffffff #000000;
+    6,1: o15 #ffffff #000000;
+    6,2: o15 #ffffff #000000;
+    7,3: o16 #ffffff #000000;
+    8,3: o16 #ffffff #000000;
+
+    
+    13,0: o00 #ffffff #000000;
+    14,0: o00 #ffffff #000000;
+    15,1: o01 #ffffff #000000;
+    15,2: o01 #ffffff #000000;
+    15,5: o02 #ffffff #000000;
+    15,4: o02 #ffffff #000000;
+    13,6: o03 #ffffff #000000;
+    14,6: o03 #ffffff #000000;
+    12,4: o04 #ffffff #000000;
+    12,5: o04 #ffffff #000000;
+    12,1: o05 #ffffff #000000;
+    12,2: o05 #ffffff #000000;
+    13,3: o06 #ffffff #000000;
+    14,3: o06 #ffffff #000000;
+}
+module counter_7segx3() -> (o00 o01 o02 o03 o04 o05 o06
+o10 o11 o12 o13 o14 o15 o16
+o20 o21 o22 o23 o24 o25 o26
+0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 0100x4 0100x8 1000) {
+    // 0100x4 = false o00;
+    // 0100x8 = false o00;
+    i0 i1 i2 i3 i4 i5 i6 i7 = counter;
+    0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 0100x4 0100x8 1000 = 8bit_to_decimal i0 i1 i2 i3 i4 i5 i6 i7;
+    o00 o01 o02 o03 o04 o05 o06 = 7seg 0001x1 0001x2 0001x4 0001x8;
+    o10 o11 o12 o13 o14 o15 o16 = 7seg 0001x1 0001x2 0001x4 0001x8;
+    o20 o21 o22 o23 o24 o25 o26 = 7seg 0001x1 0001x2 0001x4 0001x8;
+}
