@@ -120,6 +120,11 @@ func 4and(a b c d) -> (bool) {
     y = and c d;
     bool = and x y;
 }
+func 4nor(i0 i1 i2 i3) -> (bool) {
+    w1 = or i0 i1;
+    w2 = or w1 i2;
+    bool = nor w2 i3;
+}
 func 4count(a b c d) -> (x1 y2 z4) {
     a2 a1  = hAddr a b;
     c2 c1  = hAddr c d;
@@ -306,6 +311,11 @@ func 3decoder(a1 a2 a3) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     o5 = nor not_n1a2 n3;
     o6 = nor not_a1n2 n3;
     o7 = nor not_n1n2 n3;
+}
+func 4decoder (s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
+    a0 a1 a2 a3 = 2decoder s0 s1;
+    b0 b1 b2 b3 = 2decoder s2 s3;
+    o0 = and a0 b0; o1 = and a1 b0; o2 = and a2 b0; o3 = and a3 b0; o4 = and a0 b1; o5 = and a1 b1; o6 = and a2 b1; o7 = and a3 b1; o8 = and a0 b2; o9 = and a1 b2; oa = and a2 b2; ob = and a3 b2; oc = and a0 b3; od = and a1 b3; oe = and a2 b3; of = and a3 b3;
 }
 // 8bitを流すかどうか
 func 8switch(0 1 2 3 4 5 6 7 swc) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
@@ -898,51 +908,25 @@ func 4bit_addr(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3 c3) {
 
 func BCD_addr(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3 carry) {
     o0 x1 x2 x3 c0 = 4bit_addr a0 a1 a2 a3 b0 b1 b2 b3 c;
-    y0 = or x1 x2;
-    y1 = and y0 x3;
-    y2 = or c0 y1;
-    // o0 o1 o2 o3 c1 = 4bit_addr x0 x1 x2 x3 
-    //                         false y2 y2 false false;
-    
-    c1 o1 = hAddr x1 y2;
-    c2 o2 = fAddr x2 y2 c1;
-    o3 = xor x3 c2;
-    carry = or c0 c1;
+
+    // 10以上あるか確認
+    f0 = or x1 x2;
+    f1 = and f0 x3;
+    carry = or c0 f1;
+
+    c2 o1 = hAddr x1 carry;
+    c3 o2 = fAddr x2 carry c2;
+    o3 = xor x3 c3;
+}
+test BCD_addr:9->5 {
+    f f f f f f f f f -> f f f f f;
+    f t f t f f f f f -> f f f f t;
+    f f f t f f f t f -> f t t f t;
+    f f f f f t t t f -> f f t f t;
+    t f f t t f f f t -> t f f f t;
+    t f f t f f f f t -> f f f f t;
 }
 
-// memo
-// a(n+1)^2
-// func 8bit_to_decimal(a0 a1 a2 a3 a4 a5 a6 a7) -> (0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 0100x4 0100x8 1000) {
-//     fa = false a0;
-//     b0 b1 b2 b3 z0 = BCD_addr a0 a1 a2 a3 fa fa fa fa fa;
-//     c0 c1 c2 c3 z1 = BCD_addr b0 b1 b2 b3 fa a4 a4 fa fa;
-//     d0 d1 d2 d3 z2 = BCD_addr c0 c1 c2 c3 fa a5 fa fa fa;
-//     e0 e1 e2 e3 z3 = BCD_addr d0 d1 d2 d3 fa fa a6 fa fa;
-//     0001x1 0001x2 0001x4 0001x8 z4 = BCD_addr e0 e1 e2 e3 fa fa fa a7 fa;
-    
-//     f0 f1 f2 f3 z5 = BCD_addr z0 fa fa fa a4 fa fa fa z1;
-//     g0 g1 g2 g3 z6 = BCD_addr f0 f1 f2 f3 a5 a5 fa fa z2;
-//     h0 h1 h2 h3 z7 = BCD_addr g0 g1 g2 g3 fa a6 a6 fa z3;
-//     0010x1 0010x2 0010x4 0010x8 z8 = BCD_addr h0 h1 h2 h3 fa a7 fa fa z4;
-
-//     0100x1 0100x2 0100x4 0100x8 1000 = BCD_addr z7 fa fa fa a7 fa fa fa z8;
-// }
-
-func 8bit_to_decimal(1 2 4 8 16 32 64 128) -> (0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 0100x4 0100x8 1000) {
-    fa = false 1;
-    b0 b1 b2 b3 z0 = BCD_addr 1 2 4 8 fa fa fa fa fa;
-    c0 c1 c2 c3 z1 = BCD_addr b0 b1 b2 b3 fa 16 16 fa fa;
-    d0 d1 d2 d3 z2 = BCD_addr c0 c1 c2 c3 fa 32 fa fa fa;
-    e0 e1 e2 e3 z3 = BCD_addr d0 d1 d2 d3 fa fa 64 fa fa;
-    0001x1 0001x2 0001x4 0001x8 z4 = BCD_addr e0 e1 e2 e3 fa fa fa 128 fa;
-    
-    f0 f1 f2 f3 z5 = BCD_addr z0 fa fa fa 16 fa fa fa z1;
-    g0 g1 g2 g3 z6 = BCD_addr f0 f1 f2 f3 32 32 fa fa z2;
-    h0 h1 h2 h3 z7 = BCD_addr g0 g1 g2 g3 fa 64 64 fa z3;
-    0010x1 0010x2 0010x4 0010x8 z8 = BCD_addr h0 h1 h2 h3 fa 128 fa fa z4;
-
-    0100x1 0100x2 0100x4 0100x8 1000 = BCD_addr z7 fa fa fa 128 fa fa fa z8;
-}
 // 最適化コーナー
 func 4bit_addr_ni(a0 a1 a2 a3 b0 b1 b2 b3) -> (o0 o1 o2 o3 carry){
     c0 o0 = hAddr a0 b0;
@@ -977,7 +961,7 @@ func 3bit_BCD_convert(a1 a2 a3) -> (o1 o2 o3 c3) {
     c2 o2 = fAddr a2 y1 c1;
     c3 o3 = hAddr a3 c2;
 }
-func 8bit_to_decimal_(1 2 4 8 16 32 64 128) -> (0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2) {
+func 8bit_to_decimal(1 2 4 8 16 32 64 128) -> (0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2) {
     fa = false 1;
     // 1の位
     b1 b2 b3 z0 = 3bit_BCD_convert 2 4 8;
@@ -1048,7 +1032,7 @@ func 7seg(i1 i2 i4 i8) -> (o0 o1 o2 o3 o4 o5 o6) {
 }
 module counter_7seg() -> (o0 o1 o2 o3 o4 o5 o6) {
     i0 i1 i2 i3 i4 i5 i6 i7 = counter;
-    0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 = 8bit_to_decimal_ i0 i1 i2 i3 i4 i5 i6 i7;
+    0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 = 8bit_to_decimal i0 i1 i2 i3 i4 i5 i6 i7;
     o0 o1 o2 o3 o4 o5 o6 = 7seg 0001x1 0001x2 0001x4 0001x8;
 }
 graphical counter_7segx3: 30x10 {
@@ -1100,13 +1084,12 @@ graphical counter_7segx3: 30x10 {
 }
 module counter_7segx3() -> (o00 o01 o02 o03 o04 o05 o06
 o10 o11 o12 o13 o14 o15 o16
-o20 o21 o22 o23 o24 o25 o26
-0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 0100x4 0100x8 1000) {
-    // 0100x4 = false o00;
-    // 0100x8 = false o00;
+o20 o21 o22 o23 o24 o25 o26) {
+    0100x4 = false o00;
+    0100x8 = false o00;
     i0 i1 i2 i3 i4 i5 i6 i7 = counter;
-    0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 0100x4 0100x8 1000 = 8bit_to_decimal i0 i1 i2 i3 i4 i5 i6 i7;
+    0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 = 8bit_to_decimal i0 i1 i2 i3 i4 i5 i6 i7;
     o00 o01 o02 o03 o04 o05 o06 = 7seg 0001x1 0001x2 0001x4 0001x8;
-    o10 o11 o12 o13 o14 o15 o16 = 7seg 0001x1 0001x2 0001x4 0001x8;
-    o20 o21 o22 o23 o24 o25 o26 = 7seg 0001x1 0001x2 0001x4 0001x8;
+    o10 o11 o12 o13 o14 o15 o16 = 7seg 0010x1 0010x2 0010x4 0010x8;
+    o20 o21 o22 o23 o24 o25 o26 = 7seg 0100x1 0100x2 0100x4 0100x8;
 }

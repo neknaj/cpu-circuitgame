@@ -20,6 +20,7 @@
 | circular2 | 0 -> 1 | 3 |
 | 4or | 4 -> 1 | 6 |
 | 4and | 4 -> 1 | 9 |
+| 4nor | 4 -> 1 | 5 |
 | 4count | 4 -> 3 | 22 |
 | hAddr | 2 -> 2 | 5 |
 | fAddr | 3 -> 2 | 12 |
@@ -41,6 +42,7 @@
 | 1decoder | 1 -> 2 | 3 |
 | 2decoder | 2 -> 4 | 6 |
 | 3decoder | 3 -> 8 | 19 |
+| 4decoder | 4 -> 16 | 60 |
 | 8switch | 9 -> 8 | 24 |
 | 6or | 6 -> 1 | 10 |
 | ALU | 19 -> 8 | 512 |
@@ -69,14 +71,13 @@
 | condition | 11 -> 1 | 41 |
 | turing_complete | 16 -> 17 | 1488 |
 | 4bit_addr | 9 -> 5 | 48 |
-| BCD_addr | 9 -> 5 | 79 |
-| 8bit_to_decimal | 8 -> 13 | 792 |
+| BCD_addr | 9 -> 5 | 77 |
 | 4bit_addr_ni | 8 -> 5 | 41 |
 | BCD_addr_noci | 8 -> 5 | 72 |
 | BCD_addr_noco | 9 -> 4 | 77 |
 | 3bit_BCD_convert | 3 -> 4 | 27 |
-| 8bit_to_decimal_ | 8 -> 10 | 523 |
+| 8bit_to_decimal | 8 -> 10 | 519 |
 | 8bit_and | 8 -> 1 | 21 |
 | 7seg | 4 -> 7 | 180 |
-| counter_7seg | 0 -> 7 | 823 |
-| counter_7segx3 | 0 -> 34 | 1452 |
+| counter_7seg | 0 -> 7 | 819 |
+| counter_7segx3 | 0 -> 21 | 1183 |
