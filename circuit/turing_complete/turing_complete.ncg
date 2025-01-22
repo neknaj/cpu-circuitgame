@@ -539,7 +539,39 @@ module counter() -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     a0 a1 a2 a3 a4 a5 a6 a7 = 8inc o0 o1 o2 o3 o4 o5 o6 o7;
     o0 o1 o2 o3 o4 o5 o6 o7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 1 1;
 }
+// module counter_clockswc(clk) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+//     1 = true o0;
+//     0 = false o0;
 
+//     c0 a0 = hAddr o0 clk;
+//     c1 a1 = hAddr o1 c0;
+//     c2 a2 = hAddr o2 c1;
+//     c3 a3 = hAddr o3 c2;
+//     c4 a4 = hAddr o4 c3;
+//     c5 a5 = hAddr o5 c4;
+//     c6 a6 = hAddr o6 c5;
+//     c7 a7 = hAddr o7 c6;
+//     o0 o1 o2 o3 o4 o5 o6 o7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 1 1;
+// }
+module counter_clock(clk) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+    1 = true o0;
+    0 = false o0;
+
+    last = mem1bit clk write 1;
+    n_last = not last;
+    flag = and n_last clk;
+    write = or flag clk;
+
+    c0 a0 = hAddr o0 flag;
+    c1 a1 = hAddr o1 c0;
+    c2 a2 = hAddr o2 c1;
+    c3 a3 = hAddr o3 c2;
+    c4 a4 = hAddr o4 c3;
+    c5 a5 = hAddr o5 c4;
+    c6 a6 = hAddr o6 c5;
+    c7 a7 = hAddr o7 c6;
+    o0 o1 o2 o3 o4 o5 o6 o7 = mem8bits a0 a1 a2 a3 a4 a5 a6 a7 1 1;
+}
 module counter_swc(i0 i1 i2 i3 i4 i5 i6 i7 swc) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     1 = true i0;
     0 = false i0;
@@ -963,21 +995,18 @@ func 3bit_BCD_convert(a1 a2 a3) -> (o1 o2 o3 c3) {
 }
 func 8bit_to_decimal(1 2 4 8 16 32 64 128) -> (0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2) {
     fa = false 1;
-    // 1の位
-    b1 b2 b3 z0 = 3bit_BCD_convert 2 4 8;
-    c0 c1 c2 c3 z1 = BCD_addr_noci 1 b1 b2 b3 fa 16 16 fa;
-    d0 d1 d2 d3 z2 = BCD_addr_noci c0 c1 c2 c3 fa 32 fa fa;
-    e0 e1 e2 e3 z3 = BCD_addr_noci d0 d1 d2 d3 fa fa 64 fa;
-    0001x1 0001x2 0001x4 0001x8 z4 = BCD_addr_noci e0 e1 e2 e3 fa fa fa 128;
-    // 10の位
-    f1 f0 = fAddr z0 16 z1;
-
-    i0 g0 = fAddr f0 32 z2;
-    g2 g1 = fAddr f1 32 i0;
-    h0 h1 h2 h3 z7 = BCD_addr g0 g1 g2 fa fa 64 64 fa z3;
+    b0 b1 b2 b3 z0 = BCD_addr 1 2 4 8 fa fa fa fa fa;
+    c0 c1 c2 c3 z1 = BCD_addr b0 b1 b2 b3 fa 16 16 fa fa;
+    d0 d1 d2 d3 z2 = BCD_addr c0 c1 c2 c3 fa 32 fa fa fa;
+    e0 e1 e2 e3 z3 = BCD_addr d0 d1 d2 d3 fa fa 64 fa fa;
+    0001x1 0001x2 0001x4 0001x8 z4 = BCD_addr e0 e1 e2 e3 fa fa fa 128 fa;
+    
+    f0 f1 f2 f3 z5 = BCD_addr z0 fa fa fa 16 fa fa fa z1;
+    g0 g1 g2 g3 z6 = BCD_addr f0 f1 f2 f3 32 32 fa fa z2;
+    h0 h1 h2 h3 z7 = BCD_addr g0 g1 g2 g3 fa 64 64 fa z3;
     0010x1 0010x2 0010x4 0010x8 z8 = BCD_addr h0 h1 h2 h3 fa 128 fa fa z4;
-    // 100の位
-    0100x1 0100x2 = fAddr z7 128 z8;
+
+    0100x1 0100x2 0100x4 0100x8 1000 = BCD_addr z7 fa fa fa 128 fa fa fa z8;
 }
 func 8bit_and(a0 a1 a2 a3 a4 a5 a6 a7) -> (bool) {
     b0 = 4and a0 a1 a2 a3;
@@ -1003,32 +1032,38 @@ graphical counter_7seg: 10x10 {
     2,3: o6 #ffffff #000000;
 }
 // 0~9を7セグに表示
-func 7seg(i1 i2 i4 i8) -> (o0 o1 o2 o3 o4 o5 o6) {
-    // 入力信号の否定を生成
-    false = false i1;
-    n1 = not i1;
-    n2 = not i2;
-    n4 = not i4;
-    n8 = not i8;
-    
-    0 = 4and n1 n2 n4 n8;
-    1 = 4and i1 n2 n4 n8;
-    2 = 4and n1 i2 n4 n8;
-    3 = 4and i1 i2 n4 n8;
-    4 = 4and n1 n2 i4 n8;
-    5 = 4and i1 n2 i4 n8;
-    6 = 4and n1 i2 i4 n8;
-    7 = 4and i1 i2 i4 n8;
-    8 = 4and n1 n2 n4 i8;
-    9 = 4and i1 n2 n4 i8;
-
-    o0 = 8bit_or 0   2 3   5 6 7 8 9;
-    o1 = 8bit_or 0 1 2 3 4     7 8 9;
-    o2 = 9bit_or 0 1   3 4 5 6 7 8 9;
-    o3 = 7or     0   2 3   5 6   8 9;
-    o4 = 4or     0   2       6   8  ;
-    o5 = 6or     0       4 5 6   8 9;
-    o6 = 7or         2 3 4 5 6   8 9;
+// made by とりさん
+func 7seg(D C B A) -> (a b c d e f_ g) {
+    nA: nor <- A A;
+    nB: nor <- B B;
+    nC: nor <- C C;
+    norBnC: nor <- B nC;
+    nornBC: nor <- nB C;
+    nornBnC: nor <- nB nC;
+    nornAD: nor <- nA D;
+    ornAD: nor <- nornAD nornAD;
+    norBC: nor <- B C;
+    orBC: nor <- norBC norBC;
+    orBnC: nor <- norBnC norBnC;
+    ornBC: nor <- nornBC nornBC;
+    ornBnC: nor <- nornBnC nornBnC;
+    a1: nor <- A orBnC;
+    a2: nor <- ornAD orBC;
+    a: nor <- a1 a2;
+    b1: nor <- nA orBnC;
+    b2: nor <- A ornBnC;
+    b: nor <- b1 b2;
+    c1: nor <- A ornBC;
+    c: nor <- c1 c1;
+    d1: nor <- a a;
+    d2: nor <- nA ornBnC;
+    d: nor <- d1 d2;
+    e: nor <- A norBnC;
+    f2: nor <- ornAD C;
+    f_: nor <- nornBC f2;
+    g1: nor <- orBC D;
+    g2: nor <- nA ornBnC;
+    g: nor <- g1 g2;
 }
 module counter_7seg() -> (o0 o1 o2 o3 o4 o5 o6) {
     i0 i1 i2 i3 i4 i5 i6 i7 = counter;
@@ -1036,37 +1071,36 @@ module counter_7seg() -> (o0 o1 o2 o3 o4 o5 o6) {
     o0 o1 o2 o3 o4 o5 o6 = 7seg 0001x1 0001x2 0001x4 0001x8;
 }
 graphical counter_7segx3: 30x10 {
-    1,0: o20 #ffffff #000000;
-    2,0: o20 #ffffff #000000;
-    3,1: o21 #ffffff #000000;
-    3,2: o21 #ffffff #000000;
-    3,5: o22 #ffffff #000000;
-    3,4: o22 #ffffff #000000;
-    1,6: o23 #ffffff #000000;
-    2,6: o23 #ffffff #000000;
-    0,4: o24 #ffffff #000000;
-    0,5: o24 #ffffff #000000;
-    0,1: o25 #ffffff #000000;
-    0,2: o25 #ffffff #000000;
-    1,3: o26 #ffffff #000000;
-    2,3: o26 #ffffff #000000;
+    1,0: o14 #ffffff #000000;
+    2,0: o14 #ffffff #000000;
+    3,1: o15 #ffffff #000000;
+    3,2: o15 #ffffff #000000;
+    3,5: o16 #ffffff #000000;
+    3,4: o16 #ffffff #000000;
+    1,6: o17 #ffffff #000000;
+    2,6: o17 #ffffff #000000;
+    0,4: o18 #ffffff #000000;
+    0,5: o18 #ffffff #000000;
+    0,1: o19 #ffffff #000000;
+    0,2: o19 #ffffff #000000;
+    1,3: o20 #ffffff #000000;
+    2,3: o20 #ffffff #000000;
 
-    7,0: o10 #ffffff #000000;
-    8,0: o10 #ffffff #000000;
-    9,1: o11 #ffffff #000000;
-    9,2: o11 #ffffff #000000;
-    9,5: o12 #ffffff #000000;
-    9,4: o12 #ffffff #000000;
-    7,6: o13 #ffffff #000000;
-    8,6: o13 #ffffff #000000;
-    6,4: o14 #ffffff #000000;
-    6,5: o14 #ffffff #000000;
-    6,1: o15 #ffffff #000000;
-    6,2: o15 #ffffff #000000;
-    7,3: o16 #ffffff #000000;
-    8,3: o16 #ffffff #000000;
+    7,0: o7 #ffffff #000000;
+    8,0: o7 #ffffff #000000;
+    9,1: o8 #ffffff #000000;
+    9,2: o8 #ffffff #000000;
+    9,5: o9 #ffffff #000000;
+    9,4: o9 #ffffff #000000;
+    7,6: o10 #ffffff #000000;
+    8,6: o10 #ffffff #000000;
+    6,4: o11 #ffffff #000000;
+    6,5: o11 #ffffff #000000;
+    6,1: o12 #ffffff #000000;
+    6,2: o12 #ffffff #000000;
+    7,3: o13 #ffffff #000000;
+    8,3: o13 #ffffff #000000;
 
-    
     13,0: o00 #ffffff #000000;
     14,0: o00 #ffffff #000000;
     15,1: o01 #ffffff #000000;
@@ -1089,7 +1123,7 @@ o20 o21 o22 o23 o24 o25 o26) {
     0100x8 = false o00;
     i0 i1 i2 i3 i4 i5 i6 i7 = counter;
     0001x1 0001x2 0001x4 0001x8 0010x1 0010x2 0010x4 0010x8 0100x1 0100x2 = 8bit_to_decimal i0 i1 i2 i3 i4 i5 i6 i7;
-    o00 o01 o02 o03 o04 o05 o06 = 7seg 0001x1 0001x2 0001x4 0001x8;
-    o10 o11 o12 o13 o14 o15 o16 = 7seg 0010x1 0010x2 0010x4 0010x8;
-    o20 o21 o22 o23 o24 o25 o26 = 7seg 0100x1 0100x2 0100x4 0100x8;
+    o00 o01 o02 o03 o04 o05 o06 = 7seg 0001x8 0001x4 0001x2 0001x1;
+    o10 o11 o12 o13 o14 o15 o16 = 7seg 0010x8 0010x4 0010x2 0010x1;
+    o20 o21 o22 o23 o24 o25 o26 = 7seg 0100x8 0100x4 0100x2 0100x1;
 }

@@ -57,6 +57,7 @@
 | 8dec | 8 -> 8 | 50 |
 | fAddr_4decrement | 2 -> 2 | 7 |
 | counter | 0 -> 8 | 120 |
+| counter_clock | 1 -> 8 | 132 |
 | counter_swc | 9 -> 8 | 185 |
 | 7or | 7 -> 1 | 12 |
 | register_view | 15 -> 94 | 632 |
@@ -76,8 +77,8 @@
 | BCD_addr_noci | 8 -> 5 | 72 |
 | BCD_addr_noco | 9 -> 4 | 77 |
 | 3bit_BCD_convert | 3 -> 4 | 27 |
-| 8bit_to_decimal | 8 -> 10 | 519 |
+| 8bit_to_decimal | 8 -> 10 | 772 |
 | 8bit_and | 8 -> 1 | 21 |
-| 7seg | 4 -> 7 | 180 |
-| counter_7seg | 0 -> 7 | 819 |
-| counter_7segx3 | 0 -> 21 | 1183 |
+| 7seg | 4 -> 7 | 30 |
+| counter_7seg | 0 -> 7 | 922 |
+| counter_7segx3 | 0 -> 21 | 986 |
