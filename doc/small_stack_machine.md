@@ -20,6 +20,7 @@
 | fAddr | 3 -> 2 | 12 |
 | sr_latch | 2 -> 2 | 2 |
 | d_latch | 2 -> 2 | 5 |
+| dff | 2 -> 1 | 13 |
 | clock | 0 -> 1 | 3 |
 | impulse | 0 -> 1 | 3 |
 | mux16bits1 | 33 -> 16 | 144 |
@@ -33,6 +34,8 @@
 | adrDecoder1 | 1 -> 2 | 3 |
 | counter8bits | 0 -> 8 | 36 |
 | counter8bitsRewritable | 9 -> 8 | 108 |
+| counter8bits_clock | 1 -> 8 | 140 |
+| dff8bits | 9 -> 8 | 104 |
 | mem8bits8 | 18 -> 8 | 25827 |
 | mem8bits7 | 17 -> 8 | 12899 |
 | mem8bits6 | 16 -> 8 | 6435 |

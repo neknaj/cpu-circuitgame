@@ -203,6 +203,13 @@ module d_latch (d clk)->(q nq) {
     q nq: sr_latch s r;
 }
 
+module dff (d, clk) -> (q) {
+    inv_clk: not <- clk;
+    master_q master_nq: d_latch <- d inv_clk;
+    slave_q slave_nq: d_latch <- master_q clk;
+    q: buf <- slave_q;
+}
+
 // クロック回路
 
 module clock()->(a) {
@@ -344,6 +351,22 @@ module counter8bits ()->(o0 o1 o2 o3 o4 o5 o6 o7) {
 module counter8bitsRewritable (i0 i1 i2 i3 i4 i5 i6 i7 swc)->(o0 o1 o2 o3 o4 o5 o6 o7) {
     a0 a1 a2 a3 a4 a5 a6 a7 = increment8bits o0 o1 o2 o3 o4 o5 o6 o7;
     o0 o1 o2 o3 o4 o5 o6 o7 = mux8bits1 i0 i1 i2 i3 i4 i5 i6 i7, a0 a1 a2 a3 a4 a5 a6 a7, swc;
+}
+
+module counter8bits_clock(clk) -> (r0 r1 r2 r3 r4 r5 r6 r7) {
+    n0 n1 n2 n3 n4 n5 n6 n7: increment8bits r0 r1 r2 r3 r4 r5 r6 r7;
+    r0 r1 r2 r3 r4 r5 r6 r7: dff8bits <- n0 n1 n2 n3 n4 n5 n6 n7 clk;
+}
+
+module dff8bits (d0 d1 d2 d3 d4 d5 d6 d7 clk)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0: dff d0 clk;
+    o1: dff d1 clk;
+    o2: dff d2 clk;
+    o3: dff d3 clk;
+    o4: dff d4 clk;
+    o5: dff d5 clk;
+    o6: dff d6 clk;
+    o7: dff d7 clk;
 }
 
 //
