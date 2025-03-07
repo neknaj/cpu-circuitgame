@@ -29,9 +29,7 @@ func false(any) -> (false) {
 
 // 基本的なゲート
 
-func buf(x) -> (b) {
-    a = not x;
-    b = not a;
+func buf (x) -> (x) {
 }
 
 func not(x) -> (a) {
@@ -193,15 +191,7 @@ func 8nor(a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7) -> (o0 o1 o2 o3 o4 o5
     o6 = nor a6 b6;
     o7 = nor a7 b7;
 }
-func 8buf(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0 = buf 0;
-    o1 = buf 1;
-    o2 = buf 2;
-    o3 = buf 3;
-    o4 = buf 4;
-    o5 = buf 5;
-    o6 = buf 6;
-    o7 = buf 7;
+func 8buf(0 1 2 3 4 5 6 7) -> (0 1 2 3 4 5 6 7) {
 }
 func 8not(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     o0 = not 0;
@@ -277,9 +267,8 @@ func 8nagate(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
 }
 
 // 2進数 to bit
-func 1decoder(s) -> (a b) {
+func 1decoder(s) -> (a s) {
     a = not  s;
-    b = buf  s;
 }
 func 2decoder(s0 s1) -> (a b c d) {
     ns0 = not s0;
@@ -555,7 +544,6 @@ module counter() -> (o0 o1 o2 o3 o4 o5 o6 o7) {
 // }
 module counter_clock(clk) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     1 = true o0;
-    0 = false o0;
 
     last = mem1bit clk write 1;
     n_last = not last;
