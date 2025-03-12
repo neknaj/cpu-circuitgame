@@ -70,7 +70,7 @@
 | 32counter | 0 -> 32 | 453 |
 | demux1 | 2 -> 2 | 7 |
 | condition | 11 -> 1 | 41 |
-| turing_complete | 16 -> 26 | 1488 |
+| turing_complete | 16 -> 17 | 1481 |
 | 4bit_addr | 9 -> 5 | 48 |
 | BCD_addr | 9 -> 5 | 77 |
 | 4bit_addr_ni | 8 -> 5 | 41 |
@@ -92,4 +92,4 @@
 | mem8bits1 | 11 -> 8 | 173 |
 | 8decoder | 8 -> 256 | 888 |
 | 256bit_or | 256 -> 1 | 510 |
-| initMemory | 8 -> 16 | 12725 |
+| initMemory | 8 -> 25 | 12783 |
