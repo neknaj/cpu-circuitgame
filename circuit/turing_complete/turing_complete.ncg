@@ -1179,84 +1179,69 @@ module mem8bits1 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 }
 
 // 楽にするための8decoder by bem130
-func 8decoder(s0 s1 s2 s3 s4 s5 s6 s7)->(
-        o00 o10 o20 o30 o40 o50 o60 o70 o80 o90 oa0 ob0 oc0 od0 oe0 of0
-        o01 o11 o21 o31 o41 o51 o61 o71 o81 o91 oa1 ob1 oc1 od1 oe1 of1
-        o02 o12 o22 o32 o42 o52 o62 o72 o82 o92 oa2 ob2 oc2 od2 oe2 of2
-        o03 o13 o23 o33 o43 o53 o63 o73 o83 o93 oa3 ob3 oc3 od3 oe3 of3
-        o04 o14 o24 o34 o44 o54 o64 o74 o84 o94 oa4 ob4 oc4 od4 oe4 of4
-        o05 o15 o25 o35 o45 o55 o65 o75 o85 o95 oa5 ob5 oc5 od5 oe5 of5
-        o06 o16 o26 o36 o46 o56 o66 o76 o86 o96 oa6 ob6 oc6 od6 oe6 of6
-        o07 o17 o27 o37 o47 o57 o67 o77 o87 o97 oa7 ob7 oc7 od7 oe7 of7
-        o08 o18 o28 o38 o48 o58 o68 o78 o88 o98 oa8 ob8 oc8 od8 oe8 of8
-        o09 o19 o29 o39 o49 o59 o69 o79 o89 o99 oa9 ob9 oc9 od9 oe9 of9
-        o0a o1a o2a o3a o4a o5a o6a o7a o8a o9a oaa oba oca oda oea ofa
-        o0b o1b o2b o3b o4b o5b o6b o7b o8b o9b oab obb ocb odb oeb ofb
-        o0c o1c o2c o3c o4c o5c o6c o7c o8c o9c oac obc occ odc oec ofc
-        o0d o1d o2d o3d o4d o5d o6d o7d o8d o9d oad obd ocd odd oed ofd
-        o0e o1e o2e o3e o4e o5e o6e o7e o8e o9e oae obe oce ode oee ofe
-        o0f o1f o2f o3f o4f o5f o6f o7f o8f o9f oaf obf ocf odf oef off
-    ) {
-    a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af: 4decoder s0 s1 s2 s3;
-    b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf: 4decoder s4 s5 s6 s7;
-    o00:and a0 b0; o10:and a1 b0; o20:and a2 b0; o30:and a3 b0; o40:and a4 b0; o50:and a5 b0; o60:and a6 b0; o70:and a7 b0; o80:and a8 b0; o90:and a9 b0; oa0:and aa b0; ob0:and ab b0; oc0:and ac b0; od0:and ad b0; oe0:and ae b0; of0:and af b0;
-    o01:and a0 b1; o11:and a1 b1; o21:and a2 b1; o31:and a3 b1; o41:and a4 b1; o51:and a5 b1; o61:and a6 b1; o71:and a7 b1; o81:and a8 b1; o91:and a9 b1; oa1:and aa b1; ob1:and ab b1; oc1:and ac b1; od1:and ad b1; oe1:and ae b1; of1:and af b1;
-    o02:and a0 b2; o12:and a1 b2; o22:and a2 b2; o32:and a3 b2; o42:and a4 b2; o52:and a5 b2; o62:and a6 b2; o72:and a7 b2; o82:and a8 b2; o92:and a9 b2; oa2:and aa b2; ob2:and ab b2; oc2:and ac b2; od2:and ad b2; oe2:and ae b2; of2:and af b2;
-    o03:and a0 b3; o13:and a1 b3; o23:and a2 b3; o33:and a3 b3; o43:and a4 b3; o53:and a5 b3; o63:and a6 b3; o73:and a7 b3; o83:and a8 b3; o93:and a9 b3; oa3:and aa b3; ob3:and ab b3; oc3:and ac b3; od3:and ad b3; oe3:and ae b3; of3:and af b3;
-    o04:and a0 b4; o14:and a1 b4; o24:and a2 b4; o34:and a3 b4; o44:and a4 b4; o54:and a5 b4; o64:and a6 b4; o74:and a7 b4; o84:and a8 b4; o94:and a9 b4; oa4:and aa b4; ob4:and ab b4; oc4:and ac b4; od4:and ad b4; oe4:and ae b4; of4:and af b4;
-    o05:and a0 b5; o15:and a1 b5; o25:and a2 b5; o35:and a3 b5; o45:and a4 b5; o55:and a5 b5; o65:and a6 b5; o75:and a7 b5; o85:and a8 b5; o95:and a9 b5; oa5:and aa b5; ob5:and ab b5; oc5:and ac b5; od5:and ad b5; oe5:and ae b5; of5:and af b5;
-    o06:and a0 b6; o16:and a1 b6; o26:and a2 b6; o36:and a3 b6; o46:and a4 b6; o56:and a5 b6; o66:and a6 b6; o76:and a7 b6; o86:and a8 b6; o96:and a9 b6; oa6:and aa b6; ob6:and ab b6; oc6:and ac b6; od6:and ad b6; oe6:and ae b6; of6:and af b6;
-    o07:and a0 b7; o17:and a1 b7; o27:and a2 b7; o37:and a3 b7; o47:and a4 b7; o57:and a5 b7; o67:and a6 b7; o77:and a7 b7; o87:and a8 b7; o97:and a9 b7; oa7:and aa b7; ob7:and ab b7; oc7:and ac b7; od7:and ad b7; oe7:and ae b7; of7:and af b7;
-    o08:and a0 b8; o18:and a1 b8; o28:and a2 b8; o38:and a3 b8; o48:and a4 b8; o58:and a5 b8; o68:and a6 b8; o78:and a7 b8; o88:and a8 b8; o98:and a9 b8; oa8:and aa b8; ob8:and ab b8; oc8:and ac b8; od8:and ad b8; oe8:and ae b8; of8:and af b8;
-    o09:and a0 b9; o19:and a1 b9; o29:and a2 b9; o39:and a3 b9; o49:and a4 b9; o59:and a5 b9; o69:and a6 b9; o79:and a7 b9; o89:and a8 b9; o99:and a9 b9; oa9:and aa b9; ob9:and ab b9; oc9:and ac b9; od9:and ad b9; oe9:and ae b9; of9:and af b9;
-    o0a:and a0 ba; o1a:and a1 ba; o2a:and a2 ba; o3a:and a3 ba; o4a:and a4 ba; o5a:and a5 ba; o6a:and a6 ba; o7a:and a7 ba; o8a:and a8 ba; o9a:and a9 ba; oaa:and aa ba; oba:and ab ba; oca:and ac ba; oda:and ad ba; oea:and ae ba; ofa:and af ba;
-    o0b:and a0 bb; o1b:and a1 bb; o2b:and a2 bb; o3b:and a3 bb; o4b:and a4 bb; o5b:and a5 bb; o6b:and a6 bb; o7b:and a7 bb; o8b:and a8 bb; o9b:and a9 bb; oab:and aa bb; obb:and ab bb; ocb:and ac bb; odb:and ad bb; oeb:and ae bb; ofb:and af bb;
-    o0c:and a0 bc; o1c:and a1 bc; o2c:and a2 bc; o3c:and a3 bc; o4c:and a4 bc; o5c:and a5 bc; o6c:and a6 bc; o7c:and a7 bc; o8c:and a8 bc; o9c:and a9 bc; oac:and aa bc; obc:and ab bc; occ:and ac bc; odc:and ad bc; oec:and ae bc; ofc:and af bc;
-    o0d:and a0 bd; o1d:and a1 bd; o2d:and a2 bd; o3d:and a3 bd; o4d:and a4 bd; o5d:and a5 bd; o6d:and a6 bd; o7d:and a7 bd; o8d:and a8 bd; o9d:and a9 bd; oad:and aa bd; obd:and ab bd; ocd:and ac bd; odd:and ad bd; oed:and ae bd; ofd:and af bd;
-    o0e:and a0 be; o1e:and a1 be; o2e:and a2 be; o3e:and a3 be; o4e:and a4 be; o5e:and a5 be; o6e:and a6 be; o7e:and a7 be; o8e:and a8 be; o9e:and a9 be; oae:and aa be; obe:and ab be; oce:and ac be; ode:and ad be; oee:and ae be; ofe:and af be;
-    o0f:and a0 bf; o1f:and a1 bf; o2f:and a2 bf; o3f:and a3 bf; o4f:and a4 bf; o5f:and a5 bf; o6f:and a6 bf; o7f:and a7 bf; o8f:and a8 bf; o9f:and a9 bf; oaf:and aa bf; obf:and ab bf; ocf:and ac bf; odf:and ad bf; oef:and ae bf; off:and af bf;
+func 16switch(i(16) swc) -> (o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
+    o0 = and i[0] swc;
+    o1 = and i[1] swc;
+    o2 = and i[2] swc;
+    o3 = and i[3] swc;
+    o4 = and i[4] swc;
+    o5 = and i[5] swc;
+    o6 = and i[6] swc;
+    o7 = and i[7] swc;
+    o8 = and i[8] swc;
+    o9 = and i[9] swc;
+    oa = and i[10] swc;
+    ob = and i[11] swc;
+    oc = and i[12] swc;
+    od = and i[13] swc;
+    oe = and i[14] swc;
+    of = and i[15] swc;
 }
-func 256bit_or(i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31 i32 i33 i34 i35 i36 i37 i38 i39 i40 i41 i42 i43 i44 i45 i46 i47 i48 i49 i50 i51 i52 i53 i54 i55 i56 i57 i58 i59 i60 i61 i62 i63 i64 i65 i66 i67 i68 i69 i70 i71 i72 i73 i74 i75 i76 i77 i78 i79 i80 i81 i82 i83 i84 i85 i86 i87 i88 i89 i90 i91 i92 i93 i94 i95 i96 i97 i98 i99 i100 i101 i102 i103 i104 i105 i106 i107 i108 i109 i110 i111 i112 i113 i114 i115 i116 i117 i118 i119 i120 i121 i122 i123 i124 i125 i126 i127 i128 i129 i130 i131 i132 i133 i134 i135 i136 i137 i138 i139 i140 i141 i142 i143 i144 i145 i146 i147 i148 i149 i150 i151 i152 i153 i154 i155 i156 i157 i158 i159 i160 i161 i162 i163 i164 i165 i166 i167 i168 i169 i170 i171 i172 i173 i174 i175 i176 i177 i178 i179 i180 i181 i182 i183 i184 i185 i186 i187 i188 i189 i190 i191 i192 i193 i194 i195 i196 i197 i198 i199 i200 i201 i202 i203 i204 i205 i206 i207 i208 i209 i210 i211 i212 i213 i214 i215 i216 i217 i218 i219 i220 i221 i222 i223 i224 i225 i226 i227 i228 i229 i230 i231 i232 i233 i234 i235 i236 i237 i238 i239 i240 i241 i242 i243 i244 i245 i246 i247 i248 i249 i250 i251 i252 i253 i254 i255)
-->(bool) {
-    a0 = 8bit_or i0 i1 i2 i3 i4 i5 i6 i7;
-    a1 = 8bit_or i8 i9 i10 i11 i12 i13 i14 i15;
-    a2 = 8bit_or i16 i17 i18 i19 i20 i21 i22 i23;
-    a3 = 8bit_or i24 i25 i26 i27 i28 i29 i30 i31;
-    a4 = 8bit_or i32 i33 i34 i35 i36 i37 i38 i39;
-    a5 = 8bit_or i40 i41 i42 i43 i44 i45 i46 i47;
-    a6 = 8bit_or i48 i49 i50 i51 i52 i53 i54 i55;
-    a7 = 8bit_or i56 i57 i58 i59 i60 i61 i62 i63;
-    a8 = 8bit_or i64 i65 i66 i67 i68 i69 i70 i71;
-    a9 = 8bit_or i72 i73 i74 i75 i76 i77 i78 i79;
-    a10 = 8bit_or i80 i81 i82 i83 i84 i85 i86 i87;
-    a11 = 8bit_or i88 i89 i90 i91 i92 i93 i94 i95;
-    a12 = 8bit_or i96 i97 i98 i99 i100 i101 i102 i103;
-    a13 = 8bit_or i104 i105 i106 i107 i108 i109 i110 i111;
-    a14 = 8bit_or i112 i113 i114 i115 i116 i117 i118 i119;
-    a15 = 8bit_or i120 i121 i122 i123 i124 i125 i126 i127;
-    a16 = 8bit_or i128 i129 i130 i131 i132 i133 i134 i135;
-    a17 = 8bit_or i136 i137 i138 i139 i140 i141 i142 i143;
-    a18 = 8bit_or i144 i145 i146 i147 i148 i149 i150 i151;
-    a19 = 8bit_or i152 i153 i154 i155 i156 i157 i158 i159;
-    a20 = 8bit_or i160 i161 i162 i163 i164 i165 i166 i167;
-    a21 = 8bit_or i168 i169 i170 i171 i172 i173 i174 i175;
-    a22 = 8bit_or i176 i177 i178 i179 i180 i181 i182 i183;
-    a23 = 8bit_or i184 i185 i186 i187 i188 i189 i190 i191;
-    a24 = 8bit_or i192 i193 i194 i195 i196 i197 i198 i199;
-    a25 = 8bit_or i200 i201 i202 i203 i204 i205 i206 i207;
-    a26 = 8bit_or i208 i209 i210 i211 i212 i213 i214 i215;
-    a27 = 8bit_or i216 i217 i218 i219 i220 i221 i222 i223;
-    a28 = 8bit_or i224 i225 i226 i227 i228 i229 i230 i231;
-    a29 = 8bit_or i232 i233 i234 i235 i236 i237 i238 i239;
-    a30 = 8bit_or i240 i241 i242 i243 i244 i245 i246 i247;
-    a31 = 8bit_or i248 i249 i250 i251 i252 i253 i254 i255;
-
-    b0 = 8bit_or a0 a1 a2 a3 a4 a5 a6 a7;
-    b1 = 8bit_or a8 a9 a10 a11 a12 a13 a14 a15;
-    b2 = 8bit_or a16 a17 a18 a19 a20 a21 a22 a23;
-    b3 = 8bit_or a24 a25 a26 a27 a28 a29 a30 a31;
-
-    bool = 4or b0 b1 b2 b3;
+func 8decoder(s(8))->(o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
+    a(16): 4decoder s[0,3];
+    b(16): 4decoder s[4,7];
+    o0(16) = 16switch a[0,15] b[0];
+    o1(16) = 16switch a[0,15] b[1];
+    o2(16) = 16switch a[0,15] b[2];
+    o3(16) = 16switch a[0,15] b[3];
+    o4(16) = 16switch a[0,15] b[4];
+    o5(16) = 16switch a[0,15] b[5];
+    o6(16) = 16switch a[0,15] b[6];
+    o7(16) = 16switch a[0,15] b[7];
+    o8(16) = 16switch a[0,15] b[8];
+    o9(16) = 16switch a[0,15] b[9];
+    oa(16) = 16switch a[0,15] b[10];
+    ob(16) = 16switch a[0,15] b[11];
+    oc(16) = 16switch a[0,15] b[12];
+    od(16) = 16switch a[0,15] b[13];
+    oe(16) = 16switch a[0,15] b[14];
+    of(16) = 16switch a[0,15] b[15];
+}
+func 16bit_or(i(16)) -> (bool) {
+    a0 = 8bit_or i[0,7];
+    a1 = 8bit_or i[8,15];
+    bool = or a0 a1;
+}
+func 32bit_or(i(32)) -> (bool) {
+    a0 = 16bit_or i[0,15];
+    a1 = 16bit_or i[16,31];
+    bool = or a0 a1;
+}
+func 64bit_or(i(64)) -> (bool) {
+    a0 = 32bit_or i[0,31];
+    a1 = 32bit_or i[32,63];
+    bool = or a0 a1;
+}
+func 256bit_or(i(256)) -> (bool) {
+    a0 = 32bit_or i[0,31];
+    a1 = 32bit_or i[32,63];
+    a2 = 32bit_or i[64,95];
+    a3 = 32bit_or i[96,127];
+    a4 = 32bit_or i[128,159];
+    a5 = 32bit_or i[160,191];
+    a6 = 32bit_or i[192,223];
+    a7 = 32bit_or i[224,255];
+    bool = 8bit_or a0 a1 a2 a3 a4 a5 a6 a7;
 }
 // PROGRAM memoryに初期値をツッコむ
 module initMemory(i0 i1 i2 i3 i4 i5 i6 i7) -> (
