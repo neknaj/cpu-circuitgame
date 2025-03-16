@@ -373,71 +373,59 @@ module dff8bits (d0 d1 d2 d3 d4 d5 d6 d7 clk)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 // メモリ
 //
 
-module mem8bits8 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6 s7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0: not s7;
-    t00: and t0 w; t10: and s7 w; t01: and t0 r; t11: and s7 r;
-    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5 s6;
-    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5 s6;
-    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
-}
-module mem8bits7 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0: not s6;
-    t00: and t0 w; t10: and s6 w; t01: and t0 r; t11: and s6 r;
-    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5;
-    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5;
-    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
-}
-module mem8bits6 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0: not s5;
-    t00: and t0 w; t10: and s5 w; t01: and t0 r; t11: and s5 r;
-    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4;
-    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4;
-    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
-}
-module mem8bits5 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0: not s4;
-    t00: and t0 w; t10: and s4 w; t01: and t0 r; t11: and s4 r;
-    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3;
-    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3;
-    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
-}
-module mem8bits4 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0: not s3;
-    t00: and t0 w; t10: and s3 w; t01: and t0 r; t11: and s3 r;
-    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2;
-    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2;
-    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
-}
-module mem8bits3 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    t0: not s2;
-    t00: and t0 w; t10: and s2 w; t01: and t0 r; t11: and s2 r;
-    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1;
-    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1;
-    o0 o1 o2 o3 o4 o5 o6 o7: or8bits d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
-}
-module mem8bits2 (din(8), w r, s0 s1)->(o) {
-    t0: not s1;
-    t00: and t0 w; t10: and s1 w; t01: and t0 r; t11: and s1 r;
-    d0(8): mem8bits1 din, t00 t01, s0;
-    d1(8): mem8bits1 din, t10 t11, s0;
+module mem8bits10 (din(8), w r, s(10))->(o) {
+    t0: not s[9]; t00: and t0 w; t10: and s[9] w; t01: and t0 r; t11: and s[9] r;
+    d0(8): mem8bits9 din, t00 t01, s[0,8]; d1(8): mem8bits9 din, t10 t11, s[0,8];
     o(8): or8bits d0, d1;
 }
-module mem8bits1 (din(8), w r, s0)->(o) {
-    t0: not s0;
-    t00: and t0 w; t10: and s0 w; t01: and t0 r; t11: and s0 r;
-    d0(8): mem8bits din, t00 t01;
-    d1(8): mem8bits din, t10 t11;
+module mem8bits9 (din(8), w r, s(9))->(o) {
+    t0: not s[8]; t00: and t0 w; t10: and s[8] w; t01: and t0 r; t11: and s[8] r;
+    d0(8): mem8bits8 din, t00 t01, s[0,7]; d1(8): mem8bits8 din, t10 t11, s[0,7];
     o(8): or8bits d0, d1;
 }
-module mem8bits (d0 d1 d2 d3 d4 d5 d6 d7, w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0: mem1bit d0 w r;
-    o1: mem1bit d1 w r;
-    o2: mem1bit d2 w r;
-    o3: mem1bit d3 w r;
-    o4: mem1bit d4 w r;
-    o5: mem1bit d5 w r;
-    o6: mem1bit d6 w r;
-    o7: mem1bit d7 w r;
+module mem8bits8 (din(8), w r, s(8))->(o) {
+    t0: not s[7]; t00: and t0 w; t10: and s[7] w; t01: and t0 r; t11: and s[7] r;
+    d0(8): mem8bits7 din, t00 t01, s[0,6]; d1(8): mem8bits7 din, t10 t11, s[0,6];
+    o(8): or8bits d0, d1;
+}
+module mem8bits7 (din(8), w r, s(7))->(o) {
+    t0: not s[6]; t00: and t0 w; t10: and s[6] w; t01: and t0 r; t11: and s[6] r;
+    d0(8): mem8bits6 din, t00 t01, s[0,5]; d1(8): mem8bits6 din, t10 t11, s[0,5];
+    o(8): or8bits d0, d1;
+}
+module mem8bits6 (din(8), w r, s(6))->(o) {
+    t0: not s[5]; t00: and t0 w; t10: and s[5] w; t01: and t0 r; t11: and s[5] r;
+    d0(8): mem8bits5 din, t00 t01, s[0,4]; d1(8): mem8bits5 din, t10 t11, s[0,4];
+    o(8): or8bits d0, d1;
+}
+module mem8bits5 (din(8), w r, s(5))->(o) {
+    t0: not s[4]; t00: and t0 w; t10: and s[4] w; t01: and t0 r; t11: and s[4] r;
+    d0(8): mem8bits4 din, t00 t01, s[0,3]; d1(8): mem8bits4 din, t10 t11, s[0,3];
+    o(8): or8bits d0, d1;
+}
+module mem8bits4 (din(8), w r, s(4))->(o) {
+    t0: not s[3]; t00: and t0 w; t10: and s[3] w; t01: and t0 r; t11: and s[3] r;
+    d0(8): mem8bits3 din, t00 t01, s[0,2]; d1(8): mem8bits3 din, t10 t11, s[0,2];
+    o(8): or8bits d0, d1;
+}
+module mem8bits3 (din(8), w r, s(3))->(o) {
+    t0: not s[2]; t00: and t0 w; t10: and s[2] w; t01: and t0 r; t11: and s[2] r;
+    d0(8): mem8bits2 din, t00 t01, s[0,1]; d1(8): mem8bits2 din, t10 t11, s[0,1];
+    o(8): or8bits d0, d1;
+}
+module mem8bits2 (din(8), w r, s(2))->(o) {
+    t0: not s[1]; t00: and t0 w; t10: and s[1] w; t01: and t0 r; t11: and s[1] r;
+    d0(8): mem8bits1 din, t00 t01, s[0]; d1(8): mem8bits1 din, t10 t11, s[0];
+    o(8): or8bits d0, d1;
+}
+module mem8bits1 (din(8), w r, s(1))->(o) {
+    t0: not s[0]; t00: and t0 w; t10: and s[0] w; t01: and t0 r; t11: and s[0] r;
+    d0(8): mem8bits din, t00 t01; d1(8): mem8bits din, t10 t11;
+    o(8): or8bits d0, d1;
+}
+module mem8bits (d(8), w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0: mem1bit d[0] w r; o1: mem1bit d[1] w r; o2: mem1bit d[2] w r; o3: mem1bit d[3] w r;
+    o4: mem1bit d[4] w r; o5: mem1bit d[5] w r; o6: mem1bit d[6] w r; o7: mem1bit d[7] w r;
 }
 module mem1bit (d, w,r)->(o) {
     nw: not w;
