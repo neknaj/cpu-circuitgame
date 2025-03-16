@@ -845,29 +845,30 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
         ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sinr;  // input valueをswitch inuptでフィルター
     // REGが書き込まれるのは
         // REG0    => t0 or (t2 and sor0)
-        // REG2    => t1 or (t2 and sor2)
-        // REG1345 => (t2 and sor[1345])
+        // REG3    => t1 or (t2 and sor3)
+        // REG1245 => (t2 and sor[1245])
         t2sor0 = and t2 sor0;
-        t2sor2 = and t2 sor2;
+        t2sor3 = and t2 sor3;
         // switch output write register
         sowr0 = or  t0 t2sor0;   // t0 or (t2 and sor0)
         sowr1 = and t2 sor1;
-        sowr2 = or  t1 t2sor2;   // t1 or (t2 and sor2)
-        sowr3 = and t2 sor3;
+        sowr2 = and t2 sor2;
+        sowr3 = or  t1 t2sor3;   // t1 or (t2 and sor3)
         sowr4 = and t2 sor4;
         sowr5 = and t2 sor5;
 
     // REGが読み出されるのは
-        // REG01  t1 or (t2 and sir[01])
-        // REG245 (t2 and sir[245])
+        // REG1   t1 or (t2 and sir1)
+        // REG2   t1 or (t2 and sir2)
+        // REG045 (t2 and sir[045])
         // REG3   (t2 and sir3) or t3
-        t2sir0 = and t2 sir0;
         t2sir1 = and t2 sir1;
+        t2sir2 = and t2 sir2;
         t2sir3 = and t2 sir3;
         // switch input read register
-        sirr0 = or  t1 t2sir0;
+        sirr0 = and t2 sir0;
         sirr1 = or  t1 t2sir1;
-        sirr2 = and t2 sir2;
+        sirr2 = or  t1 t2sir2;
         sirr3 = or  t2sir3 t3;
         sirr4 = and t2 sir4;
         sirr5 = and t2 sir5;
@@ -910,7 +911,7 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
         imm0 imm1 imm2 imm3 imm4 imm5 _2 _3 = 8switch a2 a3 a4 a5 a6 a7 0 0 t0;
     // t1の場合 REG2 = REG0 {ope} REG1;
         // calc(命令は a5 a6 a7)
-        re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r00 r01 r02 r03 r04 r05 r06 r07 r10 r11 r12 r13 r14 r15 r16 r17;
+        re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r10 r11 r12 r13 r14 r15 r16 r17 r20 r21 r22 r23 r24 r25 r26 r27;
         // t1なら流す
         sre0 sre1 sre2 sre3 sre4 sre5 sre6 sre7 = 8switch re0 re1 re2 re3 re4 re5 re6 re7 t1;
     // t2の場合 OUTPUT(a5 a6 a7) = INPUT(a2 a3 a4)
