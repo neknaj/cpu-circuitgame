@@ -373,6 +373,21 @@ module dff8bits (d0 d1 d2 d3 d4 d5 d6 d7 clk)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 // メモリ
 //
 
+module mem8bits13 (din(8), w r, s(13))->(o) {
+    t0: not s[12]; t00: and t0 w; t10: and s[12] w; t01: and t0 r; t11: and s[12] r;
+    d0(8): mem8bits12 din, t00 t01, s[0,11]; d1(8): mem8bits12 din, t10 t11, s[0,11];
+    o(8): or8bits d0, d1;
+}
+module mem8bits12 (din(8), w r, s(12))->(o) {
+    t0: not s[11]; t00: and t0 w; t10: and s[11] w; t01: and t0 r; t11: and s[11] r;
+    d0(8): mem8bits11 din, t00 t01, s[0,10]; d1(8): mem8bits11 din, t10 t11, s[0,10];
+    o(8): or8bits d0, d1;
+}
+module mem8bits11 (din(8), w r, s(11))->(o) {
+    t0: not s[10]; t00: and t0 w; t10: and s[10] w; t01: and t0 r; t11: and s[10] r;
+    d0(8): mem8bits10 din, t00 t01, s[0,9]; d1(8): mem8bits10 din, t10 t11, s[0,9];
+    o(8): or8bits d0, d1;
+}
 module mem8bits10 (din(8), w r, s(10))->(o) {
     t0: not s[9]; t00: and t0 w; t10: and s[9] w; t01: and t0 r; t11: and s[9] r;
     d0(8): mem8bits9 din, t00 t01, s[0,8]; d1(8): mem8bits9 din, t10 t11, s[0,8];
