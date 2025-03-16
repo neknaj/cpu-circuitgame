@@ -29,9 +29,7 @@ func false(any) -> (false) {
 
 // 基本的なゲート
 
-func buf(x) -> (b) {
-    a = not x;
-    b = not a;
+func buf (x) -> (x) {
 }
 
 func not(x) -> (a) {
@@ -193,15 +191,7 @@ func 8nor(a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7) -> (o0 o1 o2 o3 o4 o5
     o6 = nor a6 b6;
     o7 = nor a7 b7;
 }
-func 8buf(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
-    o0 = buf 0;
-    o1 = buf 1;
-    o2 = buf 2;
-    o3 = buf 3;
-    o4 = buf 4;
-    o5 = buf 5;
-    o6 = buf 6;
-    o7 = buf 7;
+func 8buf(0 1 2 3 4 5 6 7) -> (0 1 2 3 4 5 6 7) {
 }
 func 8not(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     o0 = not 0;
@@ -277,9 +267,8 @@ func 8nagate(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
 }
 
 // 2進数 to bit
-func 1decoder(s) -> (a b) {
-    a = not  s;
-    b = buf  s;
+func 1decoder(s) -> (a s) {
+    a = not s;
 }
 func 2decoder(s0 s1) -> (a b c d) {
     ns0 = not s0;
@@ -555,7 +544,6 @@ module counter() -> (o0 o1 o2 o3 o4 o5 o6 o7) {
 // }
 module counter_clock(clk) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
     1 = true o0;
-    0 = false o0;
 
     last = mem1bit clk write 1;
     n_last = not last;
@@ -828,107 +816,110 @@ func condition(i0 i1 i2 i3 i4 i5 i6 i7 c0 c1 c2) -> (bool) {
 
 // merge calc and memory
 // a0 a1で命令の選択
-    // 00: immediate
-    // 01: calculate
-    // 10: copy
-    // 11: condition
+    // 0: immediate
+    // 1: calculate
+    // 2: copy
+    // 3: condition
 // a5 a6 a7で命令の選択 (calucuateモードのみ)
     // Or Nand Nor And Add Sub
     // input:   REG0, REG1
     // output:  REG2
 // a5 a6 a7で条件の選択 (conditionモード)
     // 0との比較 NEVER = < <= ALWAYS != >= >
+    // TrueならREG0でカウンタを上書き
 module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
                 i0 i1 i2 i3 i4 i5 i6 i7) ->(
                 o0 o1 o2 o3 o4 o5 o6 o7
-                c0 c1 c2 c3 c4 c5 c6 c7 cond) {
+                c0 c1 c2 c3 c4 c5 c6 c7 scond) {
     // 定数
-    0 = false <- a0;
-    1 = true <- a0;
-    // decode input
-    t0 t1 t2 t3 = 2decoder a0 a1;   // どの命令か
-    sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a2 a3 a4;   // 入力REGの選択 or 演算の選択
-    sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a5 a6 a7;  // 出力REGの選択 or 演算の選択 or 条件の選択
-    // filter input
-    ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sin_t2;  // input valueをswitch inuptでフィルター
-    // REGが書き込まれるのは
-    // REG0 => t0,t2
-    // REG3 => t1,t2
-    // REG1245 => t2
-    t0t2 = or t0 t2;
-    t1t2 = or t1 t2;
-    sor0t2 = and sor0 t2;
-    sor1t2 = and sor1 t2;
-    sor2t2 = and sor2 t2;
-    sor3t2 = and sor3 t2;
-    
-    socr0 = or t0 sor0t2;   // t0 or (t2 and sor0)
-    socr1 = and sor1 t2;    
-    socr2 = and sor2 t2;
-    socr3 = or t1 sor3t2;    // t1 or (t2 and sor3)
-    socr4 = and sor4 t2;
-    socr5 = and sor5 t2;
-    // REGが読み出されるのは
-    // REG03 => t2, t3
-    // REG1 => t1, t2
-    // REG245 => t2
-    sir0t2 = and sir0 t2;
-    sir1t2 = and sir1 t2;
-    sir3t2 = and sir3 t2;
+        0 = false <- a0;
+        1 = true <- a0;
 
-    sicr0 = or sir0t2 t3;   // t3 or (t2 and sir0)
-    sicr1 = or t1 sir1t2;   // t1 or (t2 and sir1)
-    sicr2 = and sir2 t2;
-    sicr3 = or sir3t2 t3;   // t3 or (t2 and sir0)
-    sicr4 = and sir4 t2;
-    sicr5 = and sir5 t2;
+    // decode instruction
+        // imm, calc, copy, cond
+        t0 t1 t2 t3 = 2decoder a0 a1;   // どの命令か
+        sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a2 a3 a4;   // 入力REGの選択 (switch input register)
+        sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a5 a6 a7;  // 出力REGの選択 or 演算の選択 or 条件の選択 (switch output register)
+    // filtered input (switch input read)
+        sinr = and t2 sin;    // t2 & INPUT => INPUTを流す
+        ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sinr;  // input valueをswitch inuptでフィルター
+    // REGが書き込まれるのは
+        // REG0    => t0 or (t2 and sor0)
+        // REG2    => t1 or (t2 and sor2)
+        // REG1345 => (t2 and sor[1345])
+        t2sor0 = and t2 sor0;
+        t2sor2 = and t2 sor2;
+        // switch output write register
+        sowr0 = or  t0 t2sor0;   // t0 or (t2 and sor0)
+        sowr1 = and t2 sor1;
+        sowr2 = or  t1 t2sor2;   // t1 or (t2 and sor2)
+        sowr3 = and t2 sor3;
+        sowr4 = and t2 sor4;
+        sowr5 = and t2 sor5;
+
+    // REGが読み出されるのは
+        // REG01  t1 or (t2 and sir[01])
+        // REG245 (t2 and sir[245])
+        // REG3   (t2 and sir3) or t3
+        t2sir0 = and t2 sir0;
+        t2sir1 = and t2 sir1;
+        t2sir3 = and t2 sir3;
+        // switch input read register
+        sirr0 = or  t1 t2sir0;
+        sirr1 = or  t1 t2sir1;
+        sirr2 = and t2 sir2;
+        sirr3 = or  t2sir3 t3;
+        sirr4 = and t2 sir4;
+        sirr5 = and t2 sir5;
 
     // 全てのメモリの読み出し/書き込みコード
-    // r00 r01 r02 r03 r04 r05 r06 r07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr0 sicr0;
-    // r10 r11 r12 r13 r14 r15 r16 r17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr1 sicr1;
-    // r20 r21 r22 r23 r24 r25 r26 r27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr2 sicr2;
-    // r30 r31 r32 r33 r34 r35 r36 r37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr3 sicr3;
-    // r40 r41 r42 r43 r44 r45 r46 r47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr4 sicr4;
-    // r50 r51 r52 r53 r54 r55 r56 r57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr5 sicr5;
+        // r00 r01 r02 r03 r04 r05 r06 r07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr0 sirr0;
+        // r10 r11 r12 r13 r14 r15 r16 r17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr1 sirr1;
+        // r20 r21 r22 r23 r24 r25 r26 r27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr2 sirr2;
+        // r30 r31 r32 r33 r34 r35 r36 r37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr3 sirr3;
+        // r40 r41 r42 r43 r44 r45 r46 r47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr4 sirr4;
+        // r50 r51 r52 r53 r54 r55 r56 r57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr5 sirr5;
 
     // 現在のREG内部を表示し続ける
-    sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr0 1;
-    sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr1 1;
-    sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr2 1;
-    sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr3 1;
-    sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr4 1;
-    sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 socr5 1;
-    r00 r01 r02 r03 r04 r05 r06 r07 = 8switch sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sicr0;
-    r10 r11 r12 r13 r14 r15 r16 r17 = 8switch sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 sicr1;
-    r20 r21 r22 r23 r24 r25 r26 r27 = 8switch sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 sicr2;
-    r30 r31 r32 r33 r34 r35 r36 r37 = 8switch sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 sicr3;
-    r40 r41 r42 r43 r44 r45 r46 r47 = 8switch sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 sicr4;
-    r50 r51 r52 r53 r54 r55 r56 r57 = 8switch sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 sicr5;
+        // switch register
+        sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr0 1;
+        sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr1 1;
+        sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr2 1;
+        sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr3 1;
+        sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr4 1;
+        sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr5 1;
+    // register
+        r00 r01 r02 r03 r04 r05 r06 r07 = 8switch sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sirr0;
+        r10 r11 r12 r13 r14 r15 r16 r17 = 8switch sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 sirr1;
+        r20 r21 r22 r23 r24 r25 r26 r27 = 8switch sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 sirr2;
+        r30 r31 r32 r33 r34 r35 r36 r37 = 8switch sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 sirr3;
+        r40 r41 r42 r43 r44 r45 r46 r47 = 8switch sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 sirr4;
+        r50 r51 r52 r53 r54 r55 r56 r57 = 8switch sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 sirr5;
 
     // value code
-    in0 = 9bit_or r00 r10 r20 r30 r40 r50 ins0 sre0 imm0; // REGの読み出し or INPUT or ALU結果
-    in1 = 9bit_or r01 r11 r21 r31 r41 r51 ins1 sre1 imm1;
-    in2 = 9bit_or r02 r12 r22 r32 r42 r52 ins2 sre2 imm2;
-    in3 = 9bit_or r03 r13 r23 r33 r43 r53 ins3 sre3 imm3;
-    in4 = 9bit_or r04 r14 r24 r34 r44 r54 ins4 sre4 imm4;
-    in5 = 9bit_or r05 r15 r25 r35 r45 r55 ins5 sre5 imm5;
-    in6 = 9bit_or r06 r16 r26 r36 r46 r56 ins6 sre6   _2;
-    in7 = 9bit_or r07 r17 r27 r37 r47 r57 ins7 sre7   _3;
+        in0 = 9bit_or r00 r10 r20 r30 r40 r50 ins0 sre0 imm0; // REGの読み出し or INPUT or ALU結果 or 即値
+        in1 = 9bit_or r01 r11 r21 r31 r41 r51 ins1 sre1 imm1;
+        in2 = 9bit_or r02 r12 r22 r32 r42 r52 ins2 sre2 imm2;
+        in3 = 9bit_or r03 r13 r23 r33 r43 r53 ins3 sre3 imm3;
+        in4 = 9bit_or r04 r14 r24 r34 r44 r54 ins4 sre4 imm4;
+        in5 = 9bit_or r05 r15 r25 r35 r45 r55 ins5 sre5 imm5;
+        in6 = 9bit_or r06 r16 r26 r36 r46 r56 ins6 sre6    0;
+        in7 = 9bit_or r07 r17 r27 r37 r47 r57 ins7 sre7    0;
 
     // t0の場合 REG0 = a@2:7
         imm0 imm1 imm2 imm3 imm4 imm5 _2 _3 = 8switch a2 a3 a4 a5 a6 a7 0 0 t0;
     // t1の場合 REG2 = REG0 {ope} REG1;
-        // calc(命令はa5 a6 a7)
+        // calc(命令は a5 a6 a7)
         re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r00 r01 r02 r03 r04 r05 r06 r07 r10 r11 r12 r13 r14 r15 r16 r17;
-        // !t1の場合は流さない
+        // t1なら流す
         sre0 sre1 sre2 sre3 sre4 sre5 sre6 sre7 = 8switch re0 re1 re2 re3 re4 re5 re6 re7 t1;
     // t2の場合 OUTPUT(a5 a6 a7) = INPUT(a2 a3 a4)
-        sin_t2 = and sin t2;    // t2の時 & INPUT => INPUTを流す
-        is_to_out = and sout t2;
-        o0 o1 o2 o3 o4 o5 o6 o7 = 8switch in0 in1 in2 in3 in4 in5 in6 in7 is_to_out;
+        souw = and sout t2;
+        o0 o1 o2 o3 o4 o5 o6 o7 = 8switch in0 in1 in2 in3 in4 in5 in6 in7 souw;
     // t3の場合 c@0:7 = if condition(REG3) REG0 swc
         cond = condition r30 r31 r32 r33 r34 r35 r36 r37 a5 a6 a7;
-        c0 c1 c2 c3 c4 c5 c6 c7 = 8switch r00 r01 r02 r03 r04 r05 r06 r07 cond;
+        scond = and t3 cond;
+        c0 c1 c2 c3 c4 c5 c6 c7 = 8switch r00 r01 r02 r03 r04 r05 r06 r07 scond;
 }
 
 func 4bit_addr(a0 a1 a2 a3 b0 b1 b2 b3 c) -> (o0 o1 o2 o3 c3) {
@@ -1126,4 +1117,424 @@ o20 o21 o22 o23 o24 o25 o26) {
     o00 o01 o02 o03 o04 o05 o06 = 7seg 0001x8 0001x4 0001x2 0001x1;
     o10 o11 o12 o13 o14 o15 o16 = 7seg 0010x8 0010x4 0010x2 0010x1;
     o20 o21 o22 o23 o24 o25 o26 = 7seg 0100x8 0100x4 0100x2 0100x1;
+}
+
+// 2025年3月7日
+// ここにPROGRAM用のmemoryを用意する made by bem130
+module mem8bits8 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6 s7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s7;
+    t00: and t0 w; t10: and s7 w; t01: and t0 r; t11: and s7 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5 s6;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits7 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5 s6;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits7 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5 s6)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s6;
+    t00: and t0 w; t10: and s6 w; t01: and t0 r; t11: and s6 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4 s5;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits6 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4 s5;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits6 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4 s5)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s5;
+    t00: and t0 w; t10: and s5 w; t01: and t0 r; t11: and s5 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3 s4;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits5 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3 s4;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits5 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3 s4)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s4;
+    t00: and t0 w; t10: and s4 w; t01: and t0 r; t11: and s4 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2 s3;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits4 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2 s3;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits4 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2 s3)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s3;
+    t00: and t0 w; t10: and s3 w; t01: and t0 r; t11: and s3 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1 s2;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits3 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1 s2;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits3 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1 s2)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s2;
+    t00: and t0 w; t10: and s2 w; t01: and t0 r; t11: and s2 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0 s1;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits2 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0 s1;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits2 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0 s1)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s1;
+    t00: and t0 w; t10: and s1 w; t01: and t0 r; t11: and s1 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t00 t01, s0;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits1 d0 d1 d2 d3 d4 d5 d6 d7, t10 t11, s0;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+module mem8bits1 (d0 d1 d2 d3 d4 d5 d6 d7, w r, s0)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    t0: not s0;
+    t00: and t0 w; t10: and s0 w; t01: and t0 r; t11: and s0 r;
+    d00 d01 d02 d03 d04 d05 d06 d07: mem8bits d0 d1 d2 d3 d4 d5 d6 d7, t00 t01;
+    d10 d11 d12 d13 d14 d15 d16 d17: mem8bits d0 d1 d2 d3 d4 d5 d6 d7, t10 t11;
+    o0 o1 o2 o3 o4 o5 o6 o7: 8or d00 d01 d02 d03 d04 d05 d06 d07, d10 d11 d12 d13 d14 d15 d16 d17;
+}
+
+// 楽にするための8decoder by bem130
+func 8decoder(s0 s1 s2 s3 s4 s5 s6 s7)->(
+        o00 o10 o20 o30 o40 o50 o60 o70 o80 o90 oa0 ob0 oc0 od0 oe0 of0
+        o01 o11 o21 o31 o41 o51 o61 o71 o81 o91 oa1 ob1 oc1 od1 oe1 of1
+        o02 o12 o22 o32 o42 o52 o62 o72 o82 o92 oa2 ob2 oc2 od2 oe2 of2
+        o03 o13 o23 o33 o43 o53 o63 o73 o83 o93 oa3 ob3 oc3 od3 oe3 of3
+        o04 o14 o24 o34 o44 o54 o64 o74 o84 o94 oa4 ob4 oc4 od4 oe4 of4
+        o05 o15 o25 o35 o45 o55 o65 o75 o85 o95 oa5 ob5 oc5 od5 oe5 of5
+        o06 o16 o26 o36 o46 o56 o66 o76 o86 o96 oa6 ob6 oc6 od6 oe6 of6
+        o07 o17 o27 o37 o47 o57 o67 o77 o87 o97 oa7 ob7 oc7 od7 oe7 of7
+        o08 o18 o28 o38 o48 o58 o68 o78 o88 o98 oa8 ob8 oc8 od8 oe8 of8
+        o09 o19 o29 o39 o49 o59 o69 o79 o89 o99 oa9 ob9 oc9 od9 oe9 of9
+        o0a o1a o2a o3a o4a o5a o6a o7a o8a o9a oaa oba oca oda oea ofa
+        o0b o1b o2b o3b o4b o5b o6b o7b o8b o9b oab obb ocb odb oeb ofb
+        o0c o1c o2c o3c o4c o5c o6c o7c o8c o9c oac obc occ odc oec ofc
+        o0d o1d o2d o3d o4d o5d o6d o7d o8d o9d oad obd ocd odd oed ofd
+        o0e o1e o2e o3e o4e o5e o6e o7e o8e o9e oae obe oce ode oee ofe
+        o0f o1f o2f o3f o4f o5f o6f o7f o8f o9f oaf obf ocf odf oef off
+    ) {
+    a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae af: 4decoder s0 s1 s2 s3;
+    b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 ba bb bc bd be bf: 4decoder s4 s5 s6 s7;
+    o00:and a0 b0; o10:and a1 b0; o20:and a2 b0; o30:and a3 b0; o40:and a4 b0; o50:and a5 b0; o60:and a6 b0; o70:and a7 b0; o80:and a8 b0; o90:and a9 b0; oa0:and aa b0; ob0:and ab b0; oc0:and ac b0; od0:and ad b0; oe0:and ae b0; of0:and af b0;
+    o01:and a0 b1; o11:and a1 b1; o21:and a2 b1; o31:and a3 b1; o41:and a4 b1; o51:and a5 b1; o61:and a6 b1; o71:and a7 b1; o81:and a8 b1; o91:and a9 b1; oa1:and aa b1; ob1:and ab b1; oc1:and ac b1; od1:and ad b1; oe1:and ae b1; of1:and af b1;
+    o02:and a0 b2; o12:and a1 b2; o22:and a2 b2; o32:and a3 b2; o42:and a4 b2; o52:and a5 b2; o62:and a6 b2; o72:and a7 b2; o82:and a8 b2; o92:and a9 b2; oa2:and aa b2; ob2:and ab b2; oc2:and ac b2; od2:and ad b2; oe2:and ae b2; of2:and af b2;
+    o03:and a0 b3; o13:and a1 b3; o23:and a2 b3; o33:and a3 b3; o43:and a4 b3; o53:and a5 b3; o63:and a6 b3; o73:and a7 b3; o83:and a8 b3; o93:and a9 b3; oa3:and aa b3; ob3:and ab b3; oc3:and ac b3; od3:and ad b3; oe3:and ae b3; of3:and af b3;
+    o04:and a0 b4; o14:and a1 b4; o24:and a2 b4; o34:and a3 b4; o44:and a4 b4; o54:and a5 b4; o64:and a6 b4; o74:and a7 b4; o84:and a8 b4; o94:and a9 b4; oa4:and aa b4; ob4:and ab b4; oc4:and ac b4; od4:and ad b4; oe4:and ae b4; of4:and af b4;
+    o05:and a0 b5; o15:and a1 b5; o25:and a2 b5; o35:and a3 b5; o45:and a4 b5; o55:and a5 b5; o65:and a6 b5; o75:and a7 b5; o85:and a8 b5; o95:and a9 b5; oa5:and aa b5; ob5:and ab b5; oc5:and ac b5; od5:and ad b5; oe5:and ae b5; of5:and af b5;
+    o06:and a0 b6; o16:and a1 b6; o26:and a2 b6; o36:and a3 b6; o46:and a4 b6; o56:and a5 b6; o66:and a6 b6; o76:and a7 b6; o86:and a8 b6; o96:and a9 b6; oa6:and aa b6; ob6:and ab b6; oc6:and ac b6; od6:and ad b6; oe6:and ae b6; of6:and af b6;
+    o07:and a0 b7; o17:and a1 b7; o27:and a2 b7; o37:and a3 b7; o47:and a4 b7; o57:and a5 b7; o67:and a6 b7; o77:and a7 b7; o87:and a8 b7; o97:and a9 b7; oa7:and aa b7; ob7:and ab b7; oc7:and ac b7; od7:and ad b7; oe7:and ae b7; of7:and af b7;
+    o08:and a0 b8; o18:and a1 b8; o28:and a2 b8; o38:and a3 b8; o48:and a4 b8; o58:and a5 b8; o68:and a6 b8; o78:and a7 b8; o88:and a8 b8; o98:and a9 b8; oa8:and aa b8; ob8:and ab b8; oc8:and ac b8; od8:and ad b8; oe8:and ae b8; of8:and af b8;
+    o09:and a0 b9; o19:and a1 b9; o29:and a2 b9; o39:and a3 b9; o49:and a4 b9; o59:and a5 b9; o69:and a6 b9; o79:and a7 b9; o89:and a8 b9; o99:and a9 b9; oa9:and aa b9; ob9:and ab b9; oc9:and ac b9; od9:and ad b9; oe9:and ae b9; of9:and af b9;
+    o0a:and a0 ba; o1a:and a1 ba; o2a:and a2 ba; o3a:and a3 ba; o4a:and a4 ba; o5a:and a5 ba; o6a:and a6 ba; o7a:and a7 ba; o8a:and a8 ba; o9a:and a9 ba; oaa:and aa ba; oba:and ab ba; oca:and ac ba; oda:and ad ba; oea:and ae ba; ofa:and af ba;
+    o0b:and a0 bb; o1b:and a1 bb; o2b:and a2 bb; o3b:and a3 bb; o4b:and a4 bb; o5b:and a5 bb; o6b:and a6 bb; o7b:and a7 bb; o8b:and a8 bb; o9b:and a9 bb; oab:and aa bb; obb:and ab bb; ocb:and ac bb; odb:and ad bb; oeb:and ae bb; ofb:and af bb;
+    o0c:and a0 bc; o1c:and a1 bc; o2c:and a2 bc; o3c:and a3 bc; o4c:and a4 bc; o5c:and a5 bc; o6c:and a6 bc; o7c:and a7 bc; o8c:and a8 bc; o9c:and a9 bc; oac:and aa bc; obc:and ab bc; occ:and ac bc; odc:and ad bc; oec:and ae bc; ofc:and af bc;
+    o0d:and a0 bd; o1d:and a1 bd; o2d:and a2 bd; o3d:and a3 bd; o4d:and a4 bd; o5d:and a5 bd; o6d:and a6 bd; o7d:and a7 bd; o8d:and a8 bd; o9d:and a9 bd; oad:and aa bd; obd:and ab bd; ocd:and ac bd; odd:and ad bd; oed:and ae bd; ofd:and af bd;
+    o0e:and a0 be; o1e:and a1 be; o2e:and a2 be; o3e:and a3 be; o4e:and a4 be; o5e:and a5 be; o6e:and a6 be; o7e:and a7 be; o8e:and a8 be; o9e:and a9 be; oae:and aa be; obe:and ab be; oce:and ac be; ode:and ad be; oee:and ae be; ofe:and af be;
+    o0f:and a0 bf; o1f:and a1 bf; o2f:and a2 bf; o3f:and a3 bf; o4f:and a4 bf; o5f:and a5 bf; o6f:and a6 bf; o7f:and a7 bf; o8f:and a8 bf; o9f:and a9 bf; oaf:and aa bf; obf:and ab bf; ocf:and ac bf; odf:and ad bf; oef:and ae bf; off:and af bf;
+}
+func 256bit_or(i0 i1 i2 i3 i4 i5 i6 i7 i8 i9 i10 i11 i12 i13 i14 i15 i16 i17 i18 i19 i20 i21 i22 i23 i24 i25 i26 i27 i28 i29 i30 i31 i32 i33 i34 i35 i36 i37 i38 i39 i40 i41 i42 i43 i44 i45 i46 i47 i48 i49 i50 i51 i52 i53 i54 i55 i56 i57 i58 i59 i60 i61 i62 i63 i64 i65 i66 i67 i68 i69 i70 i71 i72 i73 i74 i75 i76 i77 i78 i79 i80 i81 i82 i83 i84 i85 i86 i87 i88 i89 i90 i91 i92 i93 i94 i95 i96 i97 i98 i99 i100 i101 i102 i103 i104 i105 i106 i107 i108 i109 i110 i111 i112 i113 i114 i115 i116 i117 i118 i119 i120 i121 i122 i123 i124 i125 i126 i127 i128 i129 i130 i131 i132 i133 i134 i135 i136 i137 i138 i139 i140 i141 i142 i143 i144 i145 i146 i147 i148 i149 i150 i151 i152 i153 i154 i155 i156 i157 i158 i159 i160 i161 i162 i163 i164 i165 i166 i167 i168 i169 i170 i171 i172 i173 i174 i175 i176 i177 i178 i179 i180 i181 i182 i183 i184 i185 i186 i187 i188 i189 i190 i191 i192 i193 i194 i195 i196 i197 i198 i199 i200 i201 i202 i203 i204 i205 i206 i207 i208 i209 i210 i211 i212 i213 i214 i215 i216 i217 i218 i219 i220 i221 i222 i223 i224 i225 i226 i227 i228 i229 i230 i231 i232 i233 i234 i235 i236 i237 i238 i239 i240 i241 i242 i243 i244 i245 i246 i247 i248 i249 i250 i251 i252 i253 i254 i255)
+->(bool) {
+    a0 = 8bit_or i0 i1 i2 i3 i4 i5 i6 i7;
+    a1 = 8bit_or i8 i9 i10 i11 i12 i13 i14 i15;
+    a2 = 8bit_or i16 i17 i18 i19 i20 i21 i22 i23;
+    a3 = 8bit_or i24 i25 i26 i27 i28 i29 i30 i31;
+    a4 = 8bit_or i32 i33 i34 i35 i36 i37 i38 i39;
+    a5 = 8bit_or i40 i41 i42 i43 i44 i45 i46 i47;
+    a6 = 8bit_or i48 i49 i50 i51 i52 i53 i54 i55;
+    a7 = 8bit_or i56 i57 i58 i59 i60 i61 i62 i63;
+    a8 = 8bit_or i64 i65 i66 i67 i68 i69 i70 i71;
+    a9 = 8bit_or i72 i73 i74 i75 i76 i77 i78 i79;
+    a10 = 8bit_or i80 i81 i82 i83 i84 i85 i86 i87;
+    a11 = 8bit_or i88 i89 i90 i91 i92 i93 i94 i95;
+    a12 = 8bit_or i96 i97 i98 i99 i100 i101 i102 i103;
+    a13 = 8bit_or i104 i105 i106 i107 i108 i109 i110 i111;
+    a14 = 8bit_or i112 i113 i114 i115 i116 i117 i118 i119;
+    a15 = 8bit_or i120 i121 i122 i123 i124 i125 i126 i127;
+    a16 = 8bit_or i128 i129 i130 i131 i132 i133 i134 i135;
+    a17 = 8bit_or i136 i137 i138 i139 i140 i141 i142 i143;
+    a18 = 8bit_or i144 i145 i146 i147 i148 i149 i150 i151;
+    a19 = 8bit_or i152 i153 i154 i155 i156 i157 i158 i159;
+    a20 = 8bit_or i160 i161 i162 i163 i164 i165 i166 i167;
+    a21 = 8bit_or i168 i169 i170 i171 i172 i173 i174 i175;
+    a22 = 8bit_or i176 i177 i178 i179 i180 i181 i182 i183;
+    a23 = 8bit_or i184 i185 i186 i187 i188 i189 i190 i191;
+    a24 = 8bit_or i192 i193 i194 i195 i196 i197 i198 i199;
+    a25 = 8bit_or i200 i201 i202 i203 i204 i205 i206 i207;
+    a26 = 8bit_or i208 i209 i210 i211 i212 i213 i214 i215;
+    a27 = 8bit_or i216 i217 i218 i219 i220 i221 i222 i223;
+    a28 = 8bit_or i224 i225 i226 i227 i228 i229 i230 i231;
+    a29 = 8bit_or i232 i233 i234 i235 i236 i237 i238 i239;
+    a30 = 8bit_or i240 i241 i242 i243 i244 i245 i246 i247;
+    a31 = 8bit_or i248 i249 i250 i251 i252 i253 i254 i255;
+
+    b0 = 8bit_or a0 a1 a2 a3 a4 a5 a6 a7;
+    b1 = 8bit_or a8 a9 a10 a11 a12 a13 a14 a15;
+    b2 = 8bit_or a16 a17 a18 a19 a20 a21 a22 a23;
+    b3 = 8bit_or a24 a25 a26 a27 a28 a29 a30 a31;
+
+    bool = 4or b0 b1 b2 b3;
+}
+// PROGRAM memoryに初期値をツッコむ
+module initMemory(i0 i1 i2 i3 i4 i5 i6 i7) -> (
+    s0 s1 s2 s3 s4 s5 s6 s7 in0 in1 in2 in3 in4 in5 in6 in7
+    o0 o1 o2 o3 o4 o5 o6 o7 cond) {
+    s0 s1 s2 s3 s4 s5 s6 s7 = counter_swc c0 c1 c2 c3 c4 c5 c6 c7 cond;
+    a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21 a22 a23 a24 a25 a26 a27 a28 a29 a30 a31 a32 a33 a34 a35 a36 a37 a38 a39 a40 a41 a42 a43 a44 a45 a46 a47 a48 a49 a50 a51 a52 a53 a54 a55 a56 a57 a58 a59 a60 a61 a62 a63 a64 a65 a66 a67 a68 a69 a70 a71 a72 a73 a74 a75 a76 a77 a78 a79 a80 a81 a82 a83 a84 a85 a86 a87 a88 a89 a90 a91 a92 a93 a94 a95 a96 a97 a98 a99 a100 a101 a102 a103 a104 a105 a106 a107 a108 a109 a110 a111 a112 a113 a114 a115 a116 a117 a118 a119 a120 a121 a122 a123 a124 a125 a126 a127 a128 a129 a130 a131 a132 a133 a134 a135 a136 a137 a138 a139 a140 a141 a142 a143 a144 a145 a146 a147 a148 a149 a150 a151 a152 a153 a154 a155 a156 a157 a158 a159 a160 a161 a162 a163 a164 a165 a166 a167 a168 a169 a170 a171 a172 a173 a174 a175 a176 a177 a178 a179 a180 a181 a182 a183 a184 a185 a186 a187 a188 a189 a190 a191 a192 a193 a194 a195 a196 a197 a198 a199 a200 a201 a202 a203 a204 a205 a206 a207 a208 a209 a210 a211 a212 a213 a214 a215 a216 a217 a218 a219 a220 a221 a222 a223 a224 a225 a226 a227 a228 a229 a230 a231 a232 a233 a234 a235 a236 a237 a238 a239 a240 a241 a242 a243 a244 a245 a246 a247 a248 a249 a250 a251 a252 a253 a254 a255 = 8decoder s0 s1 s2 s3 s4 s5 s6 s7;
+    0 = false s0;
+    1 = true  s0;
+
+    // [0:2047]のデータ
+        i000 i001 i002 i003 i004 i005 i006 i007 = 8switch 1 0 1 1 0 0 0 1 a0;
+        i010 i011 i012 i013 i014 i015 i016 i017 = 8switch 1 0 1 1 0 0 1 0 a1;
+        i020 i021 i022 i023 i024 i025 i026 i027 = 8switch 0 1 0 0 0 1 0 1 a2;
+        i030 i031 i032 i033 i034 i035 i036 i037 = 8switch 1 1 0 0 0 0 0 1 a3;
+        i040 i041 i042 i043 i044 i045 i046 i047 = 8switch 0 0 0 0 0 1 1 1 a4;
+        i050 i051 i052 i053 i054 i055 i056 i057 = 8switch 1 1 0 0 0 0 1 0 a5;
+        i060 i061 i062 i063 i064 i065 i066 i067 = 8switch 1 1 0 0 0 0 0 0 a6;
+        i070 i071 i072 i073 i074 i075 i076 i077 = 8switch 0 0 0 0 1 0 1 0 a7;
+        i080 i081 i082 i083 i084 i085 i086 i087 = 8switch 1 1 0 0 0 0 1 1 a8;
+        i090 i091 i092 i093 i094 i095 i096 i097 = 8switch 1 1 0 0 0 0 0 0 a9;
+        i100 i101 i102 i103 i104 i105 i106 i107 = 8switch 0 0 0 0 1 1 0 1 a10;
+        i110 i111 i112 i113 i114 i115 i116 i117 = 8switch 1 1 0 0 0 1 0 0 a11;
+        i120 i121 i122 i123 i124 i125 i126 i127 = 8switch 1 1 0 0 0 0 0 0 a12;
+        i130 i131 i132 i133 i134 i135 i136 i137 = 8switch 0 0 0 1 0 0 0 0 a13;
+        i140 i141 i142 i143 i144 i145 i146 i147 = 8switch 1 1 0 0 0 1 0 1 a14;
+        i150 i151 i152 i153 i154 i155 i156 i157 = 8switch 1 1 0 0 0 0 0 0 a15;
+        i160 i161 i162 i163 i164 i165 i166 i167 = 8switch 1 1 0 0 0 1 1 0 a16;
+        i170 i171 i172 i173 i174 i175 i176 i177 = 8switch 1 1 0 0 0 1 1 1 a17;
+        i180 i181 i182 i183 i184 i185 i186 i187 = 8switch 1 0 1 1 0 0 0 1 a18;
+        i190 i191 i192 i193 i194 i195 i196 i197 = 8switch 1 0 1 1 0 0 1 0 a19;
+        i200 i201 i202 i203 i204 i205 i206 i207 = 8switch 0 1 0 0 0 1 0 1 a20;
+        i210 i211 i212 i213 i214 i215 i216 i217 = 8switch 1 1 0 0 0 0 0 1 a21;
+        i220 i221 i222 i223 i224 i225 i226 i227 = 8switch 1 1 0 0 0 0 1 0 a22;
+        i230 i231 i232 i233 i234 i235 i236 i237 = 8switch 1 1 0 0 0 0 1 1 a23;
+        i240 i241 i242 i243 i244 i245 i246 i247 = 8switch 0 0 0 1 1 0 1 1 a24;
+        i250 i251 i252 i253 i254 i255 i256 i257 = 8switch 1 1 0 0 0 1 0 0 a25;
+        i260 i261 i262 i263 i264 i265 i266 i267 = 8switch 1 1 0 0 0 0 0 0 a26;
+        i270 i271 i272 i273 i274 i275 i276 i277 = 8switch 0 0 0 1 1 1 1 0 a27;
+        i280 i281 i282 i283 i284 i285 i286 i287 = 8switch 1 1 0 0 0 1 0 1 a28;
+        i290 i291 i292 i293 i294 i295 i296 i297 = 8switch 1 1 0 0 0 0 0 0 a29;
+        i300 i301 i302 i303 i304 i305 i306 i307 = 8switch 0 0 1 0 0 0 0 1 a30;
+        i310 i311 i312 i313 i314 i315 i316 i317 = 8switch 1 1 0 0 0 1 1 0 a31;
+        i320 i321 i322 i323 i324 i325 i326 i327 = 8switch 1 1 0 0 0 0 0 0 a32;
+        i330 i331 i332 i333 i334 i335 i336 i337 = 8switch 0 0 1 0 0 1 0 0 a33;
+        i340 i341 i342 i343 i344 i345 i346 i347 = 8switch 1 1 0 0 0 1 1 1 a34;
+        i350 i351 i352 i353 i354 i355 i356 i357 = 8switch 1 1 0 0 0 0 0 0 a35;
+        i360 i361 i362 i363 i364 i365 i366 i367 = 8switch 1 0 1 1 0 0 0 1 a36;
+        i370 i371 i372 i373 i374 i375 i376 i377 = 8switch 1 0 1 1 0 0 1 0 a37;
+        i380 i381 i382 i383 i384 i385 i386 i387 = 8switch 0 1 0 0 0 1 0 1 a38;
+        i390 i391 i392 i393 i394 i395 i396 i397 = 8switch 0 0 1 0 1 0 1 0 a39;
+        i400 i401 i402 i403 i404 i405 i406 i407 = 8switch 1 1 0 0 0 0 0 1 a40;
+        i410 i411 i412 i413 i414 i415 i416 i417 = 8switch 1 1 0 0 0 0 0 0 a41;
+        i420 i421 i422 i423 i424 i425 i426 i427 = 8switch 0 0 1 0 1 1 0 1 a42;
+        i430 i431 i432 i433 i434 i435 i436 i437 = 8switch 1 1 0 0 0 0 1 0 a43;
+        i440 i441 i442 i443 i444 i445 i446 i447 = 8switch 1 1 0 0 0 0 0 0 a44;
+        i450 i451 i452 i453 i454 i455 i456 i457 = 8switch 0 0 1 1 0 0 0 0 a45;
+        i460 i461 i462 i463 i464 i465 i466 i467 = 8switch 1 1 0 0 0 0 1 1 a46;
+        i470 i471 i472 i473 i474 i475 i476 i477 = 8switch 1 1 0 0 0 0 0 0 a47;
+        i480 i481 i482 i483 i484 i485 i486 i487 = 8switch 0 0 1 1 0 0 1 1 a48;
+        i490 i491 i492 i493 i494 i495 i496 i497 = 8switch 1 1 0 0 0 1 0 0 a49;
+        i500 i501 i502 i503 i504 i505 i506 i507 = 8switch 1 1 0 0 0 0 0 0 a50;
+        i510 i511 i512 i513 i514 i515 i516 i517 = 8switch 0 0 1 1 0 1 1 0 a51;
+        i520 i521 i522 i523 i524 i525 i526 i527 = 8switch 1 1 0 0 0 1 0 1 a52;
+        i530 i531 i532 i533 i534 i535 i536 i537 = 8switch 1 1 0 0 0 0 0 0 a53;
+        i540 i541 i542 i543 i544 i545 i546 i547 = 8switch 0 0 1 1 1 0 0 1 a54;
+        i550 i551 i552 i553 i554 i555 i556 i557 = 8switch 1 1 0 0 0 1 1 0 a55;
+        i560 i561 i562 i563 i564 i565 i566 i567 = 8switch 1 1 0 0 0 0 0 0 a56;
+        i570 i571 i572 i573 i574 i575 i576 i577 = 8switch 0 0 1 1 1 1 0 0 a57;
+        i580 i581 i582 i583 i584 i585 i586 i587 = 8switch 1 1 0 0 0 1 1 1 a58;
+        i590 i591 i592 i593 i594 i595 i596 i597 = 8switch 1 1 0 0 0 0 0 0 a59;
+        i600 i601 i602 i603 i604 i605 i606 i607 = 8switch 0 0 1 1 1 1 1 1 a60;
+        i610 i611 i612 i613 i614 i615 i616 i617 = 8switch 0 0 1 1 0 1 1 0 a61;
+        i620 i621 i622 i623 i624 i625 i626 i627 = 8switch 1 0 0 0 0 1 1 0 a62;
+        i630 i631 i632 i633 i634 i635 i636 i637 = 8switch 0 0 0 1 0 0 0 1 a63;
+        i640 i641 i642 i643 i644 i645 i646 i647 = 8switch 1 0 0 0 0 1 1 0 a64;
+        i650 i651 i652 i653 i654 i655 i656 i657 = 8switch 0 0 1 0 1 0 1 0 a65;
+        i660 i661 i662 i663 i664 i665 i666 i667 = 8switch 1 0 0 0 0 1 1 0 a66;
+        i670 i671 i672 i673 i674 i675 i676 i677 = 8switch 0 0 0 0 0 0 0 1 a67;
+        i680 i681 i682 i683 i684 i685 i686 i687 = 8switch 1 0 0 0 0 1 1 0 a68;
+        i690 i691 i692 i693 i694 i695 i696 i697 = 8switch 0 0 0 1 1 0 1 1 a69;
+        i700 i701 i702 i703 i704 i705 i706 i707 = 8switch 1 0 0 0 0 1 1 0 a70;
+        i710 i711 i712 i713 i714 i715 i716 i717 = 8switch 0 0 1 1 1 1 0 1 a71;
+        i720 i721 i722 i723 i724 i725 i726 i727 = 8switch 1 0 0 0 0 1 1 0 a72;
+        i730 i731 i732 i733 i734 i735 i736 i737 = 8switch 0 0 0 1 0 0 0 1 a73;
+        i740 i741 i742 i743 i744 i745 i746 i747 = 8switch 1 0 0 0 0 1 1 0 a74;
+        i750 i751 i752 i753 i754 i755 i756 i757 = 8switch 0 0 1 1 1 0 1 0 a75;
+        i760 i761 i762 i763 i764 i765 i766 i767 = 8switch 1 0 0 0 0 1 1 0 a76;
+        i770 i771 i772 i773 i774 i775 i776 i777 = 8switch 1 0 1 1 0 0 0 1 a77;
+        i780 i781 i782 i783 i784 i785 i786 i787 = 8switch 1 0 1 1 0 0 1 0 a78;
+        i790 i791 i792 i793 i794 i795 i796 i797 = 8switch 0 0 0 0 1 1 0 1 a79;
+        i800 i801 i802 i803 i804 i805 i806 i807 = 8switch 1 0 0 0 0 1 1 0 a80;
+        i810 i811 i812 i813 i814 i815 i816 i817 = 8switch 0 0 1 1 1 1 1 1 a81;
+        i820 i821 i822 i823 i824 i825 i826 i827 = 8switch 1 0 0 0 0 1 1 0 a82;
+        i830 i831 i832 i833 i834 i835 i836 i837 = 8switch 0 0 0 1 1 1 0 1 a83;
+        i840 i841 i842 i843 i844 i845 i846 i847 = 8switch 1 0 0 0 0 1 1 0 a84;
+        i850 i851 i852 i853 i854 i855 i856 i857 = 8switch 0 0 1 0 1 1 1 0 a85;
+        i860 i861 i862 i863 i864 i865 i866 i867 = 8switch 1 0 0 0 0 1 1 0 a86;
+        i870 i871 i872 i873 i874 i875 i876 i877 = 8switch 0 0 0 0 1 0 1 0 a87;
+        i880 i881 i882 i883 i884 i885 i886 i887 = 8switch 1 0 0 0 0 1 1 0 a88;
+        i890 i891 i892 i893 i894 i895 i896 i897 = 8switch 0 0 0 1 1 0 0 0 a89;
+        i900 i901 i902 i903 i904 i905 i906 i907 = 8switch 1 0 0 0 0 1 1 0 a90;
+        i910 i911 i912 i913 i914 i915 i916 i917 = 8switch 0 0 0 0 0 0 1 1 a91;
+        i920 i921 i922 i923 i924 i925 i926 i927 = 8switch 1 0 0 0 0 1 1 0 a92;
+        i930 i931 i932 i933 i934 i935 i936 i937 = 8switch 0 0 0 0 1 0 1 0 a93;
+        i940 i941 i942 i943 i944 i945 i946 i947 = 8switch 1 0 0 0 0 1 1 0 a94;
+        i950 i951 i952 i953 i954 i955 i956 i957 = 8switch 1 0 1 1 0 1 1 0 a95;
+        i960 i961 i962 i963 i964 i965 i966 i967 = 8switch 1 0 0 0 0 1 1 0 a96;
+        i970 i971 i972 i973 i974 i975 i976 i977 = 8switch 1 0 1 1 0 0 0 0 a97;
+        i980 i981 i982 i983 i984 i985 i986 i987 = 8switch 1 0 0 0 0 0 0 1 a98;
+        i990 i991 i992 i993 i994 i995 i996 i997 = 8switch 1 0 0 0 1 1 1 0 a99;
+        i1000 i1001 i1002 i1003 i1004 i1005 i1006 i1007 = 8switch 1 0 0 0 0 0 1 0 a100;
+        i1010 i1011 i1012 i1013 i1014 i1015 i1016 i1017 = 8switch 0 1 1 0 1 0 1 0 a101;
+        i1020 i1021 i1022 i1023 i1024 i1025 i1026 i1027 = 8switch 1 0 0 0 0 0 1 1 a102;
+        i1030 i1031 i1032 i1033 i1034 i1035 i1036 i1037 = 8switch 1 0 0 1 1 1 1 0 a103;
+        i1040 i1041 i1042 i1043 i1044 i1045 i1046 i1047 = 8switch 1 0 0 0 0 1 0 0 a104;
+        i1050 i1051 i1052 i1053 i1054 i1055 i1056 i1057 = 8switch 1 0 1 0 0 1 1 0 a105;
+        i1060 i1061 i1062 i1063 i1064 i1065 i1066 i1067 = 8switch 1 0 0 0 0 1 0 1 a106;
+        i1070 i1071 i1072 i1073 i1074 i1075 i1076 i1077 = 8switch 1 0 1 0 1 1 1 0 a107;
+        i1080 i1081 i1082 i1083 i1084 i1085 i1086 i1087 = 8switch 1 0 1 1 0 0 0 1 a108;
+        i1090 i1091 i1092 i1093 i1094 i1095 i1096 i1097 = 8switch 1 0 0 0 1 0 0 0 a109;
+        i1100 i1101 i1102 i1103 i1104 i1105 i1106 i1107 = 8switch 1 0 0 0 0 1 1 0 a110;
+        i1110 i1111 i1112 i1113 i1114 i1115 i1116 i1117 = 8switch 1 0 0 0 1 0 1 0 a111;
+        i1120 i1121 i1122 i1123 i1124 i1125 i1126 i1127 = 8switch 1 0 0 1 0 1 1 0 a112;
+        i1130 i1131 i1132 i1133 i1134 i1135 i1136 i1137 = 8switch 1 0 0 0 1 0 1 1 a113;
+        i1140 i1141 i1142 i1143 i1144 i1145 i1146 i1147 = 8switch 1 0 0 1 1 1 1 0 a114;
+        i1150 i1151 i1152 i1153 i1154 i1155 i1156 i1157 = 8switch 1 0 0 0 1 1 0 0 a115;
+        i1160 i1161 i1162 i1163 i1164 i1165 i1166 i1167 = 8switch 1 0 1 0 0 1 1 0 a116;
+        i1170 i1171 i1172 i1173 i1174 i1175 i1176 i1177 = 8switch 1 0 0 0 1 1 0 1 a117;
+        i1180 i1181 i1182 i1183 i1184 i1185 i1186 i1187 = 8switch 1 0 1 0 1 1 1 0 a118;
+        i1190 i1191 i1192 i1193 i1194 i1195 i1196 i1197 = 8switch 1 0 1 1 0 0 1 0 a119;
+        i1200 i1201 i1202 i1203 i1204 i1205 i1206 i1207 = 8switch 1 0 0 1 0 0 0 0 a120;
+        i1210 i1211 i1212 i1213 i1214 i1215 i1216 i1217 = 8switch 1 0 0 0 0 1 1 0 a121;
+        i1220 i1221 i1222 i1223 i1224 i1225 i1226 i1227 = 8switch 1 0 0 1 0 0 0 1 a122;
+        i1230 i1231 i1232 i1233 i1234 i1235 i1236 i1237 = 8switch 1 0 0 0 1 1 1 0 a123;
+        i1240 i1241 i1242 i1243 i1244 i1245 i1246 i1247 = 8switch 1 0 0 1 0 0 1 1 a124;
+        i1250 i1251 i1252 i1253 i1254 i1255 i1256 i1257 = 8switch 1 0 0 1 1 1 1 0 a125;
+        i1260 i1261 i1262 i1263 i1264 i1265 i1266 i1267 = 8switch 1 0 0 1 0 1 0 0 a126;
+        i1270 i1271 i1272 i1273 i1274 i1275 i1276 i1277 = 8switch 1 0 1 0 0 1 1 0 a127;
+        i1280 i1281 i1282 i1283 i1284 i1285 i1286 i1287 = 8switch 1 0 0 1 0 1 0 1 a128;
+        i1290 i1291 i1292 i1293 i1294 i1295 i1296 i1297 = 8switch 1 0 1 0 1 1 1 0 a129;
+        i1300 i1301 i1302 i1303 i1304 i1305 i1306 i1307 = 8switch 1 0 1 1 0 0 1 1 a130;
+        i1310 i1311 i1312 i1313 i1314 i1315 i1316 i1317 = 8switch 1 0 0 1 1 0 0 0 a131;
+        i1320 i1321 i1322 i1323 i1324 i1325 i1326 i1327 = 8switch 1 0 0 0 0 1 1 0 a132;
+        i1330 i1331 i1332 i1333 i1334 i1335 i1336 i1337 = 8switch 0 1 1 0 0 1 1 1 a133;
+        i1340 i1341 i1342 i1343 i1344 i1345 i1346 i1347 = 8switch 1 0 0 0 1 1 1 0 a134;
+        i1350 i1351 i1352 i1353 i1354 i1355 i1356 i1357 = 8switch 0 1 1 0 0 1 1 0 a135;
+        i1360 i1361 i1362 i1363 i1364 i1365 i1366 i1367 = 8switch 1 0 0 1 0 1 1 0 a136;
+        i1370 i1371 i1372 i1373 i1374 i1375 i1376 i1377 = 8switch 1 0 0 1 1 1 0 0 a137;
+        i1380 i1381 i1382 i1383 i1384 i1385 i1386 i1387 = 8switch 1 0 1 0 0 1 1 0 a138;
+        i1390 i1391 i1392 i1393 i1394 i1395 i1396 i1397 = 8switch 1 0 0 1 1 1 0 1 a139;
+        i1400 i1401 i1402 i1403 i1404 i1405 i1406 i1407 = 8switch 1 0 1 0 1 1 1 0 a140;
+        i1410 i1411 i1412 i1413 i1414 i1415 i1416 i1417 = 8switch 1 0 1 1 0 1 0 0 a141;
+        i1420 i1421 i1422 i1423 i1424 i1425 i1426 i1427 = 8switch 1 0 1 0 0 0 0 0 a142;
+        i1430 i1431 i1432 i1433 i1434 i1435 i1436 i1437 = 8switch 1 0 0 0 0 1 1 0 a143;
+        i1440 i1441 i1442 i1443 i1444 i1445 i1446 i1447 = 8switch 1 0 1 0 0 0 0 1 a144;
+        i1450 i1451 i1452 i1453 i1454 i1455 i1456 i1457 = 8switch 1 0 0 0 1 1 1 0 a145;
+        i1460 i1461 i1462 i1463 i1464 i1465 i1466 i1467 = 8switch 1 0 1 0 0 0 1 0 a146;
+        i1470 i1471 i1472 i1473 i1474 i1475 i1476 i1477 = 8switch 1 0 0 1 0 1 1 0 a147;
+        i1480 i1481 i1482 i1483 i1484 i1485 i1486 i1487 = 8switch 1 0 1 0 0 0 1 1 a148;
+        i1490 i1491 i1492 i1493 i1494 i1495 i1496 i1497 = 8switch 1 0 0 1 1 1 1 0 a149;
+        i1500 i1501 i1502 i1503 i1504 i1505 i1506 i1507 = 8switch 1 0 1 0 0 1 0 1 a150;
+        i1510 i1511 i1512 i1513 i1514 i1515 i1516 i1517 = 8switch 1 0 1 0 1 1 1 0 a151;
+        i1520 i1521 i1522 i1523 i1524 i1525 i1526 i1527 = 8switch 1 0 1 1 0 1 0 1 a152;
+        i1530 i1531 i1532 i1533 i1534 i1535 i1536 i1537 = 8switch 1 0 1 0 1 0 0 0 a153;
+        i1540 i1541 i1542 i1543 i1544 i1545 i1546 i1547 = 8switch 1 0 0 0 0 1 1 0 a154;
+        i1550 i1551 i1552 i1553 i1554 i1555 i1556 i1557 = 8switch 1 0 1 0 1 0 0 1 a155;
+        i1560 i1561 i1562 i1563 i1564 i1565 i1566 i1567 = 8switch 1 0 0 0 1 1 1 0 a156;
+        i1570 i1571 i1572 i1573 i1574 i1575 i1576 i1577 = 8switch 1 0 1 0 1 0 1 0 a157;
+        i1580 i1581 i1582 i1583 i1584 i1585 i1586 i1587 = 8switch 1 0 0 1 0 1 1 0 a158;
+        i1590 i1591 i1592 i1593 i1594 i1595 i1596 i1597 = 8switch 1 0 1 0 1 0 1 1 a159;
+        i1600 i1601 i1602 i1603 i1604 i1605 i1606 i1607 = 8switch 1 0 0 1 1 1 1 0 a160;
+        i1610 i1611 i1612 i1613 i1614 i1615 i1616 i1617 = 8switch 1 0 1 0 1 1 0 0 a161;
+        i1620 i1621 i1622 i1623 i1624 i1625 i1626 i1627 = 8switch 1 0 1 0 0 1 1 0 a162;
+        i1630 i1631 i1632 i1633 i1634 i1635 i1636 i1637 = 8switch 1 0 1 1 0 0 0 1 a163;
+        i1640 i1641 i1642 i1643 i1644 i1645 i1646 i1647 = 8switch 1 0 1 1 0 0 1 0 a164;
+        i1650 i1651 i1652 i1653 i1654 i1655 i1656 i1657 = 8switch 0 1 0 0 0 1 0 1 a165;
+        i1660 i1661 i1662 i1663 i1664 i1665 i1666 i1667 = 8switch 1 0 0 1 1 1 1 0 a166;
+        i1670 i1671 i1672 i1673 i1674 i1675 i1676 i1677 = 8switch 1 0 1 1 0 0 0 1 a167;
+        i1680 i1681 i1682 i1683 i1684 i1685 i1686 i1687 = 8switch 1 0 1 1 0 0 1 0 a168;
+        i1690 i1691 i1692 i1693 i1694 i1695 i1696 i1697 = 8switch 0 1 0 0 0 1 0 0 a169;
+        i1700 i1701 i1702 i1703 i1704 i1705 i1706 i1707 = 8switch 1 0 0 1 1 1 1 0 a170;
+        i1710 i1711 i1712 i1713 i1714 i1715 i1716 i1717 = 8switch 1 0 1 1 0 0 0 1 a171;
+        i1720 i1721 i1722 i1723 i1724 i1725 i1726 i1727 = 8switch 1 0 1 1 0 0 1 0 a172;
+        i1730 i1731 i1732 i1733 i1734 i1735 i1736 i1737 = 8switch 0 1 0 0 0 0 0 0 a173;
+        i1740 i1741 i1742 i1743 i1744 i1745 i1746 i1747 = 8switch 1 0 0 1 1 1 1 0 a174;
+        i1750 i1751 i1752 i1753 i1754 i1755 i1756 i1757 = 8switch 1 0 1 1 0 0 0 1 a175;
+        i1760 i1761 i1762 i1763 i1764 i1765 i1766 i1767 = 8switch 1 0 1 1 0 0 1 0 a176;
+        i1770 i1771 i1772 i1773 i1774 i1775 i1776 i1777 = 8switch 0 1 0 0 0 1 0 1 a177;
+        i1780 i1781 i1782 i1783 i1784 i1785 i1786 i1787 = 8switch 1 0 0 1 1 1 1 0 a178;
+        i1790 i1791 i1792 i1793 i1794 i1795 i1796 i1797 = 8switch 1 0 1 1 0 0 0 1 a179;
+        i1800 i1801 i1802 i1803 i1804 i1805 i1806 i1807 = 8switch 1 0 1 1 0 0 1 0 a180;
+        i1810 i1811 i1812 i1813 i1814 i1815 i1816 i1817 = 8switch 0 1 0 0 0 0 0 0 a181;
+        i1820 i1821 i1822 i1823 i1824 i1825 i1826 i1827 = 8switch 1 0 0 1 1 1 1 0 a182;
+        i1830 i1831 i1832 i1833 i1834 i1835 i1836 i1837 = 8switch 1 0 1 1 0 0 0 1 a183;
+        i1840 i1841 i1842 i1843 i1844 i1845 i1846 i1847 = 8switch 1 0 1 1 0 0 1 0 a184;
+        i1850 i1851 i1852 i1853 i1854 i1855 i1856 i1857 = 8switch 0 1 0 0 0 1 0 1 a185;
+        i1860 i1861 i1862 i1863 i1864 i1865 i1866 i1867 = 8switch 1 0 0 1 1 1 1 0 a186;
+        i1870 i1871 i1872 i1873 i1874 i1875 i1876 i1877 = 8switch 1 0 1 1 0 0 0 1 a187;
+        i1880 i1881 i1882 i1883 i1884 i1885 i1886 i1887 = 8switch 1 0 1 1 0 0 1 0 a188;
+        i1890 i1891 i1892 i1893 i1894 i1895 i1896 i1897 = 8switch 0 1 0 0 0 1 0 1 a189;
+        i1900 i1901 i1902 i1903 i1904 i1905 i1906 i1907 = 8switch 1 0 0 1 1 1 1 0 a190;
+        i1910 i1911 i1912 i1913 i1914 i1915 i1916 i1917 = 8switch 1 0 1 1 0 0 0 1 a191;
+        i1920 i1921 i1922 i1923 i1924 i1925 i1926 i1927 = 8switch 1 0 1 1 0 0 1 0 a192;
+        i1930 i1931 i1932 i1933 i1934 i1935 i1936 i1937 = 8switch 0 1 0 0 0 1 0 0 a193;
+        i1940 i1941 i1942 i1943 i1944 i1945 i1946 i1947 = 8switch 1 0 0 1 1 1 1 0 a194;
+        i1950 i1951 i1952 i1953 i1954 i1955 i1956 i1957 = 8switch 1 0 1 1 0 0 0 1 a195;
+        i1960 i1961 i1962 i1963 i1964 i1965 i1966 i1967 = 8switch 1 0 1 1 0 0 1 0 a196;
+        i1970 i1971 i1972 i1973 i1974 i1975 i1976 i1977 = 8switch 0 1 0 0 0 1 0 1 a197;
+        i1980 i1981 i1982 i1983 i1984 i1985 i1986 i1987 = 8switch 1 0 0 1 1 1 1 0 a198;
+        i1990 i1991 i1992 i1993 i1994 i1995 i1996 i1997 = 8switch 1 0 1 1 0 0 1 0 a199;
+        i2000 i2001 i2002 i2003 i2004 i2005 i2006 i2007 = 8switch 1 0 0 1 0 1 0 0 a200;
+        i2010 i2011 i2012 i2013 i2014 i2015 i2016 i2017 = 8switch 1 0 1 0 0 1 1 0 a201;
+        i2020 i2021 i2022 i2023 i2024 i2025 i2026 i2027 = 8switch 1 0 1 1 0 0 1 1 a202;
+        i2030 i2031 i2032 i2033 i2034 i2035 i2036 i2037 = 8switch 1 0 0 1 1 1 0 1 a203;
+        i2040 i2041 i2042 i2043 i2044 i2045 i2046 i2047 = 8switch 1 0 1 0 1 1 1 0 a204;
+        i2050 i2051 i2052 i2053 i2054 i2055 i2056 i2057 = 8switch 1 0 1 1 0 0 0 1 a205;
+        i2060 i2061 i2062 i2063 i2064 i2065 i2066 i2067 = 8switch 1 0 0 0 1 0 1 1 a206;
+        i2070 i2071 i2072 i2073 i2074 i2075 i2076 i2077 = 8switch 1 0 0 1 1 1 1 0 a207;
+        i2080 i2081 i2082 i2083 i2084 i2085 i2086 i2087 = 8switch 1 0 1 1 0 0 0 1 a208;
+        i2090 i2091 i2092 i2093 i2094 i2095 i2096 i2097 = 8switch 1 0 1 1 0 0 1 0 a209;
+        i2100 i2101 i2102 i2103 i2104 i2105 i2106 i2107 = 8switch 0 1 0 0 0 0 1 1 a210;
+        i2110 i2111 i2112 i2113 i2114 i2115 i2116 i2117 = 8switch 1 0 0 1 1 1 1 0 a211;
+        i2120 i2121 i2122 i2123 i2124 i2125 i2126 i2127 = 8switch 1 0 1 1 0 0 0 1 a212;
+        i2130 i2131 i2132 i2133 i2134 i2135 i2136 i2137 = 8switch 1 0 1 1 0 0 1 0 a213;
+        i2140 i2141 i2142 i2143 i2144 i2145 i2146 i2147 = 8switch 0 1 0 0 0 0 1 1 a214;
+        i2150 i2151 i2152 i2153 i2154 i2155 i2156 i2157 = 8switch 1 0 0 1 1 1 1 0 a215;
+        i2160 i2161 i2162 i2163 i2164 i2165 i2166 i2167 = 8switch 1 0 1 1 0 1 0 1 a216;
+        i2170 i2171 i2172 i2173 i2174 i2175 i2176 i2177 = 8switch 1 0 1 0 1 0 0 1 a217;
+        i2180 i2181 i2182 i2183 i2184 i2185 i2186 i2187 = 8switch 1 0 0 0 1 1 1 0 a218;
+        i2190 i2191 i2192 i2193 i2194 i2195 i2196 i2197 = 8switch 1 0 1 1 0 1 0 0 a219;
+        i2200 i2201 i2202 i2203 i2204 i2205 i2206 i2207 = 8switch 1 0 1 0 0 1 0 1 a220;
+        i2210 i2211 i2212 i2213 i2214 i2215 i2216 i2217 = 8switch 1 0 1 0 1 1 1 0 a221;
+        i2220 i2221 i2222 i2223 i2224 i2225 i2226 i2227 = 8switch 1 0 1 1 0 0 0 1 a222;
+        i2230 i2231 i2232 i2233 i2234 i2235 i2236 i2237 = 8switch 1 0 1 1 0 0 1 0 a223;
+        i2240 i2241 i2242 i2243 i2244 i2245 i2246 i2247 = 8switch 0 1 0 0 0 0 0 0 a224;
+        i2250 i2251 i2252 i2253 i2254 i2255 i2256 i2257 = 8switch 1 0 0 1 1 1 1 0 a225;
+        i2260 i2261 i2262 i2263 i2264 i2265 i2266 i2267 = 8switch 1 0 1 1 0 0 0 1 a226;
+        i2270 i2271 i2272 i2273 i2274 i2275 i2276 i2277 = 8switch 1 0 1 1 0 0 1 0 a227;
+        i2280 i2281 i2282 i2283 i2284 i2285 i2286 i2287 = 8switch 0 1 0 0 0 1 0 1 a228;
+        i2290 i2291 i2292 i2293 i2294 i2295 i2296 i2297 = 8switch 1 0 0 1 1 1 1 0 a229;
+        i2300 i2301 i2302 i2303 i2304 i2305 i2306 i2307 = 8switch 1 0 1 1 0 0 1 1 a230;
+        i2310 i2311 i2312 i2313 i2314 i2315 i2316 i2317 = 8switch 1 0 0 1 1 0 1 0 a231;
+        i2320 i2321 i2322 i2323 i2324 i2325 i2326 i2327 = 8switch 1 0 0 1 0 1 1 0 a232;
+        i2330 i2331 i2332 i2333 i2334 i2335 i2336 i2337 = 8switch 1 0 1 1 0 0 0 1 a233;
+        i2340 i2341 i2342 i2343 i2344 i2345 i2346 i2347 = 8switch 1 0 0 0 1 0 1 0 a234;
+        i2350 i2351 i2352 i2353 i2354 i2355 i2356 i2357 = 8switch 1 0 0 1 0 1 1 0 a235;
+        i2360 i2361 i2362 i2363 i2364 i2365 i2366 i2367 = 8switch 1 0 1 1 0 0 0 1 a236;
+        i2370 i2371 i2372 i2373 i2374 i2375 i2376 i2377 = 8switch 1 0 0 0 1 0 1 0 a237;
+        i2380 i2381 i2382 i2383 i2384 i2385 i2386 i2387 = 8switch 1 0 0 1 0 1 1 0 a238;
+        i2390 i2391 i2392 i2393 i2394 i2395 i2396 i2397 = 8switch 1 0 1 1 0 0 1 0 a239;
+        i2400 i2401 i2402 i2403 i2404 i2405 i2406 i2407 = 8switch 1 0 0 1 0 0 0 1 a240;
+        i2410 i2411 i2412 i2413 i2414 i2415 i2416 i2417 = 8switch 1 0 0 0 1 1 1 0 a241;
+        i2420 i2421 i2422 i2423 i2424 i2425 i2426 i2427 = 8switch 1 0 1 1 0 0 0 1 a242;
+        i2430 i2431 i2432 i2433 i2434 i2435 i2436 i2437 = 8switch 1 0 1 1 0 0 1 0 a243;
+        i2440 i2441 i2442 i2443 i2444 i2445 i2446 i2447 = 8switch 0 1 0 0 0 1 0 0 a244;
+        i2450 i2451 i2452 i2453 i2454 i2455 i2456 i2457 = 8switch 1 0 0 1 1 1 1 0 a245;
+        i2460 i2461 i2462 i2463 i2464 i2465 i2466 i2467 = 8switch 1 0 1 1 0 0 0 1 a246;
+        i2470 i2471 i2472 i2473 i2474 i2475 i2476 i2477 = 8switch 1 0 1 1 0 0 1 0 a247;
+        i2480 i2481 i2482 i2483 i2484 i2485 i2486 i2487 = 8switch 0 1 0 0 0 0 0 0 a248;
+        i2490 i2491 i2492 i2493 i2494 i2495 i2496 i2497 = 8switch 1 0 0 1 1 1 1 0 a249;
+        i2500 i2501 i2502 i2503 i2504 i2505 i2506 i2507 = 8switch 1 0 1 1 0 0 1 1 a250;
+        i2510 i2511 i2512 i2513 i2514 i2515 i2516 i2517 = 8switch 1 0 0 1 1 1 0 1 a251;
+        i2520 i2521 i2522 i2523 i2524 i2525 i2526 i2527 = 8switch 1 0 1 0 1 1 1 0 a252;
+        i2530 i2531 i2532 i2533 i2534 i2535 i2536 i2537 = 8switch 1 0 1 1 0 0 0 1 a253;
+        i2540 i2541 i2542 i2543 i2544 i2545 i2546 i2547 = 8switch 1 0 1 1 0 0 1 0 a254;
+        i2550 i2551 i2552 i2553 i2554 i2555 i2556 i2557 = 8switch 0 1 0 0 0 0 0 0 a255;
+
+        // # ここから、in0 ～ in7 を生成するコード
+        in0 = 256bit_or i000 i010 i020 i030 i040 i050 i060 i070 i080 i090 i100 i110 i120 i130 i140 i150 i160 i170 i180 i190 i200 i210 i220 i230 i240 i250 i260 i270 i280 i290 i300 i310 i320 i330 i340 i350 i360 i370 i380 i390 i400 i410 i420 i430 i440 i450 i460 i470 i480 i490 i500 i510 i520 i530 i540 i550 i560 i570 i580 i590 i600 i610 i620 i630 i640 i650 i660 i670 i680 i690 i700 i710 i720 i730 i740 i750 i760 i770 i780 i790 i800 i810 i820 i830 i840 i850 i860 i870 i880 i890 i900 i910 i920 i930 i940 i950 i960 i970 i980 i990 i1000 i1010 i1020 i1030 i1040 i1050 i1060 i1070 i1080 i1090 i1100 i1110 i1120 i1130 i1140 i1150 i1160 i1170 i1180 i1190 i1200 i1210 i1220 i1230 i1240 i1250 i1260 i1270 i1280 i1290 i1300 i1310 i1320 i1330 i1340 i1350 i1360 i1370 i1380 i1390 i1400 i1410 i1420 i1430 i1440 i1450 i1460 i1470 i1480 i1490 i1500 i1510 i1520 i1530 i1540 i1550 i1560 i1570 i1580 i1590 i1600 i1610 i1620 i1630 i1640 i1650 i1660 i1670 i1680 i1690 i1700 i1710 i1720 i1730 i1740 i1750 i1760 i1770 i1780 i1790 i1800 i1810 i1820 i1830 i1840 i1850 i1860 i1870 i1880 i1890 i1900 i1910 i1920 i1930 i1940 i1950 i1960 i1970 i1980 i1990 i2000 i2010 i2020 i2030 i2040 i2050 i2060 i2070 i2080 i2090 i2100 i2110 i2120 i2130 i2140 i2150 i2160 i2170 i2180 i2190 i2200 i2210 i2220 i2230 i2240 i2250 i2260 i2270 i2280 i2290 i2300 i2310 i2320 i2330 i2340 i2350 i2360 i2370 i2380 i2390 i2400 i2410 i2420 i2430 i2440 i2450 i2460 i2470 i2480 i2490 i2500 i2510 i2520 i2530 i2540 i2550;
+        in1 = 256bit_or i001 i011 i021 i031 i041 i051 i061 i071 i081 i091 i101 i111 i121 i131 i141 i151 i161 i171 i181 i191 i201 i211 i221 i231 i241 i251 i261 i271 i281 i291 i301 i311 i321 i331 i341 i351 i361 i371 i381 i391 i401 i411 i421 i431 i441 i451 i461 i471 i481 i491 i501 i511 i521 i531 i541 i551 i561 i571 i581 i591 i601 i611 i621 i631 i641 i651 i661 i671 i681 i691 i701 i711 i721 i731 i741 i751 i761 i771 i781 i791 i801 i811 i821 i831 i841 i851 i861 i871 i881 i891 i901 i911 i921 i931 i941 i951 i961 i971 i981 i991 i1001 i1011 i1021 i1031 i1041 i1051 i1061 i1071 i1081 i1091 i1101 i1111 i1121 i1131 i1141 i1151 i1161 i1171 i1181 i1191 i1201 i1211 i1221 i1231 i1241 i1251 i1261 i1271 i1281 i1291 i1301 i1311 i1321 i1331 i1341 i1351 i1361 i1371 i1381 i1391 i1401 i1411 i1421 i1431 i1441 i1451 i1461 i1471 i1481 i1491 i1501 i1511 i1521 i1531 i1541 i1551 i1561 i1571 i1581 i1591 i1601 i1611 i1621 i1631 i1641 i1651 i1661 i1671 i1681 i1691 i1701 i1711 i1721 i1731 i1741 i1751 i1761 i1771 i1781 i1791 i1801 i1811 i1821 i1831 i1841 i1851 i1861 i1871 i1881 i1891 i1901 i1911 i1921 i1931 i1941 i1951 i1961 i1971 i1981 i1991 i2001 i2011 i2021 i2031 i2041 i2051 i2061 i2071 i2081 i2091 i2101 i2111 i2121 i2131 i2141 i2151 i2161 i2171 i2181 i2191 i2201 i2211 i2221 i2231 i2241 i2251 i2261 i2271 i2281 i2291 i2301 i2311 i2321 i2331 i2341 i2351 i2361 i2371 i2381 i2391 i2401 i2411 i2421 i2431 i2441 i2451 i2461 i2471 i2481 i2491 i2501 i2511 i2521 i2531 i2541 i2551;
+        in2 = 256bit_or i002 i012 i022 i032 i042 i052 i062 i072 i082 i092 i102 i112 i122 i132 i142 i152 i162 i172 i182 i192 i202 i212 i222 i232 i242 i252 i262 i272 i282 i292 i302 i312 i322 i332 i342 i352 i362 i372 i382 i392 i402 i412 i422 i432 i442 i452 i462 i472 i482 i492 i502 i512 i522 i532 i542 i552 i562 i572 i582 i592 i602 i612 i622 i632 i642 i652 i662 i672 i682 i692 i702 i712 i722 i732 i742 i752 i762 i772 i782 i792 i802 i812 i822 i832 i842 i852 i862 i872 i882 i892 i902 i912 i922 i932 i942 i952 i962 i972 i982 i992 i1002 i1012 i1022 i1032 i1042 i1052 i1062 i1072 i1082 i1092 i1102 i1112 i1122 i1132 i1142 i1152 i1162 i1172 i1182 i1192 i1202 i1212 i1222 i1232 i1242 i1252 i1262 i1272 i1282 i1292 i1302 i1312 i1322 i1332 i1342 i1352 i1362 i1372 i1382 i1392 i1402 i1412 i1422 i1432 i1442 i1452 i1462 i1472 i1482 i1492 i1502 i1512 i1522 i1532 i1542 i1552 i1562 i1572 i1582 i1592 i1602 i1612 i1622 i1632 i1642 i1652 i1662 i1672 i1682 i1692 i1702 i1712 i1722 i1732 i1742 i1752 i1762 i1772 i1782 i1792 i1802 i1812 i1822 i1832 i1842 i1852 i1862 i1872 i1882 i1892 i1902 i1912 i1922 i1932 i1942 i1952 i1962 i1972 i1982 i1992 i2002 i2012 i2022 i2032 i2042 i2052 i2062 i2072 i2082 i2092 i2102 i2112 i2122 i2132 i2142 i2152 i2162 i2172 i2182 i2192 i2202 i2212 i2222 i2232 i2242 i2252 i2262 i2272 i2282 i2292 i2302 i2312 i2322 i2332 i2342 i2352 i2362 i2372 i2382 i2392 i2402 i2412 i2422 i2432 i2442 i2452 i2462 i2472 i2482 i2492 i2502 i2512 i2522 i2532 i2542 i2552;
+        in3 = 256bit_or i003 i013 i023 i033 i043 i053 i063 i073 i083 i093 i103 i113 i123 i133 i143 i153 i163 i173 i183 i193 i203 i213 i223 i233 i243 i253 i263 i273 i283 i293 i303 i313 i323 i333 i343 i353 i363 i373 i383 i393 i403 i413 i423 i433 i443 i453 i463 i473 i483 i493 i503 i513 i523 i533 i543 i553 i563 i573 i583 i593 i603 i613 i623 i633 i643 i653 i663 i673 i683 i693 i703 i713 i723 i733 i743 i753 i763 i773 i783 i793 i803 i813 i823 i833 i843 i853 i863 i873 i883 i893 i903 i913 i923 i933 i943 i953 i963 i973 i983 i993 i1003 i1013 i1023 i1033 i1043 i1053 i1063 i1073 i1083 i1093 i1103 i1113 i1123 i1133 i1143 i1153 i1163 i1173 i1183 i1193 i1203 i1213 i1223 i1233 i1243 i1253 i1263 i1273 i1283 i1293 i1303 i1313 i1323 i1333 i1343 i1353 i1363 i1373 i1383 i1393 i1403 i1413 i1423 i1433 i1443 i1453 i1463 i1473 i1483 i1493 i1503 i1513 i1523 i1533 i1543 i1553 i1563 i1573 i1583 i1593 i1603 i1613 i1623 i1633 i1643 i1653 i1663 i1673 i1683 i1693 i1703 i1713 i1723 i1733 i1743 i1753 i1763 i1773 i1783 i1793 i1803 i1813 i1823 i1833 i1843 i1853 i1863 i1873 i1883 i1893 i1903 i1913 i1923 i1933 i1943 i1953 i1963 i1973 i1983 i1993 i2003 i2013 i2023 i2033 i2043 i2053 i2063 i2073 i2083 i2093 i2103 i2113 i2123 i2133 i2143 i2153 i2163 i2173 i2183 i2193 i2203 i2213 i2223 i2233 i2243 i2253 i2263 i2273 i2283 i2293 i2303 i2313 i2323 i2333 i2343 i2353 i2363 i2373 i2383 i2393 i2403 i2413 i2423 i2433 i2443 i2453 i2463 i2473 i2483 i2493 i2503 i2513 i2523 i2533 i2543 i2553;
+        in4 = 256bit_or i004 i014 i024 i034 i044 i054 i064 i074 i084 i094 i104 i114 i124 i134 i144 i154 i164 i174 i184 i194 i204 i214 i224 i234 i244 i254 i264 i274 i284 i294 i304 i314 i324 i334 i344 i354 i364 i374 i384 i394 i404 i414 i424 i434 i444 i454 i464 i474 i484 i494 i504 i514 i524 i534 i544 i554 i564 i574 i584 i594 i604 i614 i624 i634 i644 i654 i664 i674 i684 i694 i704 i714 i724 i734 i744 i754 i764 i774 i784 i794 i804 i814 i824 i834 i844 i854 i864 i874 i884 i894 i904 i914 i924 i934 i944 i954 i964 i974 i984 i994 i1004 i1014 i1024 i1034 i1044 i1054 i1064 i1074 i1084 i1094 i1104 i1114 i1124 i1134 i1144 i1154 i1164 i1174 i1184 i1194 i1204 i1214 i1224 i1234 i1244 i1254 i1264 i1274 i1284 i1294 i1304 i1314 i1324 i1334 i1344 i1354 i1364 i1374 i1384 i1394 i1404 i1414 i1424 i1434 i1444 i1454 i1464 i1474 i1484 i1494 i1504 i1514 i1524 i1534 i1544 i1554 i1564 i1574 i1584 i1594 i1604 i1614 i1624 i1634 i1644 i1654 i1664 i1674 i1684 i1694 i1704 i1714 i1724 i1734 i1744 i1754 i1764 i1774 i1784 i1794 i1804 i1814 i1824 i1834 i1844 i1854 i1864 i1874 i1884 i1894 i1904 i1914 i1924 i1934 i1944 i1954 i1964 i1974 i1984 i1994 i2004 i2014 i2024 i2034 i2044 i2054 i2064 i2074 i2084 i2094 i2104 i2114 i2124 i2134 i2144 i2154 i2164 i2174 i2184 i2194 i2204 i2214 i2224 i2234 i2244 i2254 i2264 i2274 i2284 i2294 i2304 i2314 i2324 i2334 i2344 i2354 i2364 i2374 i2384 i2394 i2404 i2414 i2424 i2434 i2444 i2454 i2464 i2474 i2484 i2494 i2504 i2514 i2524 i2534 i2544 i2554;
+        in5 = 256bit_or i005 i015 i025 i035 i045 i055 i065 i075 i085 i095 i105 i115 i125 i135 i145 i155 i165 i175 i185 i195 i205 i215 i225 i235 i245 i255 i265 i275 i285 i295 i305 i315 i325 i335 i345 i355 i365 i375 i385 i395 i405 i415 i425 i435 i445 i455 i465 i475 i485 i495 i505 i515 i525 i535 i545 i555 i565 i575 i585 i595 i605 i615 i625 i635 i645 i655 i665 i675 i685 i695 i705 i715 i725 i735 i745 i755 i765 i775 i785 i795 i805 i815 i825 i835 i845 i855 i865 i875 i885 i895 i905 i915 i925 i935 i945 i955 i965 i975 i985 i995 i1005 i1015 i1025 i1035 i1045 i1055 i1065 i1075 i1085 i1095 i1105 i1115 i1125 i1135 i1145 i1155 i1165 i1175 i1185 i1195 i1205 i1215 i1225 i1235 i1245 i1255 i1265 i1275 i1285 i1295 i1305 i1315 i1325 i1335 i1345 i1355 i1365 i1375 i1385 i1395 i1405 i1415 i1425 i1435 i1445 i1455 i1465 i1475 i1485 i1495 i1505 i1515 i1525 i1535 i1545 i1555 i1565 i1575 i1585 i1595 i1605 i1615 i1625 i1635 i1645 i1655 i1665 i1675 i1685 i1695 i1705 i1715 i1725 i1735 i1745 i1755 i1765 i1775 i1785 i1795 i1805 i1815 i1825 i1835 i1845 i1855 i1865 i1875 i1885 i1895 i1905 i1915 i1925 i1935 i1945 i1955 i1965 i1975 i1985 i1995 i2005 i2015 i2025 i2035 i2045 i2055 i2065 i2075 i2085 i2095 i2105 i2115 i2125 i2135 i2145 i2155 i2165 i2175 i2185 i2195 i2205 i2215 i2225 i2235 i2245 i2255 i2265 i2275 i2285 i2295 i2305 i2315 i2325 i2335 i2345 i2355 i2365 i2375 i2385 i2395 i2405 i2415 i2425 i2435 i2445 i2455 i2465 i2475 i2485 i2495 i2505 i2515 i2525 i2535 i2545 i2555;
+        in6 = 256bit_or i006 i016 i026 i036 i046 i056 i066 i076 i086 i096 i106 i116 i126 i136 i146 i156 i166 i176 i186 i196 i206 i216 i226 i236 i246 i256 i266 i276 i286 i296 i306 i316 i326 i336 i346 i356 i366 i376 i386 i396 i406 i416 i426 i436 i446 i456 i466 i476 i486 i496 i506 i516 i526 i536 i546 i556 i566 i576 i586 i596 i606 i616 i626 i636 i646 i656 i666 i676 i686 i696 i706 i716 i726 i736 i746 i756 i766 i776 i786 i796 i806 i816 i826 i836 i846 i856 i866 i876 i886 i896 i906 i916 i926 i936 i946 i956 i966 i976 i986 i996 i1006 i1016 i1026 i1036 i1046 i1056 i1066 i1076 i1086 i1096 i1106 i1116 i1126 i1136 i1146 i1156 i1166 i1176 i1186 i1196 i1206 i1216 i1226 i1236 i1246 i1256 i1266 i1276 i1286 i1296 i1306 i1316 i1326 i1336 i1346 i1356 i1366 i1376 i1386 i1396 i1406 i1416 i1426 i1436 i1446 i1456 i1466 i1476 i1486 i1496 i1506 i1516 i1526 i1536 i1546 i1556 i1566 i1576 i1586 i1596 i1606 i1616 i1626 i1636 i1646 i1656 i1666 i1676 i1686 i1696 i1706 i1716 i1726 i1736 i1746 i1756 i1766 i1776 i1786 i1796 i1806 i1816 i1826 i1836 i1846 i1856 i1866 i1876 i1886 i1896 i1906 i1916 i1926 i1936 i1946 i1956 i1966 i1976 i1986 i1996 i2006 i2016 i2026 i2036 i2046 i2056 i2066 i2076 i2086 i2096 i2106 i2116 i2126 i2136 i2146 i2156 i2166 i2176 i2186 i2196 i2206 i2216 i2226 i2236 i2246 i2256 i2266 i2276 i2286 i2296 i2306 i2316 i2326 i2336 i2346 i2356 i2366 i2376 i2386 i2396 i2406 i2416 i2426 i2436 i2446 i2456 i2466 i2476 i2486 i2496 i2506 i2516 i2526 i2536 i2546 i2556;
+        in7 = 256bit_or i007 i017 i027 i037 i047 i057 i067 i077 i087 i097 i107 i117 i127 i137 i147 i157 i167 i177 i187 i197 i207 i217 i227 i237 i247 i257 i267 i277 i287 i297 i307 i317 i327 i337 i347 i357 i367 i377 i387 i397 i407 i417 i427 i437 i447 i457 i467 i477 i487 i497 i507 i517 i527 i537 i547 i557 i567 i577 i587 i597 i607 i617 i627 i637 i647 i657 i667 i677 i687 i697 i707 i717 i727 i737 i747 i757 i767 i777 i787 i797 i807 i817 i827 i837 i847 i857 i867 i877 i887 i897 i907 i917 i927 i937 i947 i957 i967 i977 i987 i997 i1007 i1017 i1027 i1037 i1047 i1057 i1067 i1077 i1087 i1097 i1107 i1117 i1127 i1137 i1147 i1157 i1167 i1177 i1187 i1197 i1207 i1217 i1227 i1237 i1247 i1257 i1267 i1277 i1287 i1297 i1307 i1317 i1327 i1337 i1347 i1357 i1367 i1377 i1387 i1397 i1407 i1417 i1427 i1437 i1447 i1457 i1467 i1477 i1487 i1497 i1507 i1517 i1527 i1537 i1547 i1557 i1567 i1577 i1587 i1597 i1607 i1617 i1627 i1637 i1647 i1657 i1667 i1677 i1687 i1697 i1707 i1717 i1727 i1737 i1747 i1757 i1767 i1777 i1787 i1797 i1807 i1817 i1827 i1837 i1847 i1857 i1867 i1877 i1887 i1897 i1907 i1917 i1927 i1937 i1947 i1957 i1967 i1977 i1987 i1997 i2007 i2017 i2027 i2037 i2047 i2057 i2067 i2077 i2087 i2097 i2107 i2117 i2127 i2137 i2147 i2157 i2167 i2177 i2187 i2197 i2207 i2217 i2227 i2237 i2247 i2257 i2267 i2277 i2287 i2297 i2307 i2317 i2327 i2337 i2347 i2357 i2367 i2377 i2387 i2397 i2407 i2417 i2427 i2437 i2447 i2457 i2467 i2477 i2487 i2497 i2507 i2517 i2527 i2537 i2547 i2557;
+    // o0 o1 o2 o3 o4 o5 o6 o7 = mem8bits8 in0 in1 in2 in3 in4 in5 in6 in7 1 1 s0 s1 s2 s3 s4 s5 s6 s7;
+    // output, counter, general_input = comptuter instruction, input
+    o0 o1 o2 o3 o4 o5 o6 o7 c0 c1 c2 c3 c4 c5 c6 c7 cond = turing_complete in0 in1 in2 in3 in4 in5 in6 in7 i0 i1 i2 i3 i4 i5 i6 i7;
 }
