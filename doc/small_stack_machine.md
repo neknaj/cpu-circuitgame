@@ -36,6 +36,9 @@
 | counter8bitsRewritable | 9 -> 8 | 108 |
 | counter8bits_clock | 1 -> 8 | 140 |
 | dff8bits | 9 -> 8 | 104 |
+| mem8bits13 | 23 -> 8 | 827363 |
+| mem8bits12 | 22 -> 8 | 413667 |
+| mem8bits11 | 21 -> 8 | 206819 |
 | mem8bits10 | 20 -> 8 | 103395 |
 | mem8bits9 | 19 -> 8 | 51683 |
 | mem8bits8 | 18 -> 8 | 25827 |
