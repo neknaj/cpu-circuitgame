@@ -799,15 +799,15 @@ func demux1(in s) -> (a b) {
     b: and in s;
 }
 // 条件分岐
-func condition(i0 i1 i2 i3 i4 i5 i6 i7 c0 c1 c2) -> (bool) {
+func condition(i(8) c0 c1 c2) -> (bool) {
     t0 t1 t2 t3 = 2decoder c0 c1;
 
-    not0 = 8bit_or i0 i1 i2 i3 i4 i5 i6 i7;
+    not0 = 8bit_or i;
     is0 = not not0;
-    0neg = or is0 i7;
+    0neg = or is0 i[7];
     
     a = and is0 t1;
-    b = and i7 t2;
+    b = and i[7] t2;
     c = and 0neg t3;
     p = 3or a b c;    //4つの条件まとめ
     
@@ -837,9 +837,9 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
 
     // decode instruction
         // imm, calc, copy, cond
-        t0 t1 t2 t3 = 2decoder a0 a1;   // どの命令か
-        sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a2 a3 a4;   // 入力REGの選択 (switch input register)
-        sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a5 a6 a7;  // 出力REGの選択 or 演算の選択 or 条件の選択 (switch output register)
+        t0 t1 t2 t3 = 2decoder a1 a0;   // どの命令か
+        sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a4 a3 a2;   // 入力REGの選択 (switch input register)
+        sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a7 a6 a5;  // 出力REGの選択 or 演算の選択 or 条件の選択 (switch output register)
     // filtered input (switch input read)
         sinr = and t2 sin;    // t2 & INPUT => INPUTを流す
         ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sinr;  // input valueをswitch inuptでフィルター

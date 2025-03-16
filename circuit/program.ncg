@@ -1,0 +1,476 @@
+// part 7
+// 0. 事前に用意した回路を準備
+using nor:2->1;
+
+// 定数
+    func true(any) -> (true) {
+        a: not <- any;
+        true: or <- any a;
+    }
+    func false(any) -> (false) {
+        a: not <- any;
+        false: nor <- any a;
+    }
+
+// 基本的な回路
+    func not(x) -> (a) {
+        a = nor x x;
+    }
+    func and(x y) -> (c) {
+        a = not x  ;
+        b = not y  ;
+        c = nor a b;
+    }
+    func or(x y) -> (b) {
+        a = nor x y;
+        b = not a  ;
+    }
+    func xor(x y) -> (e) {
+        c = and x y;
+        d = nor x y;
+        e = nor c d;
+    }
+
+// 加算器
+func haddr(x y) -> (c s) {
+    c = and x y;
+    t = nor x y;
+    s = nor c t;
+}
+func faddr(x y z) -> (c s1) {
+    c0 s0 = haddr x y  ;
+    c1 s1 = haddr s0 z ;
+    c     = or    c0 c1;
+}
+func 8bit_addr(a(8) b(8)) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+    c0 o0 = haddr a[0] b[0];
+    c1 o1 = faddr c0 a[1] b[1];
+    c2 o2 = faddr c1 a[2] b[2];
+    c3 o3 = faddr c2 a[3] b[3];
+    c4 o4 = faddr c3 a[4] b[4];
+    c5 o5 = faddr c4 a[5] b[5];
+    c6 o6 = faddr c5 a[6] b[6];
+    c7 o7 = faddr c6 a[7] b[7];
+}
+// 3bit 回路
+func 3or(x y z) -> (b) {
+    a = or x y;
+    b = or a z;
+}
+// 4bit 回路
+    func 4or(a b c d) -> (bool) {
+        x = or a b;
+        y = or c d;
+        bool = or x y;
+    }
+    func 4and(a b c d) -> (bool) {
+        x = and a b;
+        y = and c d;
+        bool = and x y;
+    }
+    func 4bit_and(a(4) b(4)) -> (o0 o1 o2 o3) {
+        o0 = and a[0] b[0];
+        o1 = and a[1] b[1];
+        o2 = and a[2] b[2];
+        o3 = and a[3] b[3];
+    }
+// 8bit 回路
+    func 8not(0 1 2 3 4 5 6 7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+        o0 = not 0;
+        o1 = not 1;
+        o2 = not 2;
+        o3 = not 3;
+        o4 = not 4;
+        o5 = not 5;
+        o6 = not 6;
+        o7 = not 7;
+    }
+    func 8or(a(8)) -> (bool) {
+        o0 = or a[0,1];
+        o1 = or a[2,3];
+        o2 = or a[4,5];
+        o3 = or a[6,7];
+        o4 = or o0 o1;
+        o5 = or o2 o3;
+        bool = or o4 o5;
+    }
+    func 8bit_or(a(8) b(8)) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+        o0 = or a[0] b[0];
+        o1 = or a[1] b[1];
+        o2 = or a[2] b[2];
+        o3 = or a[3] b[3];
+        o4 = or a[4] b[4];
+        o5 = or a[5] b[5];
+        o6 = or a[6] b[6];
+        o7 = or a[7] b[7];
+    }
+    func 8bit_and(a(8) b(8)) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+        o0 = and a[0] b[0];
+        o1 = and a[1] b[1];
+        o2 = and a[2] b[2];
+        o3 = and a[3] b[3];
+        o4 = and a[4] b[4];
+        o5 = and a[5] b[5];
+        o6 = and a[6] b[6];
+        o7 = and a[7] b[7];
+    }
+    func 8bit_nor(a0 a1 a2 a3 a4 a5 a6 a7 b0 b1 b2 b3 b4 b5 b6 b7) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+        o0 = nor a0 b0;
+        o1 = nor a1 b1;
+        o2 = nor a2 b2;
+        o3 = nor a3 b3;
+        o4 = nor a4 b4;
+        o5 = nor a5 b5;
+        o6 = nor a6 b6;
+        o7 = nor a7 b7;
+    }
+    func 8inc(d(8)) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+        c = true d[0];
+        c0 o0 = haddr d[0] c;
+        c1 o1 = haddr d[1] c0;
+        c2 o2 = haddr d[2] c1;
+        c3 o3 = haddr d[3] c2;
+        c4 o4 = haddr d[4] c3;
+        c5 o5 = haddr d[5] c4;
+        c6 o6 = haddr d[6] c5;
+        c7 o7 = haddr d[7] c6;
+    }
+    func 8nagate(in(8)) -> (out) {
+        not(8) = 8not in;
+        out(8) = 8inc not;
+    }
+
+// アドレスデコーダー
+    func 2decoder(s0 s1) -> (a b c d) {
+        ns0 = not s0;
+        ns1 = not s1;
+        a = nor s0 s1;
+        b = nor ns0 s1;
+        c = nor s0 ns1;
+        d = nor ns0 ns1;
+    }
+    func 3decoder(a1 a2 a3) -> (o0 o1 o2 o3 o4 o5 o6 o7) {
+        n1 = not a1;
+        n2 = not a2;
+        n3 = not a3;
+
+        nor_n1n2 = nor n1 n2;
+        nor_n12 = nor n1 a2;
+        nor_1n2 = nor a1 n2;
+        nor_12 = nor a1 a2;
+        not_n1n2 = not nor_n1n2;
+        not_n1a2 = not nor_n12;
+        not_a1n2 = not nor_1n2;
+        not_a1a2 = not nor_12;
+
+        o0 = nor not_a1a2 a3;
+        o1 = nor not_n1a2 a3;
+        o2 = nor not_a1n2 a3;
+        o3 = nor not_n1n2 a3;
+        o4 = nor not_a1a2 n3;
+        o5 = nor not_n1a2 n3;
+        o6 = nor not_a1n2 n3;
+        o7 = nor not_n1n2 n3;
+    }
+    func 4decoder (s(4))->(o0 o1 o2 o3) {
+        a(4) = 2decoder s[0,1];
+        b(4) = 2decoder s[2,3];
+        o0(4) = 4switch a b[0];
+        o1(4) = 4switch a b[1];
+        o2(4) = 4switch a b[2];
+        o3(4) = 4switch a b[3];
+    }
+    func 8decoder(s(8))->(o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
+        a(16): 4decoder s[0,3];
+        b(16): 4decoder s[4,7];
+        o0(16) = 16switch a[0,15] b[0];
+        o1(16) = 16switch a[0,15] b[1];
+        o2(16) = 16switch a[0,15] b[2];
+        o3(16) = 16switch a[0,15] b[3];
+        o4(16) = 16switch a[0,15] b[4];
+        o5(16) = 16switch a[0,15] b[5];
+        o6(16) = 16switch a[0,15] b[6];
+        o7(16) = 16switch a[0,15] b[7];
+        o8(16) = 16switch a[0,15] b[8];
+        o9(16) = 16switch a[0,15] b[9];
+        oa(16) = 16switch a[0,15] b[10];
+        ob(16) = 16switch a[0,15] b[11];
+        oc(16) = 16switch a[0,15] b[12];
+        od(16) = 16switch a[0,15] b[13];
+        oe(16) = 16switch a[0,15] b[14];
+        of(16) = 16switch a[0,15] b[15];
+    }
+// データをスイッチで制御するやつ
+    func 4switch(data(4) swc) -> (out) {
+        out(4) = 4bit_and data swc swc swc swc;
+    }
+    func 8switch(data(8) swc) -> (out) {
+        out(8) = 8bit_and data swc swc swc swc swc swc swc swc;
+    }
+    func selector(a(8) b(8) switch) -> (data) {
+        nswitch = not switch;
+        a_swc(8) = 8switch a switch;
+        b_swc(8) = 8switch b nswitch;
+        data(8) = 8bit_or a_swc b_swc;
+    }
+    func 16switch(i(16) swc) -> (o0 o1 o2 o3 o4 o5 o6 o7 o8 o9 oa ob oc od oe of) {
+        o0 = and i[0] swc;
+        o1 = and i[1] swc;
+        o2 = and i[2] swc;
+        o3 = and i[3] swc;
+        o4 = and i[4] swc;
+        o5 = and i[5] swc;
+        o6 = and i[6] swc;
+        o7 = and i[7] swc;
+        o8 = and i[8] swc;
+        o9 = and i[9] swc;
+        oa = and i[10] swc;
+        ob = and i[11] swc;
+        oc = and i[12] swc;
+        od = and i[13] swc;
+        oe = and i[14] swc;
+        of = and i[15] swc;
+    }
+// メモリー
+    module sr_latch (s r)->(q nq) {
+        nq: nor s q;
+        q: nor r nq;
+    }
+    module d_latch (d clk)->(q nq) {
+        nd: not d;
+        s: nor nd clk;
+        r: nor d clk;
+        q nq: sr_latch s r;
+    }
+    module mem8bits (d(8), w r)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+        o0: mem1bit d[0] w r; o1: mem1bit d[1] w r; o2: mem1bit d[2] w r; o3: mem1bit d[3] w r;
+        o4: mem1bit d[4] w r; o5: mem1bit d[5] w r; o6: mem1bit d[6] w r; o7: mem1bit d[7] w r;
+    }
+    module mem1bit (d, w,r)->(o) {
+        nw: not w;
+        q nq: d_latch d nw;
+        o: and q r;
+    }
+// カウンタ
+module counter_swc(input(8) swc) -> (out) {
+    1 = true input[0];
+    a(8) = 8inc out;
+    p(8) = selector input a swc; 
+    out(8) = mem8bits p 1 1;
+}
+// 巨大なor
+    func 16or(i(16)) -> (bool) {
+        a0 = 8or i[0,7];
+        a1 = 8or i[8,15];
+        bool = or a0 a1;
+    }
+    func 32or(i(32)) -> (bool) {
+        a0 = 16or i[0,15];
+        a1 = 16or i[16,31];
+        bool = or a0 a1;
+    }
+    func 64or(i(64)) -> (bool) {
+        a0 = 32or i[0,31];
+        a1 = 32or i[32,63];
+        bool = or a0 a1;
+    }
+    func 256or(i(256)) -> (bool) {
+        a0 = 64or i[0,63];
+        a1 = 64or i[64,127];
+        a2 = 64or i[128,191];
+        a3 = 64or i[192,255];
+        bool = 4or a0 a1 a2 a3;
+    }
+
+// turing_complete
+func 6or(a(6)) -> (o) {
+    p = 3or a[0,2];
+    q = 3or a[3,5];
+    o = or p q;
+}
+func 9or(i(9)) -> (bool) {
+    p = 4or i[0,3];
+    q = 4or i[4,7];
+    bool = 3or p q i[8];
+}
+
+func ALU(a(3) b(8) c(8)) -> (out0 out1 out2 out3 out4 out5 out6 out7) {
+    // Or Nand Nor And Add Sub
+    t0 t1 t2 t3 t4 t5 f0 f1 = 3decoder a;
+    or(8) = 8bit_or b c;
+    not_b(8) = 8not b;
+    not_c(8) = 8not c;
+    nand(8) = 8bit_or not_b not_c;
+    nor(8) = 8bit_nor b c;
+    and(8) = 8not nand;
+    // add sub
+    d(8) = 8nagate c;
+    e(8) = selector c d t4;
+    add(8) = 8bit_addr b e;
+
+    o0(8) = 8switch or t0;
+    o1(8) = 8switch nand t1;
+    o2(8) = 8switch nor t2;
+    o3(8) = 8switch and t3;
+    o4(8) = 8switch add t4;
+    o5(8) = 8switch add t5;
+
+    out0 = 6or o0[0] o1[0] o2[0] o3[0] o4[0] o5[0];
+    out1 = 6or o0[1] o1[1] o2[1] o3[1] o4[1] o5[1];
+    out2 = 6or o0[2] o1[2] o2[2] o3[2] o4[2] o5[2];
+    out3 = 6or o0[3] o1[3] o2[3] o3[3] o4[3] o5[3];
+    out4 = 6or o0[4] o1[4] o2[4] o3[4] o4[4] o5[4];
+    out5 = 6or o0[5] o1[5] o2[5] o3[5] o4[5] o5[5];
+    out6 = 6or o0[6] o1[6] o2[6] o3[6] o4[6] o5[6];
+    out7 = 6or o0[7] o1[7] o2[7] o3[7] o4[7] o5[7];
+}
+// 条件分岐
+func condition(i(8) c0 c1 c2) -> (bool) {
+    t0 t1 t2 t3 = 2decoder c0 c1;
+
+    not0 = 8or i;
+    is0 = not not0;
+    0neg = or is0 i[7];
+    
+    a = and is0 t1;
+    b = and i[7] t2;
+    c = and 0neg t3;
+    p = 3or a b c;    //4つの条件まとめ
+    
+    bool = xor p c2;
+}
+module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
+                i0 i1 i2 i3 i4 i5 i6 i7) ->(
+                o0 o1 o2 o3 o4 o5 o6 o7
+                c scond) {
+    // 定数
+        0 = false <- a0;
+        1 = true <- a0;
+
+    // decode instruction
+        // imm, calc, copy, cond
+        t0 t1 t2 t3 = 2decoder a1 a0;   // どの命令か
+        sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a4 a3 a2;   // 入力REGの選択 (switch input register)
+        sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a7 a6 a5;  // 出力REGの選択 or 演算の選択 or 条件の選択 (switch output register)
+    // filtered input (switch input read)
+        sinr = and t2 sin;    // t2 & INPUT => INPUTを流す
+        ins0 ins1 ins2 ins3 ins4 ins5 ins6 ins7 = 8switch i0 i1 i2 i3 i4 i5 i6 i7 sinr;  // input valueをswitch inuptでフィルター
+    // REGが書き込まれるのは
+        // REG0    => t0 or (t2 and sor0)
+        // REG3    => t1 or (t2 and sor3)
+        // REG1245 => (t2 and sor[1245])
+        t2sor0 = and t2 sor0;
+        t2sor3 = and t2 sor3;
+        // switch output write register
+        sowr0 = or  t0 t2sor0;   // t0 or (t2 and sor0)
+        sowr1 = and t2 sor1;
+        sowr2 = and t2 sor2;
+        sowr3 = or  t1 t2sor3;   // t1 or (t2 and sor3)
+        sowr4 = and t2 sor4;
+        sowr5 = and t2 sor5;
+
+    // REGが読み出されるのは
+        // REG1   t1 or (t2 and sir1)
+        // REG2   t1 or (t2 and sir2)
+        // REG045 (t2 and sir[045])
+        // REG3   (t2 and sir3) or t3
+        t2sir1 = and t2 sir1;
+        t2sir2 = and t2 sir2;
+        t2sir3 = and t2 sir3;
+        // switch input read register
+        sirr0 = and t2 sir0;
+        sirr1 = or  t1 t2sir1;
+        sirr2 = or  t1 t2sir2;
+        sirr3 = or  t2sir3 t3;
+        sirr4 = and t2 sir4;
+        sirr5 = and t2 sir5;
+
+    // 全てのメモリの読み出し/書き込みコード
+        // r00 r01 r02 r03 r04 r05 r06 r07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr0 sirr0;
+        // r10 r11 r12 r13 r14 r15 r16 r17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr1 sirr1;
+        // r20 r21 r22 r23 r24 r25 r26 r27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr2 sirr2;
+        // r30 r31 r32 r33 r34 r35 r36 r37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr3 sirr3;
+        // r40 r41 r42 r43 r44 r45 r46 r47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr4 sirr4;
+        // r50 r51 r52 r53 r54 r55 r56 r57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr5 sirr5;
+
+    // 現在のREG内部を表示し続ける
+        // switch register
+        sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr0 1;
+        sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr1 1;
+        sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr2 1;
+        sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr3 1;
+        sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr4 1;
+        sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 = mem8bits in0 in1 in2 in3 in4 in5 in6 in7 sowr5 1;
+    // register
+        r00 r01 r02 r03 r04 r05 r06 r07 = 8switch sr00 sr01 sr02 sr03 sr04 sr05 sr06 sr07 sirr0;
+        r10 r11 r12 r13 r14 r15 r16 r17 = 8switch sr10 sr11 sr12 sr13 sr14 sr15 sr16 sr17 sirr1;
+        r20 r21 r22 r23 r24 r25 r26 r27 = 8switch sr20 sr21 sr22 sr23 sr24 sr25 sr26 sr27 sirr2;
+        r30 r31 r32 r33 r34 r35 r36 r37 = 8switch sr30 sr31 sr32 sr33 sr34 sr35 sr36 sr37 sirr3;
+        r40 r41 r42 r43 r44 r45 r46 r47 = 8switch sr40 sr41 sr42 sr43 sr44 sr45 sr46 sr47 sirr4;
+        r50 r51 r52 r53 r54 r55 r56 r57 = 8switch sr50 sr51 sr52 sr53 sr54 sr55 sr56 sr57 sirr5;
+
+    // value code
+        in0 = 9or r00 r10 r20 r30 r40 r50 ins0 sre0 imm0; // REGの読み出し or INPUT or ALU結果 or 即値
+        in1 = 9or r01 r11 r21 r31 r41 r51 ins1 sre1 imm1;
+        in2 = 9or r02 r12 r22 r32 r42 r52 ins2 sre2 imm2;
+        in3 = 9or r03 r13 r23 r33 r43 r53 ins3 sre3 imm3;
+        in4 = 9or r04 r14 r24 r34 r44 r54 ins4 sre4 imm4;
+        in5 = 9or r05 r15 r25 r35 r45 r55 ins5 sre5 imm5;
+        in6 = 9or r06 r16 r26 r36 r46 r56 ins6 sre6    0;
+        in7 = 9or r07 r17 r27 r37 r47 r57 ins7 sre7    0;
+
+    // t0の場合 REG0 = a@2:7
+        imm0 imm1 imm2 imm3 imm4 imm5 _2 _3 = 8switch a2 a3 a4 a5 a6 a7 0 0 t0;
+    // t1の場合 REG2 = REG0 {ope} REG1;
+        // calc(命令は a5 a6 a7)
+        re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r10 r11 r12 r13 r14 r15 r16 r17 r20 r21 r22 r23 r24 r25 r26 r27;
+        // t1なら流す
+        sre0 sre1 sre2 sre3 sre4 sre5 sre6 sre7 = 8switch re0 re1 re2 re3 re4 re5 re6 re7 t1;
+    // t2の場合 OUTPUT(a5 a6 a7) = INPUT(a2 a3 a4)
+        souw = and sout t2;
+        o0 o1 o2 o3 o4 o5 o6 o7 = 8switch in0 in1 in2 in3 in4 in5 in6 in7 souw;
+    // t3の場合 c@0:7 = if condition(REG3) REG0 swc
+        cond = condition r30 r31 r32 r33 r34 r35 r36 r37 a5 a6 a7;
+        scond = and t3 cond;
+        c(8) = 8switch r00 r01 r02 r03 r04 r05 r06 r07 scond;
+}
+// 1. add 5
+// 思考の流れ
+// input + 5を作りたい
+    // IMM  5 ->  REG0
+    // COPY REG0  REG1
+    // COPY INPUT REG2
+    // CALC  plus  REG1 REG2 -> REG3
+    // COPY REG3 OUTPUT
+module add5(input(8)) -> (output) {
+    s(8) = counter_swc counter cond;
+    a(256) = 8decoder s;
+    
+    0 = false input[0];
+    1 = true input[0];
+    // IMM  5 ->  REG0
+    // 0 0 0 0 0 1 0 1
+    // COPY REG0  REG1
+    // 1 0 0 0 0 0 0 1
+    // COPY INPUT REG2
+    // 1 0 1 1 0 0 1 0
+    // CALC  plus  REG1 REG2 -> REG3
+    // 0 1 0 0 0 1 0 0
+    // COPY REG3 OUTPUT
+    // 1 0 0 1 1 1 1 0
+    i00(8) = 8switch 0 0 0 0 0 1 0 1 a[0];
+    i01(8) = 8switch 1 0 0 0 0 0 0 1 a[1];
+    i02(8) = 8switch 1 0 1 1 0 0 1 0 a[2];
+    i03(8) = 8switch 0 1 0 0 0 1 0 0 a[3];
+    i04(8) = 8switch 1 0 0 1 1 1 1 0 a[4];
+    in0 = 8or i00[0] i01[0] i02[0] i03[0] i04[0] 0 0 0;
+    in1 = 8or i00[1] i01[1] i02[1] i03[1] i04[1] 0 0 0;
+    in2 = 8or i00[2] i01[2] i02[2] i03[2] i04[2] 0 0 0;
+    in3 = 8or i00[3] i01[3] i02[3] i03[3] i04[3] 0 0 0;
+    in4 = 8or i00[4] i01[4] i02[4] i03[4] i04[4] 0 0 0;
+    in5 = 8or i00[5] i01[5] i02[5] i03[5] i04[5] 0 0 0;
+    in6 = 8or i00[6] i01[6] i02[6] i03[6] i04[6] 0 0 0;
+    in7 = 8or i00[7] i01[7] i02[7] i03[7] i04[7] 0 0 0;
+    output(8) counter(8) cond = turing_complete in0 in1 in2 in3 in4 in5 in6 in7 input;
+}
+
