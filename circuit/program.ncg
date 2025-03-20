@@ -341,8 +341,9 @@ func condition(i(8) c0 c1 c2) -> (bool) {
 }
 module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
                 i0 i1 i2 i3 i4 i5 i6 i7) ->(
-                o0 o1 o2 o3 o4 o5 o6 o7 re0 re1 re2 re3 re4 re5 re6 re7
+                o0 o1 o2 o3 o4 o5 o6 o7 
                 c scond) {
+                // re0 re1 re2 re3 re4 re5 re6 re7
     // 定数
         0 = false <- a0;
         1 = true <- a0;
