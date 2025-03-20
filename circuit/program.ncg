@@ -442,3 +442,34 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
     // COPY INPUT REG2
     // CALC  plus  REG1 REG2 -> REG3
     // COPY REG3 OUTPUT
+module add5(input(8)) -> (output) {
+    s(8) = counter_swc counter cond;
+    a(256) = 8decoder s;
+    
+    0 = false input[0];
+    1 = true input[0];
+    // IMM  5 ->  REG0
+    // 0 0 0 0 0 1 0 1
+    // COPY REG0  REG1
+    // 1 0 0 0 0 0 0 1
+    // COPY INPUT REG2
+    // 1 0 1 1 0 0 1 0
+    // CALC  plus  REG1 REG2 -> REG3
+    // 0 1 0 0 0 1 0 0
+    // COPY REG3 OUTPUT
+    // 1 0 0 1 1 1 1 0
+    i00(8) = 8switch 0 0 0 0 0 1 0 1 a[0];
+    i01(8) = 8switch 1 0 0 0 0 0 0 1 a[1];
+    i02(8) = 8switch 1 0 1 1 0 0 1 0 a[2];
+    i03(8) = 8switch 0 1 0 0 0 1 0 0 a[3];
+    i04(8) = 8switch 1 0 0 1 1 1 1 0 a[4];
+    in0 = 8or i00[0] i01[0] i02[0] i03[0] i04[0] 0 0 0;
+    in1 = 8or i00[1] i01[1] i02[1] i03[1] i04[1] 0 0 0;
+    in2 = 8or i00[2] i01[2] i02[2] i03[2] i04[2] 0 0 0;
+    in3 = 8or i00[3] i01[3] i02[3] i03[3] i04[3] 0 0 0;
+    in4 = 8or i00[4] i01[4] i02[4] i03[4] i04[4] 0 0 0;
+    in5 = 8or i00[5] i01[5] i02[5] i03[5] i04[5] 0 0 0;
+    in6 = 8or i00[6] i01[6] i02[6] i03[6] i04[6] 0 0 0;
+    in7 = 8or i00[7] i01[7] i02[7] i03[7] i04[7] 0 0 0;
+    output(8) counter(8) cond = turing_complete in0 in1 in2 in3 in4 in5 in6 in7 input;
+}
