@@ -1,12 +1,17 @@
 # CPU on Circuit Game
+
 making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)  
 
 ## Build CircuitGame CLI Tool
+
 - Clone  
+
     ```sh
     git clone https://github.com/neknaj/circuitgame
     ```
+
 - Build  
+
     ```sh
     cd circuitgame
     git pull
@@ -17,23 +22,34 @@ making CPU on [Circuit Game](https://neknaj.github.io/circuitgame/)
     ```
 
 ## Develop
+
 ### Open Server and Debug in Web Browser
+
 - run  
+
     ```sh
     ./ncg -i circuit/sample.ncg -d doc/sample.md -s 8081
     ```
+
 - open in your browser  
     https://neknaj.github.io/circuitgame/?socket=ws://localhost:8081  
+
 ### Create Document
+
 ```sh
 ./ncg -i circuit/sample.ncg -d doc/sample.ncg
 ```
+
 ### Transpile
+
 - one module
+
     ```sh
     ./ncg -i circuit/sample.ncg -o test/module/sample.ts -m fAddr
     ```
+
 - all modules
+
     ```sh
     ./ncg -i circuit/sample.ncg -o test/module/sample.ts -m .+
     ```
@@ -59,4 +75,5 @@ Options:
   ```
 
 ## License
+
 This project is licensed under the MIT License.  
