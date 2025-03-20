@@ -252,12 +252,12 @@ func 3or(x y z) -> (b) {
         o: and q r;
     }
 // カウンタ
-module counter_swc(input(8) swc) -> (out) {
-    1 = true input[0];
-    a(8) = 8inc out;
-    p(8) = selector input a swc; 
-    out(8) = mem8bits p 1 1;
-}
+    module counter_swc(input(8) swc) -> (out) {
+        1 = true input[0];
+        a(8) = 8inc out;
+        p(8) = selector input a swc; 
+        out(8) = mem8bits p 1 1;
+    }
 // 巨大なor
     func 16or(i(16)) -> (bool) {
         a0 = 8or i[0,7];

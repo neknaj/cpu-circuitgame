@@ -1,4 +1,5 @@
 import { FixedLengthArray, Modules } from "./module/program";
+import { test, expect, describe, it } from "bun:test";
 /**
  * 整数を指定ビット数のブール配列に変換する関数
  * @param i 変換する整数
@@ -65,44 +66,60 @@ function testALU(operationName: string, operand: [boolean, boolean, boolean], AL
     });
 }
 
-
-test_anybit("nor", (a, b) => ~(a | b), [1, 1]);
-test_anybit("true", (a) => 1, [1]);
-test_anybit("false", (a) => 0, [1]);
-test_anybit("not", (a) => ~a, [1]);
-test_anybit("and", (a, b) => (a & b), [1, 1]);
-test_anybit("or", (a, b) => (a | b), [1, 1]);
-test_anybit("xor", (a, b) => (a ^ b), [1, 1]);
-// test_anybit("haddr", (a, b) => (a + b), [1, 1], 2);
-// test_anybit("faddr", (a, b, c) => (a + b + c), [1, 1, 1], 2);
-test_anybit("8bit_addr", (a, b) => (a + b), [8, 8]);
-test_anybit("3or", (a, b, c) => (a | b | c), [1, 1, 1]);
-test_anybit("4or", (a, b, c, d) => (a | b | c | d), [1, 1, 1, 1]);
-test_anybit("4and", (a, b, c, d) => (a & b & c & d), [1, 1, 1, 1]);
-test_anybit("4bit_and", (a, b) => (a & b), [4, 4]);
-test_anybit("8not", (a) => ~a, [8]);
-test_anybit("8or", (a, b, c, d, e, f, g, h) => (a | b | c | d | e | f | g | h), [1, 1, 1, 1, 1, 1, 1, 1]);
-test_anybit("8bit_or", (a, b) => (a | b), [8, 8]);
-test_anybit("8bit_and", (a, b) => (a & b), [8, 8]);
-test_anybit("8bit_nor", (a, b) => ~(a | b), [8, 8]);
-test_anybit("8inc", (a) => a + 1, [8]);
-test_anybit("8nagate", (a) => -a, [8]);
-test_anybit("2decoder", (a, b) => 1 << (b * 2 + a), [1, 1], 4);
-test_anybit("3decoder", (a, b, c) => 1 << (c * 4 + b * 2 + a), [1, 1, 1], 8);
-test_anybit("4decoder", (a, b, c, d) => 1 << (d * 8 + c * 4 + b * 2 + a), [1, 1, 1, 1], 16);
-// 多すぎてエラー
-// test_anybit("8decoder", (a, b, c, d, e, f, g, h) => 1 << (h * 128 + g * 64 + f * 32 + e * 16 + d * 8 + c * 4 + b * 2 + a), [1, 1, 1, 1, 1, 1, 1, 1], 256)
-test_anybit("4switch", (a, swc) => swc ? a : 0, [4, 1]);
-test_anybit("8switch", (a, swc) => swc ? a : 0, [8, 1]);
-test_anybit("selector", (a, b, swc) => swc ? a : b, [8, 8, 1]);
-test_anybit("16switch", (a, swc) => swc ? a : 0, [16, 1]);
-test_anybit("16or", (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af) => (a0 | a1 | a2 | a3 | a4 | a5 | a6 | a7 | a8 | a9 | aa | ab | ac | ad | ae | af), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-// 多いだけなので割愛
-// test_anybit("32or",(a)=> )
-// test_anybit("64or",(a)=> )
-// test_anybit("256or",(a)=> )
-test_anybit("6or", (a, b, c, d, e, f) => (a | b | c | d | e | f), [1, 1, 1, 1, 1, 1])
-test_anybit("9or", (a, b, c, d, e, f, g, h, i) => (a | b | c | d | e | f | g | h | i), [1, 1, 1, 1, 1, 1, 1, 1, 1])
+// test("nor", () => test_anybit("nor", (a, b) => ~(a | b), [1, 1]))
+describe("BASIC", () => {
+    test_anybit("nor", (a, b) => ~(a | b), [1, 1]);
+    test_anybit("true", (a) => 1, [1]);
+    test_anybit("false", (a) => 0, [1]);
+    test_anybit("not", (a) => ~a, [1]);
+    test_anybit("and", (a, b) => (a & b), [1, 1]);
+    test_anybit("or", (a, b) => (a | b), [1, 1]);
+    test_anybit("xor", (a, b) => (a ^ b), [1, 1]);
+})
+describe("adder", () => {
+    //     test_anybit("haddr", (a, b) => (a + b), [1, 1], 2);
+    //     test_anybit("faddr", (a, b, c) => (a + b + c), [1, 1, 1], 2);
+    test_anybit("8bit_addr", (a, b) => (a + b), [8, 8]);
+})
+describe("3bit", () => {
+    test_anybit("3or", (a, b, c) => (a | b | c), [1, 1, 1]);
+})
+describe("4bit", () => {
+    test_anybit("4or", (a, b, c, d) => (a | b | c | d), [1, 1, 1, 1]);
+    test_anybit("4and", (a, b, c, d) => (a & b & c & d), [1, 1, 1, 1]);
+    test_anybit("4bit_and", (a, b) => (a & b), [4, 4]);
+})
+describe("8bit", () => {
+    test_anybit("8not", (a) => ~a, [8]);
+    test_anybit("8or", (a, b, c, d, e, f, g, h) => (a | b | c | d | e | f | g | h), [1, 1, 1, 1, 1, 1, 1, 1]);
+    test_anybit("8bit_or", (a, b) => (a | b), [8, 8]);
+    test_anybit("8bit_and", (a, b) => (a & b), [8, 8]);
+    test_anybit("8bit_nor", (a, b) => ~(a | b), [8, 8]);
+    test_anybit("8inc", (a) => a + 1, [8]);
+    test_anybit("8nagate", (a) => -a, [8]);
+})
+describe("decoder", () => {
+    test_anybit("2decoder", (a, b) => 1 << (b * 2 + a), [1, 1], 4);
+    test_anybit("3decoder", (a, b, c) => 1 << (c * 4 + b * 2 + a), [1, 1, 1], 8);
+    test_anybit("4decoder", (a, b, c, d) => 1 << (d * 8 + c * 4 + b * 2 + a), [1, 1, 1, 1], 16);
+    // 多すぎてエラー
+    // test_anybit("8decoder", (a, b, c, d, e, f, g, h) => 1 << (h * 128 + g * 64 + f * 32 + e * 16 + d * 8 + c * 4 + b * 2 + a), [1, 1, 1, 1, 1, 1, 1, 1], 256)
+})
+describe("スイッチ制御", () => {
+    test_anybit("4switch", (a, swc) => swc ? a : 0, [4, 1]);
+    test_anybit("8switch", (a, swc) => swc ? a : 0, [8, 1]);
+    test_anybit("selector", (a, b, swc) => swc ? a : b, [8, 8, 1]);
+    test_anybit("16switch", (a, swc) => swc ? a : 0, [16, 1]);
+})
+describe("巨大or", () => {
+    test_anybit("6or", (a, b, c, d, e, f) => (a | b | c | d | e | f), [1, 1, 1, 1, 1, 1])
+    test_anybit("9or", (a, b, c, d, e, f, g, h, i) => (a | b | c | d | e | f | g | h | i), [1, 1, 1, 1, 1, 1, 1, 1, 1])
+    test_anybit("16or", (a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af) => (a0 | a1 | a2 | a3 | a4 | a5 | a6 | a7 | a8 | a9 | aa | ab | ac | ad | ae | af), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+    // 多いだけなので割愛
+    // test_anybit("32or",(a)=> )
+    // test_anybit("64or",(a)=> )
+    // test_anybit("256or",(a)=> )
+})
 describe("ALU", () => {
     const operand: [boolean, boolean, boolean][] = [
         [false, false, false],
@@ -126,11 +143,11 @@ test_anybit("condition", (value, operand) => {
     switch (operand) {
         case 0: return 0;
         case 1: return Number(signedValue == 0);
-        case 2: return Number(signedValue <  0);
+        case 2: return Number(signedValue < 0);
         case 3: return Number(signedValue <= 0);
         case 4: return 1;
         case 5: return Number(signedValue != 0);
         case 6: return Number(signedValue >= 0);
-        case 7: return Number(signedValue >  0);
+        case 7: return Number(signedValue > 0);
     }
 }, [8, 3], 1);
