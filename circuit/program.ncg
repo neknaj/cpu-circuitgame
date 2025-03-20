@@ -474,3 +474,13 @@ module add5(input(8)) -> (output) {
     in7 = 8or i00[7] i01[7] i02[7] i03[7] i04[7] 0 0 0;
     output(8) counter(8) cond = turing_complete in0 in1 in2 in3 in4 in5 in6 in7 input;
 }
+
+test turing_complete:16->17 {
+    f f f f f f f f f f f f f f f f -> f f f f f f f f f f f f f f f f f;
+    // INPUT -> OUTPUT
+    t f t t f t t f t f f f t f t f -> t f f f t f t f f f f f f f f f f;
+    // INPUT -> REG0 -> OUTPUT
+    t f t t f f f f t f t f t f t f -> f f f f f f f f f f f f f f f f f;
+    t f t t f f f f t f t f t f t f -> f f f f f f f f f f f f f f f f f;
+    t f f f f t t f f f f f f f f f -> t f t f t f t f f f f f f f f f f;
+}

@@ -151,3 +151,34 @@ test_anybit("condition", (value, operand) => {
         case 7: return Number(signedValue > 0);
     }
 }, [8, 3], 1);
+
+function parsePattern(pat: string): [boolean[], boolean[]] {
+    let [input, output] = pat.split("->");
+    let boolArgs = input.split(" ")
+        .filter(x => x !== "")
+        .map(x => x === "t");
+    let expectedBool = output.split(" ")
+        .filter(x => x !== "")
+        .map(x => x === "t");
+    return [boolArgs, expectedBool];
+}
+test("turing_complete", () => {
+    const tc = new Modules["turing_complete"]();
+    const patterns = [
+        // 何もないことを確認する
+        // 1 2 3 4 5 6 7 8 9 a b c d e f -> 0 1 2 3 4 5 6 7 8 9 a b c d e f C 
+        "f f f f f f f f f f f f f f f f -> f f f f f f f f f f f f f f f f f;",
+        // INPUT -> OUTPUT
+        "t f t t f t t f t f f f t f t f -> t f f f t f t f f f f f f f f f f;",
+        // INPUT -> REG0 -> OUTPUT
+        "t f t t f f f f t f t f t f t f -> f f f f f f f f f f f f f f f f f;",
+        "t f f f f t t f f f f f f f f f -> t f t f t f t f f f f f f f f f f;",
+    ];
+
+    patterns.forEach(pat => {
+        let [boolArgs, expectedBool] = parsePattern(pat);
+        tc.inputs(boolArgs);
+        tc.next()
+        expect(tc.next().outputs).toEqual(expectedBool);
+    });
+})
