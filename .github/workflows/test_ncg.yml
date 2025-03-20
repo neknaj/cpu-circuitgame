@@ -39,4 +39,5 @@ jobs:
         run: |
           mkdir -p test/module # 出力先ディレクトリを作成
           ./ncg -i circuit/turing_complete/turing_complete.ncg -o test/module/turing_complete.ts -m .+
+          ./ncg -i circuit/program.ncg -o test/module/program.ts -m .+
           npm run test
