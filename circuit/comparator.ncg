@@ -1,0 +1,125 @@
+using nor:2->1;
+
+func not (x)->(a) {
+    a: nor <- x x;
+}
+
+func and (x y)->(c) {
+    a: not <- x  ;
+    b: not <- y  ;
+    c: nor <- a b;
+}
+
+func or (x y)->(b) {
+    a: nor <- x y;
+    b: not <- a  ;
+}
+
+func hAddr (x y)->(c a) {
+    a: and x y;
+    b: nor x y;
+    c: nor a b;
+}
+
+func fAddr (x y z)->(s2 c) {
+    s1 c1: hAddr x y  ;
+    s2 c2: hAddr s1 z ;
+    c    : or    c1 c2;
+}
+
+func add8bits (d0(8), d1(8))->(o0 o1 o2 o3 o4 o5 o6 o7, c7) {
+    o0 c0: hAddr d0[0] d1[0];
+    o1 c1: fAddr d0[1] d1[1] c0;
+    o2 c2: fAddr d0[2] d1[2] c1;
+    o3 c3: fAddr d0[3] d1[3] c2;
+    o4 c4: fAddr d0[4] d1[4] c3;
+    o5 c5: fAddr d0[5] d1[5] c4;
+    o6 c6: fAddr d0[6] d1[6] c5;
+    o7 c7: fAddr d0[7] d1[7] c6;
+}
+
+func not8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    o0: not d0;
+    o1: not d1;
+    o2: not d2;
+    o3: not d3;
+    o4: not d4;
+    o5: not d5;
+    o6: not d6;
+    o7: not d7;
+}
+
+func comparator (a(8), b(8))->(o0,o1,o2) {
+    na(8): not8bits a;
+    nb(8): not8bits b;
+    s1(8) o0: add8bits a nb;
+    s2(8) o2: add8bits b na;
+    o1: nor o0 o2;
+}
+
+
+//
+// テストを定義する
+//
+
+test not:1->1 {
+    t -> f;
+    f -> t;
+}
+
+test and:2->1 {
+    t t -> t;
+    t f -> f;
+    f t -> f;
+    f f -> f;
+}
+
+test or:2->1 {
+    t t -> t;
+    t f -> t;
+    f t -> t;
+    f f -> f;
+}
+
+test nand:2->1 {
+    t t -> f;
+    t f -> t;
+    f t -> t;
+    f f -> t;
+}
+
+test nor:2->1 {
+    t t -> f;
+    t f -> f;
+    f t -> f;
+    f f -> t;
+}
+
+test xor:2->1 {
+    t t -> f;
+    t f -> t;
+    f t -> t;
+    f f -> f;
+}
+
+test increment:1->2 {
+    t -> t f;
+    f -> f t;
+}
+test hAddr:2->2 {
+    t t -> f t;
+    t f -> t f;
+    f t -> t f;
+    f f -> f f;
+}
+
+test fAddr:3->2 {
+    t t t -> t t;
+    f t t -> f t;
+    t f t -> f t;
+    f f t -> t f;
+    t t f -> f t;
+    f t f -> t f;
+    t f f -> t f;
+    f f f -> f f;
+}

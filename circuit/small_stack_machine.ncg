@@ -659,15 +659,15 @@ func hAddr_4complement2 (nx)->(c e) {
     e: buf nx;
 }
 
-func complement8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
-    c0 o0: hAddr_4complement2 d0;
-    c1 o1: hAddr_4complement d1 c0;
-    c2 o2: hAddr_4complement d2 c1;
-    c3 o3: hAddr_4complement d3 c2;
-    c4 o4: hAddr_4complement d4 c3;
-    c5 o5: hAddr_4complement d5 c4;
-    c6 o6: hAddr_4complement d6 c5;
-    c7 o7: hAddr_4complement d7 c6;
+func complement8bits (d(8))->(o0 o1 o2 o3 o4 o5 o6 o7) {
+    c0 o0: hAddr_4complement2 d[0];
+    c1 o1: hAddr_4complement d[1] c0;
+    c2 o2: hAddr_4complement d[2] c1;
+    c3 o3: hAddr_4complement d[3] c2;
+    c4 o4: hAddr_4complement d[4] c3;
+    c5 o5: hAddr_4complement d[5] c4;
+    c6 o6: hAddr_4complement d[6] c5;
+    c7 o7: hAddr_4complement d[7] c6;
 }
 // func complement8bits (d0 d1 d2 d3 d4 d5 d6 d7)->(o0 o1 o2 o3 o4 o5 o6 o7) {
 //     n0 n1 n2 n3 n4 n5 n6 n7: not8bits       d0 d1 d2 d3 d4 d5 d6 d7;
