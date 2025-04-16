@@ -154,12 +154,12 @@ test_anybit("condition", (value, operand) => {
 
 function parsePattern(pat: string): [boolean[], boolean[]] {
     let [input, output] = pat.split("->");
-    let boolArgs = input.split(" ")
-        .filter(x => x !== "")
-        .map(x => x === "t");
-    let expectedBool = output.split(" ")
-        .filter(x => x !== "")
-        .map(x => x === "t");
+    const parseBoolArray = (str: string) => str.replaceAll(";", "")
+        .split("")
+        .filter(x => x !== " ")
+        .map(x => x === "t" || x === "1");
+    let boolArgs = parseBoolArray(input);
+    let expectedBool = parseBoolArray(output);
     return [boolArgs, expectedBool];
 }
 test("turing_complete", () => {
@@ -167,17 +167,32 @@ test("turing_complete", () => {
     const patterns = [
         // 何もないことを確認する
         // 1 2 3 4 5 6 7 8 9 a b c d e f -> 0 1 2 3 4 5 6 7 8 9 a b c d e f C 
-        "f f f f f f f f f f f f f f f f -> f f f f f f f f f f f f f f f f f;",
-        // INPUT -> OUTPUT
-        "t f t t f t t f t f f f t f t f -> t f f f t f t f f f f f f f f f f;",
-        // INPUT -> REG0 -> OUTPUT
-        "t f t t f f f f t f t f t f t f -> f f f f f f f f f f f f f f f f f;",
-        "t f f f f t t f f f f f f f f f -> t f t f t f t f f f f f f f f f f;",
+        "ff fff fff ffff ffff -> ffff ffff ffff ffff f;",
+        // COPY INPUT -> OUTPUT
+        "tf ttf ttf 0000 1111 -> 0000 1111 ffff ffff f;",
+        // COPY INPUT -> REG0
+        "tf ttf fff tftf tftf -> ffff ffff ffff ffff f;",
+        "10 000 110 0000 0000 -> tftf tftf 0000 0000 0;",   // check
+        // IMM 5
+        "00 000 101 ffff ffff -> ffff ffff ffff ffff f;",
+        "10 000 110 ffff ffff -> 1010 0000 ffff ffff f;",   // check
+        // COPY REG0 -> REG1
+        "10 000 001 ffff ffff -> ffff ffff ffff ffff f;",
+        "10 001 110 ffff ffff -> 1010 0000 ffff ffff f;",   // check
+        // COPY INPUT REG2
+        "10 110 010 1100 0000 -> ffff ffff ffff ffff f;",
+        "10 010 110 ffff ffff -> 1100 0000 ffff ffff f;",   // check
+        // CALC ADD -> REG3
+        "01 000 110 ffff ffff -> ffff ffff ffff ffff f;",
+        // "10 011 110 ffff ffff -> 1110 0000 ffff ffff f;",   // check
+        // MOV REG3 -> OUT
+        "10 011 110 ffff ffff -> 1110 0000 ffff ffff f;",
     ];
 
     patterns.forEach(pat => {
         let [boolArgs, expectedBool] = parsePattern(pat);
         tc.inputs(boolArgs);
+        tc.next()
         tc.next()
         expect(tc.next().outputs).toEqual(expectedBool);
     });

@@ -371,10 +371,11 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
         sowr5 = and t2 sor5;
 
     // REGが読み出されるのは
+        // REG0   (t2 and sir0) or t3
         // REG1   t1 or (t2 and sir1)
         // REG2   t1 or (t2 and sir2)
-        // REG045 (t2 and sir[045])
         // REG3   (t2 and sir3) or t3
+        // REG45  (t2 and sir[45])
         t2sir1 = and t2 sir1;
         t2sir2 = and t2 sir2;
         t2sir3 = and t2 sir3;
@@ -424,7 +425,7 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
         imm5 imm4 imm3 imm2 imm1 imm0 _2 _3 = 8switch a2 a3 a4 a5 a6 a7 0 0 t0;
     // t1の場合 REG2 = REG0 {ope} REG1;
         // calc(命令は a5 a6 a7)
-        re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r10 r11 r12 r13 r14 r15 r16 r17 r20 r21 r22 r23 r24 r25 r26 r27;
+        re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r17 r16 r15 r14 r13 r12 r11 r10 r27 r26 r25 r24 r23 r22 r21 r20;
         // t1なら流す
         sre0 sre1 sre2 sre3 sre4 sre5 sre6 sre7 = 8switch re0 re1 re2 re3 re4 re5 re6 re7 t1;
     // t2の場合 OUTPUT(a5 a6 a7) = INPUT(a2 a3 a4)
@@ -473,14 +474,4 @@ module add5(input(8)) -> (output) {
     in6 = 8or i00[6] i01[6] i02[6] i03[6] i04[6] 0 0 0;
     in7 = 8or i00[7] i01[7] i02[7] i03[7] i04[7] 0 0 0;
     output(8) counter(8) cond = turing_complete in0 in1 in2 in3 in4 in5 in6 in7 input;
-}
-
-test turing_complete:16->17 {
-    f f f f f f f f f f f f f f f f -> f f f f f f f f f f f f f f f f f;
-    // INPUT -> OUTPUT
-    t f t t f t t f t f f f t f t f -> t f f f t f t f f f f f f f f f f;
-    // INPUT -> REG0 -> OUTPUT
-    t f t t f f f f t f t f t f t f -> f f f f f f f f f f f f f f f f f;
-    t f t t f f f f t f t f t f t f -> f f f f f f f f f f f f f f f f f;
-    t f f f f t t f f f f f f f f f -> t f t f t f t f f f f f f f f f f;
 }
