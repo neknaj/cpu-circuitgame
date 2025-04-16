@@ -423,7 +423,7 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
 
     // t0の場合 REG0 = a@2:7
         imm5 imm4 imm3 imm2 imm1 imm0 _2 _3 = 8switch a2 a3 a4 a5 a6 a7 0 0 t0;
-    // t1の場合 REG2 = REG0 {ope} REG1;
+    // t1の場合 REG3 = REG1 {ope} REG2;
         // calc(命令は a5 a6 a7)
         re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r17 r16 r15 r14 r13 r12 r11 r10 r27 r26 r25 r24 r23 r22 r21 r20;
         // t1なら流す
