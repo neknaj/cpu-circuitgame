@@ -41,5 +41,4 @@
 | 9or | 9 -> 1 | 16 |
 | ALU | 19 -> 8 | 512 |
 | condition | 11 -> 1 | 41 |
-| turing_complete | 16 -> 17 | 1481 |
-| add5 | 8 -> 8 | 2789 |
+| turing_complete | 16 -> 17 | 1483 |

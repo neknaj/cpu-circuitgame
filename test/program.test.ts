@@ -162,17 +162,32 @@ function parsePattern(pat: string): [boolean[], boolean[]] {
     let expectedBool = parseBoolArray(output);
     return [boolArgs, expectedBool];
 }
+function format(booleans: boolean[]): string {
+    // 1. boolean を 't' または 'f' に変換
+    const chars = booleans.map(b => b ? 't' : 'f');
+
+    // 2. 4文字ずつの塊（ニブル文字列）を作成
+    const nibbles: string[] = [];
+    for (let i = 0; i < chars.length; i += 4) {
+        // 配列を4要素ずつスライスし、スペースなしで結合して塊にする
+        nibbles.push(chars.slice(i, i + 4).join(''));
+    }
+
+    // 3. 作成した塊（ニブル文字列）をスペースで結合
+    return nibbles.join(' ');
+}
+
 test("turing_complete", () => {
     const tc = new Modules["turing_complete"]();
     const patterns = [
         // 何もないことを確認する
-        // 1 2 3 4 5 6 7 8 9 a b c d e f -> 0 1 2 3 4 5 6 7 8 9 a b c d e f C 
-        "ff fff fff ffff ffff -> ffff ffff ffff ffff f;",
+        //1 234 567 89ab cdef -> 0123 4567 89ab cdef C 
+        // "ff fff fff ffff ffff -> ffff ffff ffff ffff f;",
         // COPY INPUT -> OUTPUT
-        "tf ttf ttf 0000 1111 -> 0000 1111 ffff ffff f;",
+        // "tf ttf ttf 0000 0000 -> 0000 0000 ffff ffff f;",
         // COPY INPUT -> REG0
-        "tf ttf fff tftf tftf -> ffff ffff ffff ffff f;",
-        "10 000 110 0000 0000 -> tftf tftf 0000 0000 0;",   // check
+        "tf ttf fff 1010 1010 -> ffff ffff ffff ffff f;",
+        "10 000 110 0000 0000 -> 1010 1010 0000 0000 0;",   // check
         // IMM 5
         "00 000 101 ffff ffff -> ffff ffff ffff ffff f;",
         "10 000 110 ffff ffff -> 1010 0000 ffff ffff f;",   // check
@@ -180,20 +195,20 @@ test("turing_complete", () => {
         "10 000 001 ffff ffff -> ffff ffff ffff ffff f;",
         "10 001 110 ffff ffff -> 1010 0000 ffff ffff f;",   // check
         // COPY INPUT REG2
-        "10 110 010 1100 0000 -> ffff ffff ffff ffff f;",
-        "10 010 110 ffff ffff -> 1100 0000 ffff ffff f;",   // check
+        "10 110 010 1101 0000 -> ffff ffff ffff ffff f;",
+        "10 010 110 ffff ffff -> 0000 0000 ffff ffff f;",   // check
         // CALC ADD -> REG3
-        "01 000 110 ffff ffff -> ffff ffff ffff ffff f;",
-        // "10 011 110 ffff ffff -> 1110 0000 ffff ffff f;",   // check
+        "01 000 100 ffff ffff -> ffff ffff ffff ffff f;",
+        "10 011 110 ffff ffff -> 1110 0000 ffff ffff f;",   // check
         // MOV REG3 -> OUT
-        "10 011 110 ffff ffff -> 1110 0000 ffff ffff f;",
+        "10 011 110 ffff ffff -> 1111 1000 ffff ffff f;",
     ];
 
     patterns.forEach(pat => {
         let [boolArgs, expectedBool] = parsePattern(pat);
         tc.inputs(boolArgs);
-        tc.next()
-        tc.next()
-        expect(tc.next().outputs).toEqual(expectedBool);
+        tc.next();
+        tc.next();
+        expect(format(tc.next().outputs)).toEqual(format(expectedBool));
     });
 })

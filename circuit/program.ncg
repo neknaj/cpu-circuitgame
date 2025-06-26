@@ -341,16 +341,17 @@ func condition(i(8) c0 c1 c2) -> (bool) {
 }
 module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
                 i0 i1 i2 i3 i4 i5 i6 i7) ->(
-                o0 o1 o2 o3 o4 o5 o6 o7 
+                o0 o1 o2 o3 o4 o5 o6 o7
                 c scond) {
+                // sre0 sre1 sre2 sre3 sre4 sre5 sre6 sre7
                 // re0 re1 re2 re3 re4 re5 re6 re7
     // 定数
         0 = false <- a0;
         1 = true <- a0;
 
     // decode instruction
-        // imm, calc, copy, cond
-        t0 t1 t2 t3 = 2decoder a1 a0;   // どの命令か
+        // imm, copy, calc, cond   ← COPY と CALC を入れ替える
+        t0 t1 t2 t3 = 2decoder a1 a0;
         sir0 sir1 sir2 sir3 sir4 sir5 sin _0 = 3decoder a4 a3 a2;   // 入力REGの選択 (switch input register)
         sor0 sor1 sor2 sor3 sor4 sor5 sout _1 = 3decoder a7 a6 a5;  // 出力REGの選択 or 演算の選択 or 条件の選択 (switch output register)
     // filtered input (switch input read)
@@ -376,11 +377,12 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
         // REG2   t1 or (t2 and sir2)
         // REG3   (t2 and sir3) or t3
         // REG45  (t2 and sir[45])
+        t2sir0 = and t2 sir0;
         t2sir1 = and t2 sir1;
         t2sir2 = and t2 sir2;
         t2sir3 = and t2 sir3;
         // switch input read register
-        sirr0 = and t2 sir0;
+        sirr0 = or  t2sir0 t3;
         sirr1 = or  t1 t2sir1;
         sirr2 = or  t1 t2sir2;
         sirr3 = or  t2sir3 t3;
@@ -425,7 +427,7 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
         imm5 imm4 imm3 imm2 imm1 imm0 _2 _3 = 8switch a2 a3 a4 a5 a6 a7 0 0 t0;
     // t1の場合 REG3 = REG1 {ope} REG2;
         // calc(命令は a5 a6 a7)
-        re0 re1 re2 re3 re4 re5 re6 re7 = ALU a5 a6 a7 r17 r16 r15 r14 r13 r12 r11 r10 r27 r26 r25 r24 r23 r22 r21 r20;
+        re0 re1 re2 re3 re4 re5 re6 re7 = ALU a7 a6 a5 r10 r11 r12 r13 r14 r15 r16 r17 r20 r21 r22 r23 r24 r25 r26 r27;
         // t1なら流す
         sre0 sre1 sre2 sre3 sre4 sre5 sre6 sre7 = 8switch re0 re1 re2 re3 re4 re5 re6 re7 t1;
     // t2の場合 OUTPUT(a5 a6 a7) = INPUT(a2 a3 a4)
@@ -444,34 +446,34 @@ module turing_complete(a0 a1 a2 a3 a4 a5 a6 a7
     // COPY INPUT REG2
     // CALC  plus  REG1 REG2 -> REG3
     // COPY REG3 OUTPUT
-module add5(input(8)) -> (output) {
-    s(8) = counter_swc counter cond;
-    a(256) = 8decoder s;
+// module add5(input(8)) -> (output) {
+//     s(8) = counter_swc counter cond;
+//     a(256) = 8decoder s;
     
-    0 = false input[0];
-    1 = true input[0];
-    // IMM  5 ->  REG0
-    // 0 0 0 0 0 1 0 1
-    // COPY REG0  REG1
-    // 1 0 0 0 0 0 0 1
-    // COPY INPUT REG2
-    // 1 0 1 1 0 0 1 0
-    // CALC  plus  REG1 REG2 -> REG3
-    // 0 1 0 0 0 1 0 0
-    // COPY REG3 OUTPUT
-    // 1 0 0 1 1 1 1 0
-    i00(8) = 8switch 0 0 0 0 0 1 0 1 a[0];
-    i01(8) = 8switch 1 0 0 0 0 0 0 1 a[1];
-    i02(8) = 8switch 1 0 1 1 0 0 1 0 a[2];
-    i03(8) = 8switch 0 1 0 0 0 1 0 0 a[3];
-    i04(8) = 8switch 1 0 0 1 1 1 1 0 a[4];
-    in0 = 8or i00[0] i01[0] i02[0] i03[0] i04[0] 0 0 0;
-    in1 = 8or i00[1] i01[1] i02[1] i03[1] i04[1] 0 0 0;
-    in2 = 8or i00[2] i01[2] i02[2] i03[2] i04[2] 0 0 0;
-    in3 = 8or i00[3] i01[3] i02[3] i03[3] i04[3] 0 0 0;
-    in4 = 8or i00[4] i01[4] i02[4] i03[4] i04[4] 0 0 0;
-    in5 = 8or i00[5] i01[5] i02[5] i03[5] i04[5] 0 0 0;
-    in6 = 8or i00[6] i01[6] i02[6] i03[6] i04[6] 0 0 0;
-    in7 = 8or i00[7] i01[7] i02[7] i03[7] i04[7] 0 0 0;
-    output(8) counter(8) cond = turing_complete in0 in1 in2 in3 in4 in5 in6 in7 input;
-}
+//     0 = false input[0];
+//     1 = true input[0];
+//     // IMM  5 ->  REG0
+//     // 0 0 0 0 0 1 0 1
+//     // COPY REG0  REG1
+//     // 1 0 0 0 0 0 0 1
+//     // COPY INPUT REG2
+//     // 1 0 1 1 0 0 1 0
+//     // CALC  plus  REG1 REG2 -> REG3
+//     // 0 1 0 0 0 1 0 0
+//     // COPY REG3 OUTPUT
+//     // 1 0 0 1 1 1 1 0
+//     i00(8) = 8switch 0 0 0 0 0 1 0 1 a[0];
+//     i01(8) = 8switch 1 0 0 0 0 0 0 1 a[1];
+//     i02(8) = 8switch 1 0 1 1 0 0 1 0 a[2];
+//     i03(8) = 8switch 0 1 0 0 0 1 0 0 a[3];
+//     i04(8) = 8switch 1 0 0 1 1 1 1 0 a[4];
+//     in0 = 8or i00[0] i01[0] i02[0] i03[0] i04[0] 0 0 0;
+//     in1 = 8or i00[1] i01[1] i02[1] i03[1] i04[1] 0 0 0;
+//     in2 = 8or i00[2] i01[2] i02[2] i03[2] i04[2] 0 0 0;
+//     in3 = 8or i00[3] i01[3] i02[3] i03[3] i04[3] 0 0 0;
+//     in4 = 8or i00[4] i01[4] i02[4] i03[4] i04[4] 0 0 0;
+//     in5 = 8or i00[5] i01[5] i02[5] i03[5] i04[5] 0 0 0;
+//     in6 = 8or i00[6] i01[6] i02[6] i03[6] i04[6] 0 0 0;
+//     in7 = 8or i00[7] i01[7] i02[7] i03[7] i04[7] 0 0 0;
+//     output(8) counter(8) cond = turing_complete in0 in1 in2 in3 in4 in5 in6 in7 input;
+// }
